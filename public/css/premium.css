@@ -1,7 +1,7 @@
 /* =========================================================
    EPR ACCESS — PREMIUM VISUAL UPGRADES
    Brand colours extracted from official logo:
-     Red  (brand)  : #CC1A1A  rgb(204,26,26)
+     Red  (brand)  : #E2001A  rgb(204,26,26)
      Green (accent) : #2ECC2E  rgb(46,204,46)
    Loaded after output.css
 ========================================================= */
@@ -9,7 +9,7 @@
 /* --- Scroll Progress Bar --- */
 .scroll-progress {
   position: fixed; top: 0; left: 0; height: 3px; width: 0%;
-  background: linear-gradient(90deg, #2ECC2E, #CC1A1A, #2ECC2E);
+  background: linear-gradient(90deg, #2ECC2E, #E2001A, #2ECC2E);
   background-size: 200% 100%;
   animation: progressShimmer 4s linear infinite;
   z-index: 9999; transition: width 0.08s linear;
@@ -72,7 +72,7 @@
   content: ''; position: absolute;
   bottom: 0; left: 50%; transform: translateX(-50%);
   width: 0; height: 2px;
-  background: linear-gradient(90deg, #2ECC2E, #CC1A1A);
+  background: linear-gradient(90deg, #2ECC2E, #E2001A);
   transition: width 0.5s cubic-bezier(0.16,1,0.3,1);
 }
 .ribbon-stat:hover::after { width: 56%; }
@@ -125,15 +125,15 @@
   background: linear-gradient(90deg, #16a34a, #4ade80);
 }
 .plan-card.featured {
-  border-color: rgba(204,26,26,0.35) !important;
-  box-shadow: 0 12px 48px rgba(204,26,26,0.12) !important;
+  border-color: rgba(226,0,26,0.35) !important;
+  box-shadow: 0 12px 48px rgba(226,0,26,0.12) !important;
 }
 .plan-card.featured::before {
-  background: linear-gradient(90deg, #CC1A1A, #ff4d4d);
+  background: linear-gradient(90deg, #E2001A, #ff4d4d);
 }
 .plan-featured-badge {
   position: absolute; top: 14px; right: -28px;
-  background: #CC1A1A; color: #fff;
+  background: #E2001A; color: #fff;
   font-size: 0.6rem; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.07em;
   padding: 3px 40px; transform: rotate(45deg);
@@ -168,7 +168,7 @@
   background: linear-gradient(90deg, #16a34a, #4ade80);
 }
 .plan-card.featured .plan-return-fill {
-  background: linear-gradient(90deg, #CC1A1A, #ff4d4d);
+  background: linear-gradient(90deg, #E2001A, #ff4d4d);
 }
 .plan-card.visible .plan-return-fill { width: var(--bar-w, 70%); }
 
@@ -213,7 +213,7 @@
   position: absolute; inset: 0; pointer-events: none;
   background:
     radial-gradient(ellipse 80% 70% at 12% 50%, rgba(46,204,46,0.2) 0%, transparent 65%),
-    radial-gradient(ellipse 60% 80% at 88% 50%, rgba(204,26,26,0.15) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 80% at 88% 50%, rgba(226,0,26,0.15) 0%, transparent 65%),
     radial-gradient(ellipse 55% 55% at 50% 110%, rgba(46,204,46,0.08) 0%, transparent 60%);
   animation: meshPulse 10s ease-in-out infinite;
 }
@@ -636,9 +636,9 @@
 .manual-credit-header svg { color: #2ECC2E; flex-shrink: 0; }
 .manual-credit-badge {
   margin-left: auto;
-  background: rgba(204,26,26,0.1);
-  color: #CC1A1A;
-  border: 1px solid rgba(204,26,26,0.25);
+  background: rgba(226,0,26,0.1);
+  color: #E2001A;
+  border: 1px solid rgba(226,0,26,0.25);
   font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
