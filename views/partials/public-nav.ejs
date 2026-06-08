@@ -11,30 +11,57 @@
     <ul class="nav-links" id="navLinks">
       <li><a href="/" class="<%= currentPath === '/' ? 'active' : '' %>">Home</a></li>
 
+      <!-- About Us -->
       <li class="nav-dropdown">
         <a href="/about" class="nav-dropdown-toggle <%= ['/about','/team','/compliance'].includes(currentPath) ? 'active' : '' %>">
-          Company
+          About Us
           <svg class="dropdown-arrow" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
         <ul class="dropdown-menu">
-          <li><a href="/about">About Us</a></li>
-          <li><a href="/team">Our Team</a></li>
+          <li><a href="/about">Who We Are</a></li>
+          <li><a href="/team">Our Executives</a></li>
+          <li><a href="/about#subsidiary">Subsidiary</a></li>
           <li><a href="/compliance">Compliance</a></li>
         </ul>
       </li>
 
+      <!-- Services -->
       <li class="nav-dropdown">
         <a href="/services" class="nav-dropdown-toggle <%= currentPath === '/services' ? 'active' : '' %>">
           Services
           <svg class="dropdown-arrow" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
         <ul class="dropdown-menu">
-          <li><a href="/services#trading">Trading Markets</a></li>
-          <li><a href="/services#money-market">Money Market</a></li>
+          <li><a href="/services#capital">Capital Investment</a></li>
+          <li><a href="/services#trading">Trading Market Services</a></li>
+          <li><a href="/services#money-market">Money Market Services</a></li>
           <li><a href="/services#equity">Equity Services</a></li>
-          <li><a href="/services#real-estate">Real Estate</a></li>
           <li><a href="/services#savings">Savings Plan</a></li>
-          <li><a href="/services#plans">Investment Plans</a></li>
+          <li><a href="/services#fixed-deposit">Fixed Deposit</a></li>
+          <li><a href="/services#real-estate">Real Estate Management</a></li>
+          <li><a href="/services#it">IT Services</a></li>
+          <li><a href="/services#farming">Farming Services</a></li>
+          <li><a href="/services#livestock">Livestock Market</a></li>
+          <li><a href="/services#project">Project Financing</a></li>
+        </ul>
+      </li>
+
+      <!-- Investment -->
+      <li class="nav-dropdown">
+        <a href="/services#plans" class="nav-dropdown-toggle">
+          Investment
+          <svg class="dropdown-arrow" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <ul class="dropdown-menu">
+          <li><a href="/services#silver">Silver – SPlus</a></li>
+          <li><a href="/services#bronze">Bronze – BPlus</a></li>
+          <li><a href="/services#gold">Gold – GPlus</a></li>
+          <li><a href="/services#diamond">Diamond – DPlus</a></li>
+          <li><a href="/services#savings-plan">Savings Plan</a></li>
+          <li><a href="/services#fixed-deposit">Fixed Deposit</a></li>
+          <li><a href="/services#trading-inv">Trading Investment</a></li>
+          <li><a href="/services#dollar">Dollar Investment</a></li>
+          <li><a href="/services#real-estate-inv">Real Estate</a></li>
         </ul>
       </li>
 
