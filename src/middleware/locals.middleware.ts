@@ -33,6 +33,16 @@ export default async function localsMiddleware(req: Request, res: Response, next
           where: { userId: user.id, read: false },
         });
         res.locals.unreadCount = unreadCount;
+
+        // Inject admin sidebar badge counts for ADMIN / STAFF users
+        if (user.role === 'ADMIN' || user.role === 'STAFF') {
+          const [pendingDeposits, pendingKyc] = await Promise.all([
+            prisma.transaction.count({ where: { type: 'DEPOSIT', status: 'PENDING' } }),
+            prisma.user.count({ where: { kycStatus: 'SUBMITTED' } }),
+          ]);
+          res.locals.pendingDeposits = pendingDeposits;
+          res.locals.pendingKyc = pendingKyc;
+        }
       }
     } catch {
       // session may be stale
