@@ -306,7 +306,18 @@
   transform: translateY(-6px) scale(1.02) !important;
 }
 
-/* --- Dashboard stat card: prevent value overflow --- */
+/* --- Fix section-sub negative margin overlap --- */
+/* Original had margin:-12px which pulled subtitle into the h3 above it */
+.section-sub {
+  margin: 6px 0 20px !important;
+}
+
+/* Ensure h3 inside dash-section has breathing room before the subtitle */
+.dash-section h3 {
+  margin-bottom: 4px;
+}
+
+/* Dashboard stat card: prevent value overflow --- */
 .stat-card {
   overflow: hidden;        /* hard stop — nothing bleeds outside the card */
 }
