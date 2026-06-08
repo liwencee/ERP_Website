@@ -5,6 +5,7 @@
   <%- include('../partials/head') %>
 </head>
 <body class="public-body">
+  <div class="scroll-progress" id="scrollProgress"></div>
   <%- include('../partials/public-nav') %>
   <main>
     <%- include('../partials/flash') %>
@@ -96,6 +97,15 @@
         </div>
       </div>
 
+      <!-- Floating particles -->
+      <div class="hero-particles" aria-hidden="true">
+        <span class="particle p1"></span>
+        <span class="particle p2"></span>
+        <span class="particle p3"></span>
+        <span class="particle p4"></span>
+        <span class="particle p5"></span>
+      </div>
+
       <button class="carousel-prev" id="carouselPrev" aria-label="Previous slide">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
@@ -110,24 +120,56 @@
       </div>
     </section>
 
+    <!-- Stats Ribbon -->
+    <div class="stats-ribbon">
+      <div class="stats-ribbon-inner stagger">
+        <div class="ribbon-stat">
+          <strong><span class="acc" data-count="500">500</span><span class="acc">+</span></strong>
+          <em>Active Investors</em>
+        </div>
+        <div class="ribbon-stat">
+          <strong>₦<span class="acc" data-count="500">500</span><span class="acc">M+</span></strong>
+          <em>Total Invested</em>
+        </div>
+        <div class="ribbon-stat">
+          <strong><span class="acc">15–18</span><span class="acc">%</span></strong>
+          <em>Annual Returns</em>
+        </div>
+        <div class="ribbon-stat">
+          <strong><span class="acc" data-count="4">4</span><span class="acc">+</span></strong>
+          <em>Years Operating</em>
+        </div>
+      </div>
+    </div>
+
     <!-- Investment Plans Preview -->
     <section class="section section-light">
       <div class="container">
-        <div class="section-header">
-          <h2>Our Investment Plans</h2>
-          <p>Choose from a range of expertly curated investment opportunities</p>
+        <div class="section-header stagger">
+          <span class="section-eyebrow">Investment Plans</span>
+          <h2>Choose Your Path to <span class="gradient-text">Financial Growth</span></h2>
+          <p>Expertly curated plans for every investor — from first-timer to seasoned pro</p>
         </div>
-        <div class="plans-grid">
+        <div class="plans-grid stagger">
           <% if (plans.length) { %>
-            <% plans.forEach(function(plan) { %>
-            <div class="plan-card">
-              <div class="plan-type plan-type-<%= plan.type.toLowerCase().replace('_','-') %>"><%= plan.type.replace('_', ' ') %></div>
+            <% plans.forEach(function(plan, idx) { %>
+            <%
+              var maxRate = Math.max.apply(null, plans.map(function(p){ return p.returnRate; }));
+              var isFeatured = plan.returnRate === maxRate;
+              var barWidth = Math.round((plan.returnRate / 20) * 100);
+            %>
+            <div class="plan-card <%= isFeatured ? 'featured' : '' %>" data-type="<%= plan.type %>" style="--bar-w:<%= barWidth %>%">
+              <% if (isFeatured) { %><div class="plan-featured-badge">Top Pick</div><% } %>
+              <div class="plan-type plan-type-<%= plan.type.toLowerCase().replace('_','-') %>"><%= plan.type.replace(/_/g, ' ') %></div>
               <h3 class="plan-name"><%= plan.name %></h3>
               <p class="plan-desc"><%= plan.description.substring(0, 120) %>...</p>
               <div class="plan-details">
                 <div class="plan-detail">
                   <span class="detail-label">Returns</span>
-                  <span class="detail-value text-gold"><%= plan.returnRate %>% p.a.</span>
+                  <span class="detail-value text-gold">
+                    <%= plan.returnRate %>% p.a.
+                    <div class="plan-return-bar"><div class="plan-return-fill"></div></div>
+                  </span>
                 </div>
                 <div class="plan-detail">
                   <span class="detail-label">Duration</span>
@@ -151,31 +193,123 @@
       </div>
     </section>
 
+    <!-- Investment Calculator -->
+    <section class="section section-light pub-calc-section">
+      <div class="container">
+        <div class="section-header stagger">
+          <span class="section-eyebrow">Calculator</span>
+          <h2>See Your <span class="gradient-text">Money Grow</span></h2>
+          <p>Enter an amount and pick a plan — watch the returns calculate in real time</p>
+        </div>
+        <div class="pub-calc-wrapper">
+
+          <!-- Inputs -->
+          <div class="pub-calc-inputs">
+            <div class="pub-calc-field">
+              <label for="pubCalcAmount">How much would you like to invest?</label>
+              <input type="number" id="pubCalcAmount" value="100000" min="10000" step="5000" placeholder="e.g. 100,000" />
+              <input type="range" id="pubCalcSlider" min="10000" max="10000000" step="5000" value="100000" class="pub-calc-slider" />
+            </div>
+
+            <div class="pub-calc-field">
+              <label for="pubCalcPlan">Select Investment Plan</label>
+              <select id="pubCalcPlan">
+                <option value="">— Choose a plan —</option>
+                <% plans.forEach(function(p) { %>
+                <option value="<%= p.returnRate %>|<%= p.duration %>|<%= p.name %>">
+                  <%= p.name %> — <%= p.returnRate %>% / <%= p.duration %> days
+                </option>
+                <% }) %>
+              </select>
+            </div>
+
+            <div class="pub-calc-field">
+              <label>Annualized Returns</label>
+              <div class="pub-calc-rate-display">
+                <span id="pubCalcRateVal">—</span>
+                <span class="rate-pct">%</span>
+              </div>
+            </div>
+
+            <a href="/auth/register" class="btn btn-gold btn-block pub-calc-cta">Start Investing Now</a>
+          </div>
+
+          <!-- Summary -->
+          <div class="pub-calc-summary" id="pubCalcSummary">
+            <div class="pub-calc-summary-header">
+              <h3>Investment Summary</h3>
+              <p>Here is the breakdown of your returns based on current inputs.</p>
+            </div>
+            <div class="pub-calc-summary-body" id="pubCalcBody" style="display:none">
+              <div class="pub-calc-details-card">
+                <h4>Calculation Details</h4>
+                <div class="pub-calc-row"><span>Invested Capital</span><strong id="pcInvested">—</strong></div>
+                <div class="pub-calc-row"><span>Plan</span><strong id="pcPlan">—</strong></div>
+                <div class="pub-calc-row"><span>Interest Rate (Annual)</span><strong id="pcRate">—</strong></div>
+                <div class="pub-calc-row"><span>Duration</span><strong id="pcDuration">—</strong></div>
+                <div class="pub-calc-row"><span>Maturity Date</span><strong id="pcMaturity">—</strong></div>
+              </div>
+              <div class="pub-calc-interest-card">
+                <span>Total Interest Earned</span>
+                <strong id="pcInterest" class="text-green">—</strong>
+              </div>
+              <div class="pub-calc-payout-card">
+                <span>Total Payout Value</span>
+                <strong id="pcPayout">—</strong>
+              </div>
+            </div>
+            <div class="pub-calc-empty" id="pubCalcEmpty">
+              <div style="font-size:3rem">📊</div>
+              <p>Select a plan and enter an amount to see your projected returns</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
     <!-- Why EPR Access -->
     <section class="section section-dark">
       <div class="container">
-        <div class="section-header">
-          <h2>Why Choose EPR Access</h2>
-          <p>Built on trust, transparency, and proven results</p>
+        <div class="section-header stagger">
+          <span class="section-eyebrow">Why EPR Access</span>
+          <h2>Built for the Smart <span class="gradient-text">Nigerian Investor</span></h2>
+          <p>Transparency, security and consistent returns — since day one</p>
         </div>
-        <div class="features-grid">
+        <div class="features-grid stagger">
           <div class="feature-card">
-            <div class="feature-icon">🏛️</div>
+            <div class="feature-icon-wrap">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/>
+              </svg>
+            </div>
             <h3>CAC Registered</h3>
             <p>Fully registered and compliant with Nigerian corporate laws and financial regulations.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon">🔒</div>
+            <div class="feature-icon-wrap">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+              </svg>
+            </div>
             <h3>Secure Platform</h3>
             <p>Bank-grade security protects your investments and personal data at all times.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon">📈</div>
+            <div class="feature-icon-wrap">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"/>
+              </svg>
+            </div>
             <h3>Consistent Returns</h3>
             <p>Our professionally managed portfolios have delivered consistent returns for investors.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon">👥</div>
+            <div class="feature-icon-wrap">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/>
+              </svg>
+            </div>
             <h3>Expert Team</h3>
             <p>Decades of combined experience in Nigerian and international markets.</p>
           </div>
@@ -186,8 +320,9 @@
     <!-- Team Teaser -->
     <section class="section section-light">
       <div class="container">
-        <div class="section-header">
-          <h2>Meet Our Leadership</h2>
+        <div class="section-header stagger">
+          <span class="section-eyebrow">Our Team</span>
+          <h2>Meet Our <span class="gradient-text">Leadership</span></h2>
           <p>Experienced professionals committed to your financial growth</p>
         </div>
         <div class="team-teaser">
@@ -251,11 +386,18 @@
     </section>
 
     <!-- CTA -->
-    <section class="section cta-section">
+    <section class="cta-section">
+      <div class="cta-mesh"></div>
       <div class="container text-center">
-        <h2>Ready to Start Your Investment Journey?</h2>
-        <p>Join hundreds of Nigerians growing their wealth with EPR Access Limited.</p>
-        <a href="/auth/register" class="btn btn-gold btn-lg">Create Free Account</a>
+        <div class="cta-badge">Now Open to Investors</div>
+        <h2 style="color:#fff; margin-bottom:16px;">Ready to Start Your<br><span class="gradient-text">Investment Journey?</span></h2>
+        <p style="color:rgba(255,255,255,0.65); font-size:1.1rem; margin-bottom:36px; max-width:520px; margin-left:auto; margin-right:auto; line-height:1.7;">
+          Join hundreds of Nigerians growing their wealth with EPR Access Limited. Start with as little as ₦10,000.
+        </p>
+        <div class="cta-actions">
+          <a href="/auth/register" class="btn btn-gold btn-lg">Create Free Account</a>
+          <a href="/services" class="btn-cta-ghost">Explore Plans</a>
+        </div>
       </div>
     </section>
 
