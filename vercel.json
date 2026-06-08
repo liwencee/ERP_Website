@@ -1,20 +1,10 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "api/index.ts",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": [
-          "views/**",
-          "public/**",
-          "prisma/**",
-          "src/**"
-        ]
-      }
+  "functions": {
+    "api/index.ts": {
+      "includeFiles": "{views,public,prisma,src}/**"
     }
-  ],
+  },
   "rewrites": [
-    { "source": "/:path*", "destination": "/api/index" }
+    { "source": "/(.*)", "destination": "/api/index" }
   ]
 }
