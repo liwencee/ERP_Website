@@ -5,13 +5,13 @@
   <%- include('../partials/head') %>
 </head>
 <body class="auth-body">
-  <div class="auth-container">
+  <div class="auth-container" style="max-width:640px;">
     <div class="auth-brand">
       <a href="/" class="nav-logo"><img src="/images/logo.png" alt="EPR Access Limited" class="site-logo site-logo-auth" /></a>
     </div>
     <div class="auth-card">
       <h2>Create Your Account</h2>
-      <p class="auth-sub">Start your investment journey today</p>
+      <p class="auth-sub">Start your investment journey today — available worldwide</p>
 
       <%- include('../partials/flash') %>
 
@@ -22,42 +22,343 @@
       <% } %>
 
       <form action="/auth/register" method="POST" class="auth-form">
+
+        <!-- Name -->
         <div class="form-row">
           <div class="form-group">
             <label for="firstName">First Name</label>
-            <input type="text" id="firstName" name="firstName" required placeholder="John" value="<%= locals.body ? body.firstName || '' : '' %>" />
+            <input type="text" id="firstName" name="firstName" required placeholder="First name"
+              value="<%= locals.body ? body.firstName || '' : '' %>" />
           </div>
           <div class="form-group">
             <label for="lastName">Last Name</label>
-            <input type="text" id="lastName" name="lastName" required placeholder="Doe" value="<%= locals.body ? body.lastName || '' : '' %>" />
+            <input type="text" id="lastName" name="lastName" required placeholder="Last name"
+              value="<%= locals.body ? body.lastName || '' : '' %>" />
           </div>
         </div>
+
+        <!-- Country -->
+        <div class="form-group">
+          <label for="country">Country</label>
+          <select id="country" name="country" required>
+            <option value="">— Select your country —</option>
+            <optgroup label="── Popular ──">
+              <option value="NG" selected>🇳🇬 Nigeria</option>
+              <option value="GB">🇬🇧 United Kingdom</option>
+              <option value="US">🇺🇸 United States</option>
+              <option value="GH">🇬🇭 Ghana</option>
+              <option value="CA">🇨🇦 Canada</option>
+              <option value="ZA">🇿🇦 South Africa</option>
+              <option value="AE">🇦🇪 United Arab Emirates</option>
+            </optgroup>
+            <optgroup label="── All Countries ──">
+              <option value="AF">Afghanistan</option>
+              <option value="AL">Albania</option>
+              <option value="DZ">Algeria</option>
+              <option value="AD">Andorra</option>
+              <option value="AO">Angola</option>
+              <option value="AG">Antigua and Barbuda</option>
+              <option value="AR">Argentina</option>
+              <option value="AM">Armenia</option>
+              <option value="AU">Australia</option>
+              <option value="AT">Austria</option>
+              <option value="AZ">Azerbaijan</option>
+              <option value="BS">Bahamas</option>
+              <option value="BH">Bahrain</option>
+              <option value="BD">Bangladesh</option>
+              <option value="BB">Barbados</option>
+              <option value="BY">Belarus</option>
+              <option value="BE">Belgium</option>
+              <option value="BZ">Belize</option>
+              <option value="BJ">Benin</option>
+              <option value="BT">Bhutan</option>
+              <option value="BO">Bolivia</option>
+              <option value="BA">Bosnia and Herzegovina</option>
+              <option value="BW">Botswana</option>
+              <option value="BR">Brazil</option>
+              <option value="BN">Brunei</option>
+              <option value="BG">Bulgaria</option>
+              <option value="BF">Burkina Faso</option>
+              <option value="BI">Burundi</option>
+              <option value="CV">Cabo Verde</option>
+              <option value="KH">Cambodia</option>
+              <option value="CM">Cameroon</option>
+              <option value="CA">Canada</option>
+              <option value="CF">Central African Republic</option>
+              <option value="TD">Chad</option>
+              <option value="CL">Chile</option>
+              <option value="CN">China</option>
+              <option value="CO">Colombia</option>
+              <option value="KM">Comoros</option>
+              <option value="CG">Congo (Republic)</option>
+              <option value="CD">Congo (DR)</option>
+              <option value="CR">Costa Rica</option>
+              <option value="HR">Croatia</option>
+              <option value="CU">Cuba</option>
+              <option value="CY">Cyprus</option>
+              <option value="CZ">Czech Republic</option>
+              <option value="DK">Denmark</option>
+              <option value="DJ">Djibouti</option>
+              <option value="DM">Dominica</option>
+              <option value="DO">Dominican Republic</option>
+              <option value="EC">Ecuador</option>
+              <option value="EG">Egypt</option>
+              <option value="SV">El Salvador</option>
+              <option value="GQ">Equatorial Guinea</option>
+              <option value="ER">Eritrea</option>
+              <option value="EE">Estonia</option>
+              <option value="SZ">Eswatini</option>
+              <option value="ET">Ethiopia</option>
+              <option value="FJ">Fiji</option>
+              <option value="FI">Finland</option>
+              <option value="FR">France</option>
+              <option value="GA">Gabon</option>
+              <option value="GM">Gambia</option>
+              <option value="GE">Georgia</option>
+              <option value="DE">Germany</option>
+              <option value="GH">Ghana</option>
+              <option value="GR">Greece</option>
+              <option value="GD">Grenada</option>
+              <option value="GT">Guatemala</option>
+              <option value="GN">Guinea</option>
+              <option value="GW">Guinea-Bissau</option>
+              <option value="GY">Guyana</option>
+              <option value="HT">Haiti</option>
+              <option value="HN">Honduras</option>
+              <option value="HU">Hungary</option>
+              <option value="IS">Iceland</option>
+              <option value="IN">India</option>
+              <option value="ID">Indonesia</option>
+              <option value="IR">Iran</option>
+              <option value="IQ">Iraq</option>
+              <option value="IE">Ireland</option>
+              <option value="IL">Israel</option>
+              <option value="IT">Italy</option>
+              <option value="JM">Jamaica</option>
+              <option value="JP">Japan</option>
+              <option value="JO">Jordan</option>
+              <option value="KZ">Kazakhstan</option>
+              <option value="KE">Kenya</option>
+              <option value="KI">Kiribati</option>
+              <option value="KW">Kuwait</option>
+              <option value="KG">Kyrgyzstan</option>
+              <option value="LA">Laos</option>
+              <option value="LV">Latvia</option>
+              <option value="LB">Lebanon</option>
+              <option value="LS">Lesotho</option>
+              <option value="LR">Liberia</option>
+              <option value="LY">Libya</option>
+              <option value="LI">Liechtenstein</option>
+              <option value="LT">Lithuania</option>
+              <option value="LU">Luxembourg</option>
+              <option value="MG">Madagascar</option>
+              <option value="MW">Malawi</option>
+              <option value="MY">Malaysia</option>
+              <option value="MV">Maldives</option>
+              <option value="ML">Mali</option>
+              <option value="MT">Malta</option>
+              <option value="MH">Marshall Islands</option>
+              <option value="MR">Mauritania</option>
+              <option value="MU">Mauritius</option>
+              <option value="MX">Mexico</option>
+              <option value="FM">Micronesia</option>
+              <option value="MD">Moldova</option>
+              <option value="MC">Monaco</option>
+              <option value="MN">Mongolia</option>
+              <option value="ME">Montenegro</option>
+              <option value="MA">Morocco</option>
+              <option value="MZ">Mozambique</option>
+              <option value="MM">Myanmar</option>
+              <option value="NA">Namibia</option>
+              <option value="NR">Nauru</option>
+              <option value="NP">Nepal</option>
+              <option value="NL">Netherlands</option>
+              <option value="NZ">New Zealand</option>
+              <option value="NI">Nicaragua</option>
+              <option value="NE">Niger</option>
+              <option value="NG">Nigeria</option>
+              <option value="MK">North Macedonia</option>
+              <option value="NO">Norway</option>
+              <option value="OM">Oman</option>
+              <option value="PK">Pakistan</option>
+              <option value="PW">Palau</option>
+              <option value="PA">Panama</option>
+              <option value="PG">Papua New Guinea</option>
+              <option value="PY">Paraguay</option>
+              <option value="PE">Peru</option>
+              <option value="PH">Philippines</option>
+              <option value="PL">Poland</option>
+              <option value="PT">Portugal</option>
+              <option value="QA">Qatar</option>
+              <option value="RO">Romania</option>
+              <option value="RU">Russia</option>
+              <option value="RW">Rwanda</option>
+              <option value="KN">Saint Kitts and Nevis</option>
+              <option value="LC">Saint Lucia</option>
+              <option value="VC">Saint Vincent and the Grenadines</option>
+              <option value="WS">Samoa</option>
+              <option value="SM">San Marino</option>
+              <option value="ST">São Tomé and Príncipe</option>
+              <option value="SA">Saudi Arabia</option>
+              <option value="SN">Senegal</option>
+              <option value="RS">Serbia</option>
+              <option value="SC">Seychelles</option>
+              <option value="SL">Sierra Leone</option>
+              <option value="SG">Singapore</option>
+              <option value="SK">Slovakia</option>
+              <option value="SI">Slovenia</option>
+              <option value="SB">Solomon Islands</option>
+              <option value="SO">Somalia</option>
+              <option value="ZA">South Africa</option>
+              <option value="SS">South Sudan</option>
+              <option value="ES">Spain</option>
+              <option value="LK">Sri Lanka</option>
+              <option value="SD">Sudan</option>
+              <option value="SR">Suriname</option>
+              <option value="SE">Sweden</option>
+              <option value="CH">Switzerland</option>
+              <option value="SY">Syria</option>
+              <option value="TW">Taiwan</option>
+              <option value="TJ">Tajikistan</option>
+              <option value="TZ">Tanzania</option>
+              <option value="TH">Thailand</option>
+              <option value="TL">Timor-Leste</option>
+              <option value="TG">Togo</option>
+              <option value="TO">Tonga</option>
+              <option value="TT">Trinidad and Tobago</option>
+              <option value="TN">Tunisia</option>
+              <option value="TR">Türkiye (Turkey)</option>
+              <option value="TM">Turkmenistan</option>
+              <option value="TV">Tuvalu</option>
+              <option value="UG">Uganda</option>
+              <option value="UA">Ukraine</option>
+              <option value="AE">United Arab Emirates</option>
+              <option value="GB">United Kingdom</option>
+              <option value="US">United States</option>
+              <option value="UY">Uruguay</option>
+              <option value="UZ">Uzbekistan</option>
+              <option value="VU">Vanuatu</option>
+              <option value="VE">Venezuela</option>
+              <option value="VN">Vietnam</option>
+              <option value="YE">Yemen</option>
+              <option value="ZM">Zambia</option>
+              <option value="ZW">Zimbabwe</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <!-- Email & Phone -->
         <div class="form-group">
           <label for="email">Email Address</label>
-          <input type="email" id="email" name="email" required placeholder="your@email.com" value="<%= locals.body ? body.email || '' : '' %>" />
+          <input type="email" id="email" name="email" required placeholder="your@email.com"
+            value="<%= locals.body ? body.email || '' : '' %>" />
         </div>
         <div class="form-group">
           <label for="phone">Phone Number <span class="optional">(optional)</span></label>
-          <input type="tel" id="phone" name="phone" placeholder="+234 800 000 0000" value="<%= locals.body ? body.phone || '' : '' %>" />
+          <input type="tel" id="phone" name="phone" placeholder="+234 800 000 0000"
+            value="<%= locals.body ? body.phone || '' : '' %>" />
+        </div>
+
+        <!-- BVN (required for Nigerian financial regulations) -->
+        <div class="form-group" id="bvnGroup">
+          <label for="bvn">
+            BVN — Bank Verification Number
+            <span class="form-badge-req">Required</span>
+          </label>
+          <input type="text" id="bvn" name="bvn" maxlength="11" placeholder="11-digit BVN"
+            inputmode="numeric" pattern="[0-9]{11}"
+            value="<%= locals.body ? body.bvn || '' : '' %>" />
+          <small class="form-note">Your BVN is required for identity verification under Nigerian financial regulations. It is securely encrypted and never shared.</small>
+        </div>
+
+        <!-- Government ID -->
+        <div class="form-group">
+          <label for="idType">Government-Issued ID</label>
+          <select id="idType" name="idType" required>
+            <option value="">— Select ID type —</option>
+            <option value="NIN">National Identity Number (NIN)</option>
+            <option value="DRIVERS_LICENSE">Driver's License</option>
+            <option value="INTERNATIONAL_PASSPORT">International Passport</option>
+            <option value="VOTERS_CARD">Voter's Card</option>
+          </select>
         </div>
         <div class="form-group">
+          <label for="idNumber">ID Number</label>
+          <input type="text" id="idNumber" name="idNumber" required placeholder="Enter your ID number"
+            value="<%= locals.body ? body.idNumber || '' : '' %>" />
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" id="password" name="password" required placeholder="Min. 8 characters" autocomplete="new-password" />
+          <div class="password-wrap">
+            <input type="password" id="password" name="password" required placeholder="Min. 8 characters"
+              autocomplete="new-password" />
+            <button type="button" class="password-toggle" data-target="password" aria-label="Show password">
+              <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
         </div>
         <div class="form-group">
           <label for="confirmPassword">Confirm Password</label>
-          <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Repeat password" autocomplete="new-password" />
+          <div class="password-wrap">
+            <input type="password" id="confirmPassword" name="confirmPassword" required
+              placeholder="Repeat password" autocomplete="new-password" />
+            <button type="button" class="password-toggle" data-target="confirmPassword" aria-label="Show password">
+              <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
         </div>
+
+        <!-- Referral Code -->
         <div class="form-group">
-          <label for="refCode">Referral Code <span class="optional">(optional)</span></label>
-          <input type="text" id="refCode" name="refCode" placeholder="e.g. EPRABC123" value="<%= locals.refCode || (locals.body ? body.refCode || '' : '') %>" style="text-transform:uppercase" />
+          <label for="refCode">
+            Referral Code <span class="optional">(optional)</span>
+          </label>
+          <input type="text" id="refCode" name="refCode" placeholder="e.g. EPRABC123"
+            value="<%= locals.refCode || (locals.body ? body.refCode || '' : '') %>"
+            style="text-transform:uppercase" />
+          <small class="form-note">
+            Your unique referral code is automatically generated when you register and shown in your dashboard. Share it to earn referral bonuses when others invest.
+          </small>
         </div>
-        <p class="form-note">By registering, you agree to our terms and conditions.</p>
-        <button type="submit" class="btn btn-gold btn-block">Create Account</button>
+
+        <p class="form-note" style="margin-top:4px;">By registering, you agree to our <a href="/compliance" class="form-link">Terms &amp; Conditions</a> and <a href="/compliance" class="form-link">Privacy Policy</a>.</p>
+        <button type="submit" class="btn btn-gold btn-block" style="margin-top:8px;">Create Account</button>
       </form>
 
       <p class="auth-footer">Already have an account? <a href="/auth/login">Log in</a></p>
     </div>
   </div>
+  <script>
+    // Password show/hide toggle
+    document.querySelectorAll('.password-toggle').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var input = document.getElementById(btn.dataset.target);
+        var isText = input.type === 'text';
+        input.type = isText ? 'password' : 'text';
+        btn.querySelector('.eye-icon').style.opacity = isText ? '1' : '0.4';
+      });
+    });
+    // Hide BVN field for non-Nigerian residents
+    document.getElementById('country').addEventListener('change', function() {
+      var bvnGroup = document.getElementById('bvnGroup');
+      var bvnInput = document.getElementById('bvn');
+      if (this.value === 'NG') {
+        bvnGroup.style.display = '';
+        bvnInput.required = true;
+      } else {
+        bvnGroup.style.display = 'none';
+        bvnInput.required = false;
+        bvnInput.value = '';
+      }
+    });
+  </script>
 </body>
 </html>

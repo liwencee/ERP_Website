@@ -126,7 +126,7 @@
 
   let current = 0;
   let autoplayTimer = null;
-  const INTERVAL = 7000; // ms between slides
+  const INTERVAL = 9000; // ms between slides
 
   function goTo(index) {
     slides[current].classList.remove('active');
