@@ -17,26 +17,51 @@ import sessionConfig from './config/session';
 import logger from './utils/logger';
 import router from './routes';
 import localsMiddleware from './middleware/locals.middleware';
+import { runMaturityJob } from './jobs/mature-investments';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Security
+// ─── Security ────────────────────────────────────────────────────────────────
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-      scriptSrc: ["'self'", "'unsafe-inline'", 'https://js.paystack.co'],
+      styleSrc: [
+        "'self'",
+        "'unsafe-inline'",
+        'https://fonts.googleapis.com',
+        'https://*.tawk.to',
+      ],
+      fontSrc: [
+        "'self'",
+        'https://fonts.gstatic.com',
+        'https://*.tawk.to',
+      ],
+      scriptSrc: [
+        "'self'",
+        "'unsafe-inline'",
+        'https://js.paystack.co',
+        'https://embed.tawk.to',
+        'https://*.tawk.to',
+      ],
       imgSrc: ["'self'", 'data:', 'https:'],
+      connectSrc: [
+        "'self'",
+        'https://*.tawk.to',
+        'wss://*.tawk.to',
+      ],
+      frameSrc: [
+        "'self'",
+        'https://*.tawk.to',
+      ],
     },
   },
 }));
 app.use(hpp());
 app.use(cors({ origin: process.env.APP_URL, credentials: true }));
 
-// Rate limiting
+// ─── Rate limiting ───────────────────────────────────────────────────────────
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 200,
@@ -44,47 +69,70 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Body parsing
+// ─── Body parsing ────────────────────────────────────────────────────────────
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
-// Session & flash
+// ─── Session & flash ─────────────────────────────────────────────────────────
 app.use(session(sessionConfig));
 app.use(flash());
 
-// Logging
+// ─── Logging ─────────────────────────────────────────────────────────────────
 app.use(morgan('combined', {
   stream: { write: (msg) => logger.info(msg.trim()) },
 }));
 
-// Static files
+// ─── Static files ────────────────────────────────────────────────────────────
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// View engine
+// ─── View engine ─────────────────────────────────────────────────────────────
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '..', 'views'));
 
-// Inject res.locals
+// ─── Locals ──────────────────────────────────────────────────────────────────
 app.use(localsMiddleware);
 
-// Routes
+// ─── Routes ──────────────────────────────────────────────────────────────────
 app.use(router);
 
-// 404
+// ─── 404 ─────────────────────────────────────────────────────────────────────
 app.use((_req, res) => {
   res.status(404).render('errors/404', { title: 'Page Not Found' });
 });
 
-// Global error handler
+// ─── Global error handler ────────────────────────────────────────────────────
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   logger.error(err.stack || err.message);
   res.status(500).render('errors/500', { title: 'Server Error' });
 });
 
+// ─── Investment maturity job ─────────────────────────────────────────────────
+// Runs once on startup, then every hour to credit matured investments
+function startMaturityScheduler(): void {
+  const INTERVAL_MS = 60 * 60 * 1000; // 1 hour
+
+  // Initial run shortly after startup
+  setTimeout(() => {
+    runMaturityJob().catch((err) =>
+      logger.error(`[MaturityJob] Startup run failed: ${err.message}`)
+    );
+  }, 10_000); // 10 seconds after boot
+
+  // Recurring hourly
+  setInterval(() => {
+    runMaturityJob().catch((err) =>
+      logger.error(`[MaturityJob] Scheduled run failed: ${err.message}`)
+    );
+  }, INTERVAL_MS);
+
+  logger.info('[MaturityJob] Scheduler started — runs every hour');
+}
+
 if (require.main === module) {
   app.listen(PORT, () => {
     logger.info(`EPR Access server running on http://localhost:${PORT}`);
+    startMaturityScheduler();
   });
 }
 

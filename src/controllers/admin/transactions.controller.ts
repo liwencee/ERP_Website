@@ -34,6 +34,10 @@ export async function index(req: Request, res: Response): Promise<void> {
   });
 }
 
+// ─── Confirm ─────────────────────────────────────────────────────────────────
+// Only DEPOSIT transactions credit the wallet.
+// Confirming a WITHDRAWAL means it has been paid out — just mark confirmed,
+// the wallet was already debited when the request was made.
 export async function confirm(req: Request, res: Response): Promise<void> {
   const tx = await prisma.transaction.findUnique({ where: { id: req.params.id } });
   if (!tx || tx.status !== 'PENDING') {
@@ -46,35 +50,63 @@ export async function confirm(req: Request, res: Response): Promise<void> {
   const updateData: any = { status: 'CONFIRMED' };
   if (backdateDate) {
     const parsed = new Date(backdateDate);
-    if (!isNaN(parsed.getTime())) {
-      updateData.createdAt = parsed;
-    }
+    if (!isNaN(parsed.getTime())) updateData.createdAt = parsed;
   }
 
   await prisma.transaction.update({ where: { id: tx.id }, data: updateData });
-  await prisma.wallet.update({
-    where: { userId: tx.userId },
-    data: { balance: { increment: tx.amount } },
-  });
 
   const user = await prisma.user.findUnique({ where: { id: tx.userId } });
-  if (user) {
-    await prisma.notification.create({
-      data: {
-        userId: tx.userId,
-        title: 'Deposit Confirmed',
-        message: `Your deposit of ₦${Number(tx.amount).toLocaleString()} has been confirmed and credited to your wallet.`,
-      },
+
+  if (tx.type === 'DEPOSIT') {
+    // Credit wallet only for deposits
+    await prisma.wallet.update({
+      where: { userId: tx.userId },
+      data: { balance: { increment: tx.amount } },
     });
-    try {
-      await emailService.sendDepositConfirmed(user.email, user.firstName, Number(tx.amount), tx.reference);
-    } catch { /* silent */ }
+
+    if (user) {
+      await prisma.notification.create({
+        data: {
+          userId: tx.userId,
+          title: 'Deposit Confirmed',
+          message: `Your deposit of ₦${Number(tx.amount).toLocaleString()} has been confirmed and credited to your wallet.`,
+        },
+      });
+      try {
+        await emailService.sendDepositConfirmed(user.email, user.firstName, Number(tx.amount), tx.reference);
+      } catch { /* silent — don't block the admin action */ }
+    }
+
+    req.flash('success', 'Deposit confirmed and wallet credited.');
+
+  } else if (tx.type === 'WITHDRAWAL') {
+    // Wallet was already debited on request — confirm means payment has been sent
+    if (user) {
+      await prisma.notification.create({
+        data: {
+          userId: tx.userId,
+          title: 'Withdrawal Processed',
+          message: `Your withdrawal of ₦${Number(tx.amount).toLocaleString()} has been processed and sent to your bank account.`,
+        },
+      });
+      try {
+        await emailService.sendWithdrawalNotice(user.email, user.firstName, Number(tx.amount), 'Confirmed');
+      } catch { /* silent */ }
+    }
+
+    req.flash('success', 'Withdrawal confirmed — payment marked as sent.');
+
+  } else {
+    // INVESTMENT / RETURN / BONUS — just mark confirmed, no wallet change
+    req.flash('success', 'Transaction confirmed.');
   }
 
-  req.flash('success', 'Transaction confirmed and wallet credited.');
   res.redirect('/admin/transactions');
 }
 
+// ─── Reject ──────────────────────────────────────────────────────────────────
+// Rejecting a WITHDRAWAL must refund the wallet (it was pre-debited).
+// Rejecting a DEPOSIT just marks it rejected — wallet was never credited.
 export async function reject(req: Request, res: Response): Promise<void> {
   const tx = await prisma.transaction.findUnique({ where: { id: req.params.id } });
   if (!tx || tx.status !== 'PENDING') {
@@ -86,21 +118,48 @@ export async function reject(req: Request, res: Response): Promise<void> {
   await prisma.transaction.update({ where: { id: tx.id }, data: { status: 'REJECTED' } });
 
   const user = await prisma.user.findUnique({ where: { id: tx.userId } });
-  if (user) {
-    await prisma.notification.create({
-      data: {
-        userId: tx.userId,
-        title: 'Deposit Rejected',
-        message: `Your deposit request of ₦${Number(tx.amount).toLocaleString()} has been rejected. Please contact support.`,
-      },
+
+  if (tx.type === 'WITHDRAWAL') {
+    // Refund: wallet was debited when the request was submitted
+    await prisma.wallet.update({
+      where: { userId: tx.userId },
+      data: { balance: { increment: tx.amount } },
     });
+
+    if (user) {
+      await prisma.notification.create({
+        data: {
+          userId: tx.userId,
+          title: 'Withdrawal Rejected',
+          message: `Your withdrawal request of ₦${Number(tx.amount).toLocaleString()} was rejected and refunded to your wallet. Please contact support if you have questions.`,
+        },
+      });
+      try {
+        await emailService.sendWithdrawalNotice(user.email, user.firstName, Number(tx.amount), 'Rejected');
+      } catch { /* silent */ }
+    }
+
+    req.flash('success', 'Withdrawal rejected and amount refunded to user wallet.');
+
+  } else {
+    // DEPOSIT rejected — wallet was never credited, no refund needed
+    if (user) {
+      await prisma.notification.create({
+        data: {
+          userId: tx.userId,
+          title: 'Deposit Rejected',
+          message: `Your deposit request of ₦${Number(tx.amount).toLocaleString()} has been rejected. Please contact support.`,
+        },
+      });
+    }
+
+    req.flash('success', 'Transaction rejected.');
   }
 
-  req.flash('success', 'Transaction rejected.');
   res.redirect('/admin/transactions');
 }
 
-// Backdate an existing confirmed investment (admin only)
+// ─── Backdate Investment ──────────────────────────────────────────────────────
 export async function backdateInvestment(req: Request, res: Response): Promise<void> {
   const { investmentId, startDate, maturityDate } = req.body;
   if (!investmentId || !startDate || !maturityDate) {
