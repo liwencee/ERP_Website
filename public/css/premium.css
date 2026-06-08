@@ -267,6 +267,45 @@
   background: linear-gradient(90deg, transparent 0%, #e5e7eb 30%, #e5e7eb 70%, transparent 100%);
 }
 
+/* --- Value cards: glassmorphism (replaces solid green) --- */
+.value-card {
+  background: rgba(255,255,255,0.07) !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.25),
+    inset 0 1px 0 rgba(255,255,255,0.12) !important;
+  position: relative;
+  overflow: hidden;
+}
+/* Green accent line on top of each card */
+.value-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #2ECC2E, #80e880);
+}
+.value-card h3 {
+  color: #ffffff !important;
+  margin-bottom: 12px;
+}
+.value-card p {
+  color: rgba(255,255,255,0.72) !important;
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+.value-card:hover {
+  background: rgba(255,255,255,0.11) !important;
+  border-color: rgba(46,204,46,0.35) !important;
+  box-shadow:
+    0 16px 48px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.16),
+    0 0 0 1px rgba(46,204,46,0.2) !important;
+  transform: translateY(-6px) scale(1.02) !important;
+}
+
 /* --- Dashboard stat card: prevent value overflow --- */
 .stat-card {
   overflow: hidden;        /* hard stop — nothing bleeds outside the card */
