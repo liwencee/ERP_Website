@@ -23,6 +23,7 @@ router.get('/users/:id', adminUsers.show);
 router.post('/users/:id/kyc', adminUsers.reviewKyc);
 router.post('/users/:id/status', adminUsers.toggleStatus);
 router.post('/users/:id/force-logout', adminUsers.forceLogout);
+router.post('/users/:id/credit-wallet', adminUsers.creditWallet);
 
 // ─── Plans ───────────────────────────────────────────────────────────────────
 router.get('/plans', adminPlans.index);

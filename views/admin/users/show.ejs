@@ -41,8 +41,48 @@
 
         <div class="admin-user-main">
           <div class="dash-section">
-            <h3>Wallet</h3>
-            <p>Balance: <strong class="text-gold"><%= formatCurrency(profileUser.wallet ? Number(profileUser.wallet.balance) : 0) %></strong></p>
+            <div class="section-header-row">
+              <h3>Wallet</h3>
+              <span class="wallet-balance-badge">
+                Balance: <strong class="text-gold"><%= formatCurrency(profileUser.wallet ? Number(profileUser.wallet.balance) : 0) %></strong>
+              </span>
+            </div>
+
+            <!-- Manual Wallet Credit -->
+            <div class="manual-credit-box">
+              <div class="manual-credit-header">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                Manual Wallet Top-Up
+                <span class="manual-credit-badge">Admin Override</span>
+              </div>
+              <p class="manual-credit-note">
+                Use this to manually credit the user's wallet when automatic payment confirmation is not working.
+                A transaction record will be created and the user will be notified.
+              </p>
+              <form action="/admin/users/<%= profileUser.id %>/credit-wallet" method="POST"
+                    onsubmit="return confirm('Credit ₦' + document.getElementById('creditAmount').value + ' to this user\'s wallet?')">
+                <div class="manual-credit-row">
+                  <div class="manual-credit-field">
+                    <label for="creditAmount">Amount (₦)</label>
+                    <input type="number" id="creditAmount" name="amount"
+                           min="100" step="100" placeholder="e.g. 50000" required />
+                  </div>
+                  <div class="manual-credit-field">
+                    <label for="creditNote">Note / Reason</label>
+                    <input type="text" id="creditNote" name="note"
+                           placeholder="e.g. Bank transfer confirmed — ref TXN123" maxlength="120" />
+                  </div>
+                  <button type="submit" class="btn btn-gold manual-credit-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                    Credit Wallet
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
 
           <% if (profileUser.documents.length) { %>

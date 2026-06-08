@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import prisma from '../../config/database';
-import { generateReferralCode } from '../../utils/helpers';
+import { generateReferralCode, generateRef } from '../../utils/helpers';
+import * as emailService from '../../services/email.service';
 
 export async function index(req: Request, res: Response): Promise<void> {
   const page = parseInt(req.query.page as string) || 1;
@@ -158,4 +159,74 @@ export async function createStaffPost(req: Request, res: Response): Promise<void
 
   req.flash('success', `Staff account created for ${firstName} ${lastName}.`);
   res.redirect('/admin/users');
+}
+
+// ─── Manual Wallet Credit ─────────────────────────────────────────────────────
+// Allows admin to manually credit a user's wallet when auto top-up fails.
+export async function creditWallet(req: Request, res: Response): Promise<void> {
+  const userId = req.params.id;
+  const amount = parseFloat(req.body.amount);
+  const note = (req.body.note as string)?.trim() || 'Manual top-up by admin';
+
+  if (!amount || amount < 100) {
+    req.flash('error', 'Minimum credit amount is ₦100.');
+    res.redirect(`/admin/users/${userId}`);
+    return;
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { wallet: true },
+  });
+
+  if (!user) {
+    req.flash('error', 'User not found.');
+    res.redirect('/admin/users');
+    return;
+  }
+
+  if (!user.wallet) {
+    req.flash('error', 'User has no wallet — cannot credit.');
+    res.redirect(`/admin/users/${userId}`);
+    return;
+  }
+
+  const reference = generateRef('MAN');
+  const adminName = req.session.userName || 'Admin';
+
+  await prisma.$transaction([
+    // Credit the wallet
+    prisma.wallet.update({
+      where: { userId },
+      data: { balance: { increment: amount } },
+    }),
+    // Create a confirmed DEPOSIT transaction record
+    prisma.transaction.create({
+      data: {
+        userId,
+        type: 'DEPOSIT',
+        amount,
+        status: 'CONFIRMED',
+        reference,
+        paymentMethod: 'BANK_TRANSFER',
+        description: `Manual top-up by ${adminName} — ${note}`,
+      },
+    }),
+    // Notify the user
+    prisma.notification.create({
+      data: {
+        userId,
+        title: 'Wallet Credited',
+        message: `₦${amount.toLocaleString()} has been manually credited to your wallet by our team. Reference: ${reference}.`,
+      },
+    }),
+  ]);
+
+  // Send email confirmation silently
+  try {
+    await emailService.sendDepositConfirmed(user.email, user.firstName, amount, reference);
+  } catch { /* silent */ }
+
+  req.flash('success', `₦${amount.toLocaleString()} successfully credited to ${user.firstName} ${user.lastName}'s wallet. Ref: ${reference}`);
+  res.redirect(`/admin/users/${userId}`);
 }

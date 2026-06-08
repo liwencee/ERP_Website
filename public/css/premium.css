@@ -306,6 +306,87 @@
   transform: translateY(-6px) scale(1.02) !important;
 }
 
+/* --- Manual Wallet Credit Box (admin user detail) --- */
+.wallet-balance-badge { font-size: 0.95rem; color: #4b5563; }
+
+.manual-credit-box {
+  margin-top: 20px;
+  background: rgba(46,204,46,0.04);
+  border: 1.5px dashed rgba(46,204,46,0.35);
+  border-radius: 12px;
+  padding: 20px 24px;
+}
+.manual-credit-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #0a1628;
+  margin-bottom: 8px;
+}
+.manual-credit-header svg { color: #2ECC2E; flex-shrink: 0; }
+.manual-credit-badge {
+  margin-left: auto;
+  background: rgba(204,26,26,0.1);
+  color: #CC1A1A;
+  border: 1px solid rgba(204,26,26,0.25);
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 2px 10px;
+  border-radius: 100px;
+}
+.manual-credit-note {
+  font-size: 0.82rem;
+  color: #6b7280;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.manual-credit-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+.manual-credit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+  min-width: 160px;
+}
+.manual-credit-field label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #374151;
+}
+.manual-credit-field input {
+  padding: 9px 12px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  transition: border-color 0.2s;
+  background: #fff;
+}
+.manual-credit-field input:focus {
+  outline: none;
+  border-color: #2ECC2E;
+}
+.manual-credit-btn {
+  white-space: nowrap;
+  padding: 10px 20px !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+@media (max-width: 640px) {
+  .manual-credit-row { flex-direction: column; }
+  .manual-credit-btn { width: 100%; justify-content: center; }
+}
+
 /* --- Fix section-sub negative margin overlap --- */
 /* Original had margin:-12px which pulled subtitle into the h3 above it */
 .section-sub {
