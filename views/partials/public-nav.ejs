@@ -4,77 +4,106 @@
       <img src="/images/logo.png" alt="EPR Access Limited" class="site-logo" />
     </a>
 
-    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+    <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
 
-    <ul class="nav-links" id="navLinks">
-      <li><a href="/" class="<%= currentPath === '/' ? 'active' : '' %>">Home</a></li>
+    <!-- nav-drawer: display:contents on desktop, fixed sidebar on mobile -->
+    <div class="nav-drawer" id="navDrawer">
 
-      <!-- About Us -->
-      <li class="nav-dropdown">
-        <a href="/about" class="nav-dropdown-toggle <%= ['/about','/team','/compliance'].includes(currentPath) ? 'active' : '' %>">
-          About Us
-          <svg class="dropdown-arrow" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-        <ul class="dropdown-menu">
-          <li><a href="/about">Who We Are</a></li>
-          <li><a href="/team">Our Executives</a></li>
-          <li><a href="/about#subsidiary">Subsidiary</a></li>
-          <li><a href="/compliance">Compliance</a></li>
-        </ul>
-      </li>
+      <!-- Visible only inside mobile drawer -->
+      <div class="drawer-header">
+        <div class="drawer-brand">
+          <img src="/images/logo.png" alt="EPR Access" class="drawer-logo-img" />
+          <div class="drawer-brand-text">
+            <span class="drawer-brand-name">EPR Access</span>
+            <span class="drawer-brand-tagline">Investment Platform</span>
+          </div>
+        </div>
+        <div class="drawer-header-badge">
+          <span class="drawer-live-dot"></span>Live
+        </div>
+      </div>
 
-      <!-- Services -->
-      <li class="nav-dropdown">
-        <a href="/services" class="nav-dropdown-toggle <%= currentPath === '/services' ? 'active' : '' %>">
-          Services
-          <svg class="dropdown-arrow" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-        <ul class="dropdown-menu">
-          <li><a href="/services#capital">Capital Investment</a></li>
-          <li><a href="/services#trading">Trading Market Services</a></li>
-          <li><a href="/services#money-market">Money Market Services</a></li>
-          <li><a href="/services#equity">Equity Services</a></li>
-          <li><a href="/services#savings">Savings Plan</a></li>
-          <li><a href="/services#fixed-deposit">Fixed Deposit</a></li>
-          <li><a href="/services#real-estate">Real Estate Management</a></li>
-          <li><a href="/services#it">IT Services</a></li>
-          <li><a href="/services#farming">Farming Services</a></li>
-          <li><a href="/services#livestock">Livestock Market</a></li>
-          <li><a href="/services#project">Project Financing</a></li>
-        </ul>
-      </li>
+      <ul class="nav-links" id="navLinks">
+        <li>
+          <a href="/" class="<%= currentPath === '/' ? 'active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>
+            Home
+          </a>
+        </li>
 
-      <!-- Investment -->
-      <li class="nav-dropdown">
-        <a href="/services#plans" class="nav-dropdown-toggle">
-          Investment
-          <svg class="dropdown-arrow" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-        <ul class="dropdown-menu">
-          <li><a href="/services#silver">Silver – SPlus</a></li>
-          <li><a href="/services#bronze">Bronze – BPlus</a></li>
-          <li><a href="/services#gold">Gold – GPlus</a></li>
-          <li><a href="/services#diamond">Diamond – DPlus</a></li>
-          <li><a href="/services#savings-plan">Savings Plan</a></li>
-          <li><a href="/services#fixed-deposit">Fixed Deposit</a></li>
-          <li><a href="/services#trading-inv">Trading Investment</a></li>
-          <li><a href="/services#dollar">Dollar Investment</a></li>
-          <li><a href="/services#real-estate-inv">Real Estate</a></li>
-        </ul>
-      </li>
+        <!-- About Us -->
+        <li class="nav-dropdown">
+          <a href="/about" class="nav-dropdown-toggle <%= ['/about','/team','/compliance'].includes(currentPath) ? 'active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+            About Us
+            <svg class="dropdown-arrow" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a href="/about">Who We Are</a></li>
+            <li><a href="/team">Our Executives</a></li>
+            <li><a href="/about#subsidiary">Subsidiary</a></li>
+            <li><a href="/compliance">Compliance</a></li>
+          </ul>
+        </li>
 
-      <li><a href="/contact" class="<%= currentPath === '/contact' ? 'active' : '' %>">Contact</a></li>
-    </ul>
+        <!-- Services -->
+        <li class="nav-dropdown">
+          <a href="/services" class="nav-dropdown-toggle <%= currentPath === '/services' ? 'active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/></svg>
+            Services
+            <svg class="dropdown-arrow" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a href="/services#capital">Capital Investment</a></li>
+            <li><a href="/services#trading">Trading Market</a></li>
+            <li><a href="/services#money-market">Money Market</a></li>
+            <li><a href="/services#equity">Equity Services</a></li>
+            <li><a href="/services#savings">Savings Plan</a></li>
+            <li><a href="/services#fixed-deposit">Fixed Deposit</a></li>
+            <li><a href="/services#real-estate">Real Estate</a></li>
+          </ul>
+        </li>
 
-    <div class="nav-actions">
-      <% if (locals.user) { %>
-        <a href="/dashboard" class="btn btn-outline-gold">Dashboard</a>
-      <% } else { %>
-        <a href="/auth/login" class="btn btn-outline-gold">Login</a>
-        <a href="/auth/register" class="btn btn-gold">Get Started</a>
-      <% } %>
-    </div>
+        <!-- Investment -->
+        <li class="nav-dropdown">
+          <a href="/services#plans" class="nav-dropdown-toggle">
+            <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
+            Investment
+            <svg class="dropdown-arrow" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a href="/services#silver">Silver – SPlus</a></li>
+            <li><a href="/services#bronze">Bronze – BPlus</a></li>
+            <li><a href="/services#gold">Gold – GPlus</a></li>
+            <li><a href="/services#diamond">Diamond – DPlus</a></li>
+            <li><a href="/services#savings-plan">Savings Plan</a></li>
+            <li><a href="/services#fixed-deposit">Fixed Deposit</a></li>
+            <li><a href="/services#real-estate-inv">Real Estate</a></li>
+          </ul>
+        </li>
+
+        <li>
+          <a href="/contact" class="<%= currentPath === '/contact' ? 'active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
+            Contact
+          </a>
+        </li>
+      </ul>
+
+      <div class="nav-actions" id="navActions">
+        <% if (locals.user) { %>
+          <a href="/dashboard" class="btn btn-outline-gold">Dashboard</a>
+        <% } else { %>
+          <a href="/auth/login" class="btn btn-outline-gold">Login</a>
+          <a href="/auth/register" class="btn btn-gold">Get Started</a>
+        <% } %>
+      </div>
+
+    </div><!-- /.nav-drawer -->
   </nav>
+
+  <!-- Mobile backdrop overlay -->
+  <div class="nav-overlay" id="navOverlay"></div>
 </header>

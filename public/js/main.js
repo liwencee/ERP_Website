@@ -58,16 +58,61 @@
   });
 })();
 
-// ─── Mobile nav toggle ───────────────────────────────
-const toggle = document.getElementById('navToggle');
-const navLinks = document.getElementById('navLinks');
-const navActions = document.querySelector('.nav-actions');
-if (toggle) {
-  toggle.addEventListener('click', () => {
-    navLinks?.classList.toggle('open');
-    navActions?.classList.toggle('open');
+// ─── Mobile nav drawer ───────────────────────────────
+(function () {
+  const toggle  = document.getElementById('navToggle');
+  const drawer  = document.getElementById('navDrawer');
+  const overlay = document.getElementById('navOverlay');
+  if (!toggle || !drawer) return;
+
+  function openDrawer() {
+    toggle.classList.add('open');
+    drawer.classList.add('open');
+    overlay?.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    toggle.setAttribute('aria-expanded', 'true');
+    toggle.setAttribute('aria-label', 'Close menu');
+  }
+
+  function closeDrawer() {
+    toggle.classList.remove('open');
+    drawer.classList.remove('open');
+    overlay?.classList.remove('open');
+    document.body.style.overflow = '';
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', 'Open menu');
+    // Collapse all open sub-menus
+    drawer.querySelectorAll('.nav-dropdown.open').forEach(function (d) { d.classList.remove('open'); });
+  }
+
+  toggle.addEventListener('click', function () {
+    drawer.classList.contains('open') ? closeDrawer() : openDrawer();
   });
-}
+
+  overlay?.addEventListener('click', closeDrawer);
+
+  // Accordion: dropdown toggles
+  drawer.querySelectorAll('.nav-dropdown-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      if (window.innerWidth > 768) return;
+      e.preventDefault();
+      var li = btn.closest('.nav-dropdown');
+      var wasOpen = li.classList.contains('open');
+      drawer.querySelectorAll('.nav-dropdown').forEach(function (d) { d.classList.remove('open'); });
+      if (!wasOpen) li.classList.add('open');
+    });
+  });
+
+  // Close drawer when a non-toggle link is clicked
+  drawer.querySelectorAll('a:not(.nav-dropdown-toggle)').forEach(function (a) {
+    a.addEventListener('click', closeDrawer);
+  });
+
+  // Close on resize to desktop
+  window.addEventListener('resize', function () {
+    if (window.innerWidth > 768) closeDrawer();
+  });
+})();
 
 // ─── Hero Carousel ────────────────────────────────────
 (function () {
@@ -81,7 +126,7 @@ if (toggle) {
 
   let current = 0;
   let autoplayTimer = null;
-  const INTERVAL = 4000; // ms between slides
+  const INTERVAL = 7000; // ms between slides
 
   function goTo(index) {
     slides[current].classList.remove('active');
