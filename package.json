@@ -7,6 +7,7 @@
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc && npm run build:css",
     "build:css": "tailwindcss -i ./public/css/input.css -o ./public/css/output.css --minify",
+    "vercel-build": "prisma generate && npm run build:css",
     "start": "node dist/server.js",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
