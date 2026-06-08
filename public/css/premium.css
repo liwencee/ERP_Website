@@ -266,3 +266,20 @@
   height: 1px;
   background: linear-gradient(90deg, transparent 0%, #e5e7eb 30%, #e5e7eb 70%, transparent 100%);
 }
+
+/* --- Dashboard stat card: prevent value overflow --- */
+.stat-card {
+  overflow: hidden;        /* hard stop — nothing bleeds outside the card */
+}
+.stat-body {
+  flex: 1;
+  min-width: 0;            /* lets the flex child shrink below its content size */
+}
+.stat-value {
+  font-size: clamp(0.92rem, 1.6vw, 1.25rem) !important;
+  font-weight: 700 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block !important;
+}
