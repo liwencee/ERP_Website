@@ -29,6 +29,9 @@
   "author": "EPR Access Limited",
   "license": "UNLICENSED",
   "private": true,
+  "engines": {
+    "node": ">=20.x"
+  },
   "dependencies": {
     "@prisma/client": "^5.10.0",
     "axios": "^1.6.7",

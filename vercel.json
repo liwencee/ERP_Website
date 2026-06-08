@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "nodes": { "version": "20.x" },
   "builds": [
     {
       "src": "src/server.ts",
