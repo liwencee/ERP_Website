@@ -5,7 +5,11 @@
   <%- include('../partials/head') %>
 </head>
 <body class="dashboard-body">
-  <%- include('../partials/sidebar') %>
+  <% if (user && (user.role === 'ADMIN' || user.role === 'STAFF')) { %>
+    <%- include('../partials/admin-sidebar') %>
+  <% } else { %>
+    <%- include('../partials/sidebar') %>
+  <% } %>
   <div class="dashboard-main" id="dashboardMain">
     <%- include('../partials/topbar', { pageTitle: 'Profile' }) %>
     <div class="dashboard-content">
