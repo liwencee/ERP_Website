@@ -22,6 +22,11 @@ import { runMaturityJob } from './jobs/mature-investments';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust the Vercel/proxy TLS terminator so secure cookies are set correctly
+// (express-session refuses to set a `secure` cookie if it thinks the
+// connection is plain HTTP, which it is behind the proxy without this).
+app.set('trust proxy', 1);
+
 // ─── Security ────────────────────────────────────────────────────────────────
 app.use(helmet({
   contentSecurityPolicy: {

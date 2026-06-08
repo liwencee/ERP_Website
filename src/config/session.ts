@@ -3,13 +3,34 @@ import path from 'path';
 import fs from 'fs';
 
 function buildStore(): session.Store | undefined {
-  // Vercel / serverless: no persistent filesystem — use in-memory store.
-  // For production with real persistence use Upstash Redis + connect-redis.
-  if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
-    return undefined; // express-session default in-memory store
+  const dbUrl = process.env.DATABASE_URL || '';
+
+  // Postgres-backed sessions whenever a Postgres DB is configured.
+  // Critical on Vercel: serverless function instances don't share memory,
+  // so an in-memory store loses sessions between requests. A shared DB
+  // store keeps users logged in across every invocation.
+  if (dbUrl.startsWith('postgres')) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const pgSession = require('connect-pg-simple')(session);
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { Pool } = require('pg');
+      const pool = new Pool({
+        connectionString: dbUrl,
+        ssl: { rejectUnauthorized: false },
+        max: 3,
+      });
+      return new pgSession({
+        pool,
+        tableName: 'session',
+        createTableIfMissing: true,
+      });
+    } catch {
+      // fall through to file/memory store
+    }
   }
 
-  // Local dev: file-based store so sessions survive server restarts
+  // Local non-Postgres dev: file-based store so sessions survive restarts
   try {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const FileStore = require('session-file-store')(session);
@@ -17,11 +38,12 @@ function buildStore(): session.Store | undefined {
     if (!fs.existsSync(sessionsDir)) fs.mkdirSync(sessionsDir, { recursive: true });
     return new FileStore({ path: sessionsDir, ttl: 60 * 60 * 24 * 7, retries: 1, logFn: () => {} });
   } catch {
-    return undefined; // fallback silently
+    return undefined; // last resort: in-memory (dev only)
   }
 }
 
 const store = buildStore();
+const isProduction = process.env.NODE_ENV === 'production' || !!process.env.VERCEL;
 
 const sessionConfig: session.SessionOptions = {
   ...(store ? { store } : {}),
@@ -30,9 +52,9 @@ const sessionConfig: session.SessionOptions = {
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    secure: isProduction,                 // HTTPS-only in production
+    sameSite: 'lax',                       // same-site app — lax keeps logins working
+    maxAge: 1000 * 60 * 60 * 24 * 7,       // 7 days
   },
 };
 
