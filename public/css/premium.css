@@ -306,6 +306,50 @@
   transform: translateY(-6px) scale(1.02) !important;
 }
 
+/* --- Invest Tenure Selector --- */
+.tenure-breakdown {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+}
+.tenure-breakdown h4 {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 12px;
+}
+.tenure-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 0;
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.tenure-row:last-child { border-bottom: none; }
+.tenure-row span { color: rgba(255,255,255,0.7); }
+.tenure-row strong { color: #2ECC2E; }
+
+.invest-preview {
+  background: var(--gray-50, #f9fafb);
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.invest-preview .return-preview {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
 /* --- Services Overview Grid --- */
 .services-overview-grid {
   display: grid;

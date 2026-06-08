@@ -60,14 +60,32 @@ model InvestmentPlan {
   description String
   minAmount   Decimal
   maxAmount   Decimal?
-  returnRate  Decimal
-  duration    Int
+  returnRate  Decimal  // headline / fallback rate (total return for `duration`)
+  duration    Int      // headline / fallback duration in days
   status      String   @default("ACTIVE")
 
   investments UserInvestment[]
+  tenures     PlanTenure[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// A plan can offer multiple tenures (e.g. 6 months, 9 months, 1 year),
+// each with its own total return rate and referral rate.
+model PlanTenure {
+  id           String   @id @default(uuid())
+  planId       String
+  plan         InvestmentPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  label        String   // e.g. "6 Months", "1 Year & Above"
+  durationDays Int
+  returnRate   Decimal  // total return (%) earned over this tenure
+  referralRate Decimal  @default(0)
+  sortOrder    Int      @default(0)
+
+  investments  UserInvestment[]
+
+  createdAt DateTime @default(now())
 }
 
 // InvestmentStatus: ACTIVE | MATURED | WITHDRAWN | CANCELLED
@@ -78,6 +96,8 @@ model UserInvestment {
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   planId         String
   plan           InvestmentPlan @relation(fields: [planId], references: [id])
+  tenureId       String?
+  tenure         PlanTenure? @relation(fields: [tenureId], references: [id])
   amount         Decimal
   expectedReturn Decimal
   status         String   @default("ACTIVE")

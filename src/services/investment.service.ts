@@ -9,9 +9,13 @@ export function calculateExpectedReturn(amount: number, rate: number): number {
 export async function createInvestment(
   userId: string,
   planId: string,
-  amount: number
+  amount: number,
+  tenureId?: string
 ): Promise<string> {
-  const plan = await prisma.investmentPlan.findUnique({ where: { id: planId } });
+  const plan = await prisma.investmentPlan.findUnique({
+    where: { id: planId },
+    include: { tenures: true },
+  });
   if (!plan || plan.status !== 'ACTIVE') throw new Error('Investment plan is not available.');
 
   if (amount < Number(plan.minAmount)) {
@@ -21,9 +25,27 @@ export async function createInvestment(
     throw new Error(`Maximum investment amount is ₦${Number(plan.maxAmount).toLocaleString()}.`);
   }
 
-  const expectedReturn = calculateExpectedReturn(amount, Number(plan.returnRate));
+  // Resolve the chosen tenure. If the plan has tenures, one must be selected
+  // (and must belong to this plan). Otherwise fall back to the plan headline.
+  let rate = Number(plan.returnRate);
+  let durationDays = plan.duration;
+  let resolvedTenureId: string | null = null;
+
+  if (plan.tenures.length > 0) {
+    const tenure = tenureId
+      ? plan.tenures.find((t) => t.id === tenureId)
+      : undefined;
+    if (!tenure) {
+      throw new Error('Please select a valid investment tenure.');
+    }
+    rate = Number(tenure.returnRate);
+    durationDays = tenure.durationDays;
+    resolvedTenureId = tenure.id;
+  }
+
+  const expectedReturn = calculateExpectedReturn(amount, rate);
   const startDate = new Date();
-  const maturityDate = addDays(startDate, plan.duration);
+  const maturityDate = addDays(startDate, durationDays);
 
   // Debit wallet first (throws if insufficient)
   const ref = await debitWallet(userId, amount, 'INVESTMENT', `Investment in ${plan.name}`);
@@ -33,6 +55,7 @@ export async function createInvestment(
     data: {
       userId,
       planId,
+      tenureId: resolvedTenureId,
       amount,
       expectedReturn,
       status: 'ACTIVE',

@@ -10,10 +10,11 @@ export async function index(req: Request, res: Response): Promise<void> {
     prisma.investmentPlan.findMany({
       where: { status: 'ACTIVE' },
       orderBy: { type: 'asc' },
+      include: { tenures: { orderBy: { sortOrder: 'asc' } } },
     }),
     prisma.userInvestment.findMany({
       where: { userId },
-      include: { plan: true },
+      include: { plan: true, tenure: true },
       orderBy: { createdAt: 'desc' },
     }),
   ]);
@@ -22,7 +23,10 @@ export async function index(req: Request, res: Response): Promise<void> {
 }
 
 export async function investGet(req: Request, res: Response): Promise<void> {
-  const plan = await prisma.investmentPlan.findUnique({ where: { id: req.params.planId } });
+  const plan = await prisma.investmentPlan.findUnique({
+    where: { id: req.params.planId },
+    include: { tenures: { orderBy: { sortOrder: 'asc' } } },
+  });
   if (!plan || plan.status !== 'ACTIVE') {
     req.flash('error', 'Investment plan not found.');
     res.redirect('/dashboard/investments');
@@ -34,7 +38,7 @@ export async function investGet(req: Request, res: Response): Promise<void> {
 
 export async function investPost(req: Request, res: Response): Promise<void> {
   const userId = req.session.userId!;
-  const { amount } = req.body;
+  const { amount, tenureId } = req.body;
   const parsed = parseFloat(amount);
 
   if (!parsed || parsed <= 0) {
@@ -44,7 +48,7 @@ export async function investPost(req: Request, res: Response): Promise<void> {
   }
 
   try {
-    const investmentId = await investmentService.createInvestment(userId, req.params.planId, parsed);
+    const investmentId = await investmentService.createInvestment(userId, req.params.planId, parsed, tenureId);
 
     const [user, investment] = await Promise.all([
       prisma.user.findUnique({ where: { id: userId } }),

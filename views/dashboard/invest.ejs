@@ -5,28 +5,55 @@
   <%- include('../partials/head') %>
 </head>
 <body class="dashboard-body">
-  <%- include('../partials/sidebar') %>
+  <% if (user && (user.role === 'ADMIN' || user.role === 'STAFF')) { %>
+    <%- include('../partials/admin-sidebar') %>
+  <% } else { %>
+    <%- include('../partials/sidebar') %>
+  <% } %>
   <div class="dashboard-main" id="dashboardMain">
     <%- include('../partials/topbar', { pageTitle: 'Invest' }) %>
     <div class="dashboard-content">
       <%- include('../partials/flash') %>
+
+      <%
+        var hasTenures = plan.tenures && plan.tenures.length > 0;
+        var rateList = hasTenures ? plan.tenures.map(function(t){ return Number(t.returnRate); }) : [Number(plan.returnRate)];
+        var minRate = Math.min.apply(null, rateList);
+        var maxRate = Math.max.apply(null, rateList);
+      %>
 
       <div class="form-page">
         <a href="/dashboard/investments" class="back-link">← Back to Plans</a>
 
         <div class="invest-layout">
           <div class="plan-summary-card">
-            <div class="plan-type plan-type-<%= plan.type.toLowerCase().replace('_','-') %>"><%= plan.type.replace('_',' ') %></div>
+            <div class="plan-type plan-type-<%= plan.type.toLowerCase().replace('_','-') %>"><%= plan.type.replace(/_/g,' ') %></div>
             <h2><%= plan.name %></h2>
             <p><%= plan.description %></p>
             <div class="plan-specs">
-              <div class="plan-spec"><span>Return Rate</span><strong class="text-gold"><%= plan.returnRate %>% per annum</strong></div>
-              <div class="plan-spec"><span>Duration</span><strong><%= plan.duration %> days</strong></div>
+              <div class="plan-spec">
+                <span>Return Rate</span>
+                <strong class="text-gold">
+                  <% if (minRate === maxRate) { %><%= maxRate %>%<% } else { %><%= minRate %>% – <%= maxRate %>%<% } %>
+                </strong>
+              </div>
               <div class="plan-spec"><span>Min Investment</span><strong>₦<%= Number(plan.minAmount).toLocaleString() %></strong></div>
               <% if (plan.maxAmount) { %>
               <div class="plan-spec"><span>Max Investment</span><strong>₦<%= Number(plan.maxAmount).toLocaleString() %></strong></div>
               <% } %>
             </div>
+
+            <% if (hasTenures) { %>
+            <div class="tenure-breakdown">
+              <h4>Available Tenures</h4>
+              <% plan.tenures.forEach(function(t) { %>
+              <div class="tenure-row">
+                <span><%= t.label %></span>
+                <strong><%= Number(t.returnRate) %>%</strong>
+              </div>
+              <% }) %>
+            </div>
+            <% } %>
           </div>
 
           <div class="invest-form-card">
@@ -34,6 +61,23 @@
             <p>Wallet Balance: <strong class="text-gold"><%= formatCurrency(wallet ? Number(wallet.balance) : 0) %></strong></p>
 
             <form action="/dashboard/investments/<%= plan.id %>/invest" method="POST" class="auth-form" id="investForm">
+
+              <% if (hasTenures) { %>
+              <div class="form-group">
+                <label for="tenureId">Choose Tenure</label>
+                <select id="tenureId" name="tenureId" required>
+                  <% plan.tenures.forEach(function(t, i) { %>
+                  <option value="<%= t.id %>"
+                          data-rate="<%= Number(t.returnRate) %>"
+                          data-days="<%= t.durationDays %>"
+                          <%= i === plan.tenures.length - 1 ? 'selected' : '' %>>
+                    <%= t.label %> — <%= Number(t.returnRate) %>% (<%= t.durationDays %> days)
+                  </option>
+                  <% }) %>
+                </select>
+              </div>
+              <% } %>
+
               <div class="form-group">
                 <label for="amount">Investment Amount (₦)</label>
                 <input type="number" id="amount" name="amount"
@@ -41,10 +85,22 @@
                   <% if (plan.maxAmount) { %>max="<%= Number(plan.maxAmount) %>"<% } %>
                   step="100" required placeholder="Enter amount" />
               </div>
-              <div class="return-preview" id="returnPreview" style="display:none;">
-                <span>Expected Return at Maturity:</span>
-                <strong class="text-gold" id="expectedReturn">—</strong>
+
+              <div class="invest-preview" id="investPreview" style="display:none;">
+                <div class="return-preview">
+                  <span>Selected Rate</span>
+                  <strong class="text-gold" id="previewRate">—</strong>
+                </div>
+                <div class="return-preview">
+                  <span>Maturity Date</span>
+                  <strong id="previewMaturity">—</strong>
+                </div>
+                <div class="return-preview" style="border-top:2px solid var(--gray-200); padding-top:12px; margin-top:4px;">
+                  <span>Expected Return at Maturity</span>
+                  <strong class="text-gold" id="expectedReturn">—</strong>
+                </div>
               </div>
+
               <button type="submit" class="btn btn-gold btn-block">Confirm Investment</button>
             </form>
           </div>
@@ -56,20 +112,47 @@
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
   <script src="/js/dashboard.js"></script>
   <script>
-    var rate = <%= plan.returnRate %>;
-    var amountInput = document.getElementById('amount');
-    var preview = document.getElementById('returnPreview');
-    var returnEl = document.getElementById('expectedReturn');
-    amountInput.addEventListener('input', function() {
-      var val = parseFloat(amountInput.value);
-      if (val > 0) {
-        var ret = val * (1 + rate / 100);
-        returnEl.textContent = '₦' + ret.toLocaleString('en-NG', { minimumFractionDigits: 2 });
-        preview.style.display = 'flex';
-      } else {
-        preview.style.display = 'none';
+    (function () {
+      var fallbackRate = <%= Number(plan.returnRate) %>;
+      var fallbackDays = <%= plan.duration %>;
+      var amountInput   = document.getElementById('amount');
+      var tenureSelect  = document.getElementById('tenureId');
+      var preview       = document.getElementById('investPreview');
+      var rateEl        = document.getElementById('previewRate');
+      var maturityEl    = document.getElementById('previewMaturity');
+      var returnEl      = document.getElementById('expectedReturn');
+
+      function currentTenure() {
+        if (tenureSelect) {
+          var opt = tenureSelect.options[tenureSelect.selectedIndex];
+          return { rate: parseFloat(opt.dataset.rate), days: parseInt(opt.dataset.days, 10) };
+        }
+        return { rate: fallbackRate, days: fallbackDays };
       }
-    });
+
+      function fmt(n) {
+        return '₦' + Number(n).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+
+      function update() {
+        var val = parseFloat(amountInput.value);
+        var t = currentTenure();
+        if (val > 0) {
+          var ret = val * (1 + t.rate / 100);
+          var maturity = new Date();
+          maturity.setDate(maturity.getDate() + t.days);
+          rateEl.textContent = t.rate + '% over ' + t.days + ' days';
+          maturityEl.textContent = maturity.toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
+          returnEl.textContent = fmt(ret);
+          preview.style.display = 'block';
+        } else {
+          preview.style.display = 'none';
+        }
+      }
+
+      amountInput.addEventListener('input', update);
+      if (tenureSelect) tenureSelect.addEventListener('change', update);
+    })();
   </script>
 </body>
 </html>

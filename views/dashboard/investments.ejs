@@ -103,7 +103,9 @@
               <tr>
                 <td>
                   <%= inv.plan.name %>
-                  <small class="plan-type-tag"><%= inv.plan.type.replace('_',' ') %></small>
+                  <small class="plan-type-tag">
+                    <%= inv.plan.type.replace('_',' ') %><% if (inv.tenure) { %> · <%= inv.tenure.label %><% } %>
+                  </small>
                 </td>
                 <td><%= formatCurrency(Number(inv.amount)) %></td>
                 <td class="text-gold"><%= formatCurrency(Number(inv.expectedReturn)) %></td>
