@@ -17,8 +17,8 @@
           <span class="balance-amount"><%= formatCurrency(wallet ? Number(wallet.balance) : 0) %></span>
         </div>
         <div class="wallet-actions">
-          <button class="btn btn-gold" onclick="showModal('fundModal')">Fund Wallet</button>
-          <button class="btn btn-outline-gold" onclick="showModal('withdrawModal')">Withdraw</button>
+          <button class="btn btn-gold" data-open-modal="fundModal">Fund Wallet</button>
+          <button class="btn btn-outline-gold" data-open-modal="withdrawModal">Withdraw</button>
         </div>
       </div>
 
@@ -51,7 +51,7 @@
       <div class="modal" id="fundModal">
         <div class="modal-box">
           <h3>Fund Your Wallet</h3>
-          <button class="modal-close" onclick="closeModal('fundModal')">&times;</button>
+          <button class="modal-close" data-close-modal="fundModal">&times;</button>
           <form action="/dashboard/wallet/fund" method="POST">
             <div class="form-group">
               <label>Amount (₦)</label>
@@ -95,7 +95,7 @@
       <div class="modal" id="withdrawModal">
         <div class="modal-box">
           <h3>Request Withdrawal</h3>
-          <button class="modal-close" onclick="closeModal('withdrawModal')">&times;</button>
+          <button class="modal-close" data-close-modal="withdrawModal">&times;</button>
           <p>Available: <strong class="text-gold"><%= formatCurrency(wallet ? Number(wallet.balance) : 0) %></strong></p>
           <form action="/dashboard/wallet/withdraw" method="POST">
             <div class="form-group">
@@ -113,11 +113,41 @@
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
   <script src="/js/dashboard.js"></script>
   <script>
-    function showModal(id) { document.getElementById(id).classList.add('open'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-    document.querySelectorAll('.modal').forEach(function(m) {
-      m.addEventListener('click', function(e) { if (e.target === m) m.classList.remove('open'); });
-    });
+    (function () {
+      // Open modal buttons
+      document.querySelectorAll('[data-open-modal]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var modalId = btn.getAttribute('data-open-modal');
+          var modal = document.getElementById(modalId);
+          if (modal) modal.classList.add('open');
+        });
+      });
+
+      // Close modal buttons
+      document.querySelectorAll('[data-close-modal]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var modalId = btn.getAttribute('data-close-modal');
+          var modal = document.getElementById(modalId);
+          if (modal) modal.classList.remove('open');
+        });
+      });
+
+      // Close on backdrop click
+      document.querySelectorAll('.modal').forEach(function (modal) {
+        modal.addEventListener('click', function (e) {
+          if (e.target === modal) modal.classList.remove('open');
+        });
+      });
+
+      // Close on Escape key
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('.modal.open').forEach(function (m) {
+            m.classList.remove('open');
+          });
+        }
+      });
+    })();
   </script>
 </body>
 </html>
