@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>KYC Verification | EPR Access</title>
+  <%- include('../partials/head') %>
+</head>
+<body class="dashboard-body">
+  <%- include('../partials/sidebar') %>
+  <div class="dashboard-main" id="dashboardMain">
+    <%- include('../partials/topbar', { pageTitle: 'KYC Verification' }) %>
+    <div class="dashboard-content">
+      <%- include('../partials/flash') %>
+
+      <div class="kyc-status-banner kyc-<%= user.kycStatus.toLowerCase() %>">
+        <span>KYC Status: <strong><%= user.kycStatus %></strong></span>
+        <% if (user.kycStatus === 'APPROVED') { %>
+          <span>✓ Your identity has been verified</span>
+        <% } else if (user.kycStatus === 'SUBMITTED') { %>
+          <span>Your documents are under review. This usually takes 1–2 business days.</span>
+        <% } else if (user.kycStatus === 'REJECTED') { %>
+          <span>Your documents were rejected. Please upload new documents.</span>
+        <% } else { %>
+          <span>Please upload at least one identity document to complete verification.</span>
+        <% } %>
+      </div>
+
+      <div class="kyc-grid">
+        <div class="kyc-upload-section">
+          <h3>Upload Document</h3>
+          <form action="/dashboard/kyc" method="POST" enctype="multipart/form-data" class="auth-form">
+            <div class="form-group">
+              <label>Document Type</label>
+              <select name="documentType" required>
+                <option value="">Select type</option>
+                <option value="ID_CARD">National ID Card</option>
+                <option value="PASSPORT">International Passport</option>
+                <option value="UTILITY_BILL">Utility Bill</option>
+                <option value="BANK_STATEMENT">Bank Statement</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Upload File <span class="optional">(JPG, PNG or PDF, max 5MB)</span></label>
+              <input type="file" name="document" accept=".jpg,.jpeg,.png,.pdf" required />
+            </div>
+            <button type="submit" class="btn btn-gold">Upload Document</button>
+          </form>
+        </div>
+
+        <div class="kyc-docs-section">
+          <h3>Uploaded Documents</h3>
+          <% if (documents.length) { %>
+          <div class="docs-list">
+            <% documents.forEach(function(doc) { %>
+            <div class="doc-item">
+              <div class="doc-info">
+                <span class="doc-type"><%= doc.type.replace('_',' ') %></span>
+                <span class="doc-date"><%= formatDate(doc.createdAt) %></span>
+              </div>
+              <span class="badge-status status-<%= doc.status.toLowerCase() %>"><%= doc.status %></span>
+            </div>
+            <% }) %>
+          </div>
+          <% } else { %>
+          <div class="empty-state"><p>No documents uploaded yet.</p></div>
+          <% } %>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

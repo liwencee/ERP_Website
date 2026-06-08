@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Investments | EPR Access</title>
+  <%- include('../partials/head') %>
+</head>
+<body class="dashboard-body">
+  <%- include('../partials/sidebar') %>
+  <div class="dashboard-main" id="dashboardMain">
+    <%- include('../partials/topbar', { pageTitle: 'Investments' }) %>
+    <div class="dashboard-content">
+      <%- include('../partials/flash') %>
+
+      <!-- Investment Calculator -->
+      <div class="dash-section calculator-section">
+        <h3>Investment Calculator</h3>
+        <p class="section-sub">Estimate your returns before you invest</p>
+        <div class="calculator-grid">
+          <div class="calc-inputs">
+            <div class="form-group">
+              <label>Investment Amount (₦)</label>
+              <input type="number" id="calcAmount" placeholder="e.g. 100000" min="0" step="1000" />
+            </div>
+            <div class="form-group">
+              <label>Select Plan</label>
+              <select id="calcPlan">
+                <option value="">— Choose a plan —</option>
+                <% plans.forEach(function(plan) { %>
+                <option value="<%= plan.returnRate %>|<%= plan.duration %>|<%= plan.minAmount %>|<%= plan.name %>">
+                  <%= plan.name %> — <%= plan.returnRate %>% / <%= plan.duration %> days
+                </option>
+                <% }) %>
+              </select>
+            </div>
+            <button class="btn btn-gold" onclick="calculateReturns()">Calculate</button>
+          </div>
+          <div class="calc-results" id="calcResults" style="display:none">
+            <div class="calc-result-item">
+              <span>Principal</span>
+              <strong id="rPrincipal">₦0</strong>
+            </div>
+            <div class="calc-result-item">
+              <span>Interest Rate</span>
+              <strong id="rRate">0%</strong>
+            </div>
+            <div class="calc-result-item">
+              <span>Duration</span>
+              <strong id="rDuration">0 days</strong>
+            </div>
+            <div class="calc-result-item highlight">
+              <span>Total at Maturity</span>
+              <strong id="rTotal" class="text-gold">₦0</strong>
+            </div>
+            <div class="calc-result-item">
+              <span>You Earn</span>
+              <strong id="rProfit" class="text-green">+₦0</strong>
+            </div>
+            <div class="calc-cta">
+              <a href="/auth/register" class="btn btn-gold btn-block" id="rInvestLink">Invest Now</a>
+            </div>
+          </div>
+          <div class="calc-placeholder" id="calcPlaceholder">
+            <div class="calc-icon">📊</div>
+            <p>Enter an amount and select a plan to see your projected returns</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Available Plans -->
+      <div class="dash-section">
+        <h3>Available Investment Plans</h3>
+        <div class="plans-grid">
+          <% if (plans.length) { %>
+            <% plans.forEach(function(plan) { %>
+            <div class="plan-card">
+              <div class="plan-type plan-type-<%= plan.type.toLowerCase().replace('_','-') %>"><%= plan.type.replace('_',' ') %></div>
+              <h4><%= plan.name %></h4>
+              <p class="plan-desc"><%= plan.description.substring(0, 100) %>...</p>
+              <div class="plan-details">
+                <div class="plan-detail"><span>Returns</span><strong class="text-gold"><%= plan.returnRate %>%</strong></div>
+                <div class="plan-detail"><span>Duration</span><strong><%= plan.duration %> days</strong></div>
+                <div class="plan-detail"><span>Min</span><strong>₦<%= Number(plan.minAmount).toLocaleString() %></strong></div>
+              </div>
+              <a href="/dashboard/investments/<%= plan.id %>/invest" class="btn btn-gold btn-block">Invest Now</a>
+            </div>
+            <% }) %>
+          <% } else { %>
+          <p>No investment plans available at this time. Please check back soon.</p>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- My Investments -->
+      <div class="dash-section">
+        <h3>My Investments</h3>
+        <% if (myInvestments.length) { %>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead><tr><th>Plan</th><th>Amount</th><th>Expected Return</th><th>Start</th><th>Maturity</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              <% myInvestments.forEach(function(inv) { %>
+              <% const isMatured = new Date() >= new Date(inv.maturityDate); %>
+              <tr>
+                <td>
+                  <%= inv.plan.name %>
+                  <small class="plan-type-tag"><%= inv.plan.type.replace('_',' ') %></small>
+                </td>
+                <td><%= formatCurrency(Number(inv.amount)) %></td>
+                <td class="text-gold"><%= formatCurrency(Number(inv.expectedReturn)) %></td>
+                <td><%= formatDate(inv.startDate) %></td>
+                <td>
+                  <%= formatDate(inv.maturityDate) %>
+                  <% if (!isMatured && inv.status === 'ACTIVE') { %>
+                  <span class="lock-badge" title="Investment locked until maturity">🔒</span>
+                  <% } %>
+                </td>
+                <td><span class="badge-status status-<%= inv.status.toLowerCase() %>"><%= inv.status %></span></td>
+                <td>
+                  <% if (inv.status === 'ACTIVE' && inv.plan.type === 'SAVINGS') { %>
+                    <form action="/dashboard/investments/<%= inv.id %>/redeem-early" method="POST" onsubmit="return confirm('Early withdrawal returns principal only — no interest. Continue?')">
+                      <button type="submit" class="btn btn-sm btn-danger">Withdraw Early</button>
+                    </form>
+                  <% } else if (inv.status === 'ACTIVE' && !isMatured) { %>
+                    <span class="text-muted text-sm">Locked</span>
+                  <% } else { %>
+                    <span class="text-muted text-sm">—</span>
+                  <% } %>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="withdrawal-notice">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span><strong>Withdrawal Policy:</strong> Fixed Deposit, Real Estate, and Stock Portfolio investments are locked until maturity date. Only Savings Plans allow early withdrawal (principal only, no returns).</span>
+        </div>
+        <% } else { %>
+        <div class="empty-state"><p>You have not made any investments yet.</p></div>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <script src="/js/dashboard.js"></script>
+  <script>
+    function formatNGN(n) {
+      return '₦' + Number(n).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    function calculateReturns() {
+      const amount = parseFloat(document.getElementById('calcAmount').value);
+      const planVal = document.getElementById('calcPlan').value;
+      const results = document.getElementById('calcResults');
+      const placeholder = document.getElementById('calcPlaceholder');
+
+      if (!amount || !planVal) {
+        alert('Please enter an amount and select a plan.');
+        return;
+      }
+
+      const [rate, duration, minAmount, planName] = planVal.split('|');
+      if (amount < parseFloat(minAmount)) {
+        alert(`Minimum investment for this plan is ₦${Number(minAmount).toLocaleString()}`);
+        return;
+      }
+
+      const interest = amount * (parseFloat(rate) / 100);
+      const total = amount + interest;
+
+      document.getElementById('rPrincipal').textContent = formatNGN(amount);
+      document.getElementById('rRate').textContent = rate + '% p.a.';
+      document.getElementById('rDuration').textContent = duration + ' days';
+      document.getElementById('rTotal').textContent = formatNGN(total);
+      document.getElementById('rProfit').textContent = '+' + formatNGN(interest);
+
+      results.style.display = 'block';
+      placeholder.style.display = 'none';
+    }
+
+    document.getElementById('calcPlan')?.addEventListener('change', function() {
+      const amount = parseFloat(document.getElementById('calcAmount').value);
+      if (amount) calculateReturns();
+    });
+    document.getElementById('calcAmount')?.addEventListener('input', function() {
+      const planVal = document.getElementById('calcPlan').value;
+      if (planVal && this.value) calculateReturns();
+    });
+  </script>
+</body>
+</html>

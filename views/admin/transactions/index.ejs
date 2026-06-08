@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Transactions | EPR Access Admin</title>
+  <%- include('../../partials/head') %>
+</head>
+<body class="dashboard-body">
+  <%- include('../../partials/sidebar') %>
+  <div class="dashboard-main" id="dashboardMain">
+    <%- include('../../partials/topbar', { pageTitle: 'Transactions' }) %>
+    <div class="dashboard-content">
+      <%- include('../../partials/flash') %>
+
+      <div class="dash-section">
+        <div class="section-header-row">
+          <h3>All Transactions</h3>
+          <form action="/admin/transactions" method="GET" class="search-form">
+            <select name="type" onchange="this.form.submit()">
+              <option value="">All Types</option>
+              <option value="DEPOSIT" <%= typeFilter === 'DEPOSIT' ? 'selected' : '' %>>Deposit</option>
+              <option value="WITHDRAWAL" <%= typeFilter === 'WITHDRAWAL' ? 'selected' : '' %>>Withdrawal</option>
+              <option value="INVESTMENT" <%= typeFilter === 'INVESTMENT' ? 'selected' : '' %>>Investment</option>
+              <option value="RETURN" <%= typeFilter === 'RETURN' ? 'selected' : '' %>>Return</option>
+            </select>
+            <select name="status" onchange="this.form.submit()">
+              <option value="">All Statuses</option>
+              <option value="PENDING" <%= statusFilter === 'PENDING' ? 'selected' : '' %>>Pending</option>
+              <option value="CONFIRMED" <%= statusFilter === 'CONFIRMED' ? 'selected' : '' %>>Confirmed</option>
+              <option value="REJECTED" <%= statusFilter === 'REJECTED' ? 'selected' : '' %>>Rejected</option>
+            </select>
+          </form>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Method</th>
+                <th>Proof</th>
+                <th>Reference</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% transactions.forEach(function(tx) { %>
+              <tr>
+                <td><a href="/admin/users/<%= tx.userId %>"><%= tx.user.firstName %> <%= tx.user.lastName %></a></td>
+                <td><span class="tx-type tx-<%= tx.type.toLowerCase() %>"><%= tx.type %></span></td>
+                <td><%= formatCurrency(Number(tx.amount)) %></td>
+                <td><%= tx.paymentMethod || '—' %></td>
+                <td>
+                  <% if (tx.proofUrl) { %>
+                  <a href="<%= tx.proofUrl %>" target="_blank" class="btn btn-sm btn-outline-gold">View</a>
+                  <% } else { %>—<% } %>
+                </td>
+                <td class="mono"><%= tx.reference %></td>
+                <td><%= formatDate(tx.createdAt) %></td>
+                <td><span class="badge-status status-<%= tx.status.toLowerCase() %>"><%= tx.status %></span></td>
+                <td>
+                  <% if (tx.status === 'PENDING') { %>
+                  <form action="/admin/transactions/<%= tx.id %>/confirm" method="POST" style="display:inline" onsubmit="return confirmWithBackdate(this, '<%= tx.id %>')">
+                    <input type="hidden" name="backdateDate" class="backdate-input" />
+                    <button type="submit" class="btn btn-sm btn-gold">Confirm</button>
+                  </form>
+                  <form action="/admin/transactions/<%= tx.id %>/reject" method="POST" style="display:inline">
+                    <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+                  </form>
+                  <% } %>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <% if (!transactions.length) { %>
+        <div class="empty-state"><p>No transactions found.</p></div>
+        <% } %>
+        <% if (totalPages > 1) { %>
+        <div class="pagination">
+          <% if (page > 1) { %><a href="?page=<%= page-1 %>&type=<%= typeFilter %>&status=<%= statusFilter %>" class="btn btn-sm btn-outline-gold">Previous</a><% } %>
+          <span>Page <%= page %> of <%= totalPages %></span>
+          <% if (page < totalPages) { %><a href="?page=<%= page+1 %>&type=<%= typeFilter %>&status=<%= statusFilter %>" class="btn btn-sm btn-outline-gold">Next</a><% } %>
+        </div>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <script src="/js/dashboard.js"></script>
+  <script>
+    function confirmWithBackdate(form, txId) {
+      const useBackdate = confirm('Backdate this transaction? Click OK to set a custom date, or Cancel to use today.');
+      if (useBackdate) {
+        const dateInput = prompt('Enter transaction date (YYYY-MM-DD):', new Date().toISOString().slice(0,10));
+        if (dateInput) {
+          form.querySelector('.backdate-input').value = dateInput;
+        }
+      }
+      return true;
+    }
+  </script>
+</body>
+</html>

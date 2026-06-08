@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>All Investments | EPR Access Admin</title>
+  <%- include('../../partials/head') %>
+</head>
+<body class="dashboard-body">
+  <%- include('../../partials/sidebar') %>
+  <div class="dashboard-main" id="dashboardMain">
+    <%- include('../../partials/topbar', { pageTitle: 'All Investments' }) %>
+    <div class="dashboard-content">
+      <%- include('../../partials/flash') %>
+
+      <div class="dash-section">
+        <div class="section-header-row">
+          <h3>All Investments</h3>
+          <form action="/admin/investments" method="GET" class="search-form">
+            <select name="status" onchange="this.form.submit()">
+              <option value="">All Statuses</option>
+              <option value="ACTIVE" <%= statusFilter === 'ACTIVE' ? 'selected' : '' %>>Active</option>
+              <option value="MATURED" <%= statusFilter === 'MATURED' ? 'selected' : '' %>>Matured</option>
+              <option value="WITHDRAWN" <%= statusFilter === 'WITHDRAWN' ? 'selected' : '' %>>Withdrawn</option>
+              <option value="CANCELLED" <%= statusFilter === 'CANCELLED' ? 'selected' : '' %>>Cancelled</option>
+            </select>
+          </form>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Investor</th>
+                <th>Plan</th>
+                <th>Amount</th>
+                <th>Expected Return</th>
+                <th>Start</th>
+                <th>Maturity</th>
+                <th>Status</th>
+                <th>Backdate</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% investments.forEach(function(inv) { %>
+              <tr>
+                <td><a href="/admin/users/<%= inv.userId %>"><%= inv.user.firstName %> <%= inv.user.lastName %></a></td>
+                <td><%= inv.plan.name %></td>
+                <td><%= formatCurrency(Number(inv.amount)) %></td>
+                <td class="text-gold"><%= formatCurrency(Number(inv.expectedReturn)) %></td>
+                <td><%= formatDate(inv.startDate) %></td>
+                <td><%= formatDate(inv.maturityDate) %></td>
+                <td><span class="badge-status status-<%= inv.status.toLowerCase() %>"><%= inv.status %></span></td>
+                <td>
+                  <button class="btn btn-sm btn-outline-gold" onclick="openBackdate('<%= inv.id %>')">Edit Dates</button>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <% if (!investments.length) { %>
+        <div class="empty-state"><p>No investments found.</p></div>
+        <% } %>
+        <% if (totalPages > 1) { %>
+        <div class="pagination">
+          <% if (page > 1) { %><a href="?page=<%= page-1 %>&status=<%= statusFilter %>" class="btn btn-sm btn-outline-gold">Previous</a><% } %>
+          <span>Page <%= page %> of <%= totalPages %></span>
+          <% if (page < totalPages) { %><a href="?page=<%= page+1 %>&status=<%= statusFilter %>" class="btn btn-sm btn-outline-gold">Next</a><% } %>
+        </div>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <!-- Backdate Modal -->
+  <div class="modal" id="backdateModal">
+    <div class="modal-box" style="max-width:400px">
+      <h3>Edit Investment Dates</h3>
+      <button class="modal-close" onclick="closeModal('backdateModal')">&times;</button>
+      <p class="text-muted" style="margin-bottom:16px;font-size:0.9rem;">Update start and maturity dates for this investment (admin backdating).</p>
+      <form action="/admin/investments/backdate" method="POST" class="auth-form">
+        <input type="hidden" name="investmentId" id="backdateInvId" />
+        <div class="form-group">
+          <label>Start Date</label>
+          <input type="date" name="startDate" required id="backdateStart" />
+        </div>
+        <div class="form-group">
+          <label>Maturity Date</label>
+          <input type="date" name="maturityDate" required id="backdateMaturity" />
+        </div>
+        <button type="submit" class="btn btn-gold">Update Dates</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/dashboard.js"></script>
+  <script>
+    function openBackdate(invId) {
+      document.getElementById('backdateInvId').value = invId;
+      document.getElementById('backdateModal').classList.add('open');
+    }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    document.querySelectorAll('.modal').forEach(function(m) {
+      m.addEventListener('click', function(e) { if (e.target === m) m.classList.remove('open'); });
+    });
+  </script>
+</body>
+</html>

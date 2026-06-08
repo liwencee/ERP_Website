@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>User Detail | EPR Access Admin</title>
+  <%- include('../../partials/head') %>
+</head>
+<body class="dashboard-body">
+  <%- include('../../partials/sidebar') %>
+  <div class="dashboard-main" id="dashboardMain">
+    <%- include('../../partials/topbar', { pageTitle: 'User Detail' }) %>
+    <div class="dashboard-content">
+      <%- include('../../partials/flash') %>
+
+      <a href="/admin/users" class="back-link">← Back to Users</a>
+
+      <div class="admin-user-layout">
+        <div class="admin-user-card">
+          <div class="user-avatar-lg"><%= profileUser.firstName.charAt(0) %><%= profileUser.lastName.charAt(0) %></div>
+          <h2><%= profileUser.firstName %> <%= profileUser.lastName %></h2>
+          <p><%= profileUser.email %></p>
+          <p><%= profileUser.phone || 'No phone' %></p>
+          <div class="user-badges">
+            <span class="badge-role role-<%= profileUser.role.toLowerCase() %>"><%= profileUser.role %></span>
+            <span class="badge-status status-<%= profileUser.status.toLowerCase() %>"><%= profileUser.status %></span>
+            <span class="badge-status status-<%= profileUser.kycStatus.toLowerCase() %>">KYC: <%= profileUser.kycStatus %></span>
+          </div>
+          <p class="text-muted">Joined: <%= formatDate(profileUser.createdAt) %></p>
+          <p class="text-muted">Referral Code: <code><%= profileUser.referralCode || '—' %></code></p>
+          <p class="text-muted">Referrals Made: <strong><%= typeof referralCount !== 'undefined' ? referralCount : 0 %></strong></p>
+          <div class="admin-actions">
+            <form action="/admin/users/<%= profileUser.id %>/status" method="POST">
+              <button type="submit" class="btn btn-sm <%= profileUser.status === 'ACTIVE' ? 'btn-danger' : 'btn-gold' %>">
+                <%= profileUser.status === 'ACTIVE' ? 'Suspend Account' : 'Activate Account' %>
+              </button>
+            </form>
+            <form action="/admin/users/<%= profileUser.id %>/force-logout" method="POST" onsubmit="return confirm('Force logout this user?')">
+              <button type="submit" class="btn btn-sm btn-outline-gold">Force Logout</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="admin-user-main">
+          <div class="dash-section">
+            <h3>Wallet</h3>
+            <p>Balance: <strong class="text-gold"><%= formatCurrency(profileUser.wallet ? Number(profileUser.wallet.balance) : 0) %></strong></p>
+          </div>
+
+          <% if (profileUser.documents.length) { %>
+          <div class="dash-section">
+            <div class="section-header-row">
+              <h3>KYC Documents</h3>
+              <div style="display:flex;gap:8px;">
+                <form action="/admin/users/<%= profileUser.id %>/kyc" method="POST">
+                  <input type="hidden" name="action" value="approve" />
+                  <button type="submit" class="btn btn-sm btn-gold">Approve KYC</button>
+                </form>
+                <form action="/admin/users/<%= profileUser.id %>/kyc" method="POST">
+                  <input type="hidden" name="action" value="reject" />
+                  <button type="submit" class="btn btn-sm btn-danger">Reject KYC</button>
+                </form>
+              </div>
+            </div>
+            <div class="docs-list">
+              <% profileUser.documents.forEach(function(doc) { %>
+              <div class="doc-item">
+                <span class="doc-type"><%= doc.type.replace('_',' ') %></span>
+                <a href="<%= doc.url %>" target="_blank" class="btn btn-sm btn-outline-gold">View</a>
+                <span class="badge-status status-<%= doc.status.toLowerCase() %>"><%= doc.status %></span>
+              </div>
+              <% }) %>
+            </div>
+          </div>
+          <% } %>
+
+          <div class="dash-section">
+            <h3>Investments (<%= profileUser.investments.length %>)</h3>
+            <% if (profileUser.investments.length) { %>
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead><tr><th>Plan</th><th>Amount</th><th>Expected</th><th>Maturity</th><th>Status</th></tr></thead>
+                <tbody>
+                  <% profileUser.investments.forEach(function(inv) { %>
+                  <tr>
+                    <td><%= inv.plan.name %></td>
+                    <td><%= formatCurrency(Number(inv.amount)) %></td>
+                    <td class="text-gold"><%= formatCurrency(Number(inv.expectedReturn)) %></td>
+                    <td><%= formatDate(inv.maturityDate) %></td>
+                    <td><span class="badge-status status-<%= inv.status.toLowerCase() %>"><%= inv.status %></span></td>
+                  </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+            <% } else { %><p>No investments.</p><% } %>
+          </div>
+
+          <div class="dash-section">
+            <h3>Recent Transactions</h3>
+            <% if (profileUser.transactions.length) { %>
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead><tr><th>Type</th><th>Amount</th><th>Reference</th><th>Date</th><th>Status</th></tr></thead>
+                <tbody>
+                  <% profileUser.transactions.forEach(function(tx) { %>
+                  <tr>
+                    <td><span class="tx-type tx-<%= tx.type.toLowerCase() %>"><%= tx.type %></span></td>
+                    <td><%= formatCurrency(Number(tx.amount)) %></td>
+                    <td class="mono"><%= tx.reference %></td>
+                    <td><%= formatDate(tx.createdAt) %></td>
+                    <td><span class="badge-status status-<%= tx.status.toLowerCase() %>"><%= tx.status %></span></td>
+                  </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+            <% } else { %><p>No transactions.</p><% } %>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

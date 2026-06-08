@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title><%= title %> | EPR Access Limited</title>
+  <%- include('../partials/head') %>
+</head>
+<body class="public-body">
+
+  <%- include('../partials/public-nav') %>
+
+  <main>
+    <%- include('../partials/flash') %>
+    <%- body %>
+  </main>
+
+  <%- include('../partials/public-footer') %>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>

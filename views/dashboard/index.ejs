@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Dashboard | EPR Access</title>
+  <%- include('../partials/head') %>
+</head>
+<body class="dashboard-body">
+  <%- include('../partials/sidebar') %>
+  <div class="dashboard-main" id="dashboardMain">
+    <%- include('../partials/topbar', { pageTitle: 'Dashboard' }) %>
+    <div class="dashboard-content">
+      <%- include('../partials/flash') %>
+
+      <div class="dash-welcome">
+        <h2>Welcome back, <%= user.firstName %>!</h2>
+        <p>Here's an overview of your investment portfolio.</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-wallet">₦</div>
+          <div class="stat-body">
+            <span class="stat-label">Wallet Balance</span>
+            <span class="stat-value"><%= formatCurrency(wallet ? Number(wallet.balance) : 0) %></span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-invest">📈</div>
+          <div class="stat-body">
+            <span class="stat-label">Active Investments</span>
+            <span class="stat-value"><%= activeInvestments.length %></span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-total">💰</div>
+          <div class="stat-body">
+            <span class="stat-label">Total Invested</span>
+            <span class="stat-value"><%= formatCurrency(totalInvested) %></span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-kyc">🪪</div>
+          <div class="stat-body">
+            <span class="stat-label">KYC Status</span>
+            <span class="stat-value kyc-<%= user.kycStatus.toLowerCase() %>"><%= user.kycStatus %></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-section">
+        <div class="section-header-row">
+          <h3>Active Investments</h3>
+          <a href="/dashboard/investments" class="btn btn-sm btn-outline-gold">View All</a>
+        </div>
+        <% if (activeInvestments.length) { %>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead><tr><th>Plan</th><th>Amount</th><th>Expected Return</th><th>Maturity</th><th>Status</th></tr></thead>
+            <tbody>
+              <% activeInvestments.forEach(function(inv) { %>
+              <tr>
+                <td><%= inv.plan.name %></td>
+                <td><%= formatCurrency(Number(inv.amount)) %></td>
+                <td class="text-gold"><%= formatCurrency(Number(inv.expectedReturn)) %></td>
+                <td><%= formatDate(inv.maturityDate) %></td>
+                <td><span class="badge-status status-<%= inv.status.toLowerCase() %>"><%= inv.status %></span></td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <% } else { %>
+        <div class="empty-state">
+          <p>No active investments yet.</p>
+          <a href="/dashboard/investments" class="btn btn-gold">Browse Plans</a>
+        </div>
+        <% } %>
+      </div>
+
+      <div class="dash-section">
+        <div class="section-header-row">
+          <h3>Recent Transactions</h3>
+          <a href="/dashboard/transactions" class="btn btn-sm btn-outline-gold">View All</a>
+        </div>
+        <% if (recentTransactions.length) { %>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead><tr><th>Type</th><th>Amount</th><th>Reference</th><th>Date</th><th>Status</th></tr></thead>
+            <tbody>
+              <% recentTransactions.forEach(function(tx) { %>
+              <tr>
+                <td><span class="tx-type tx-<%= tx.type.toLowerCase() %>"><%= tx.type %></span></td>
+                <td><%= formatCurrency(Number(tx.amount)) %></td>
+                <td class="mono"><%= tx.reference %></td>
+                <td><%= formatDate(tx.createdAt) %></td>
+                <td><span class="badge-status status-<%= tx.status.toLowerCase() %>"><%= tx.status %></span></td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <% } else { %>
+        <div class="empty-state"><p>No transactions yet.</p></div>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

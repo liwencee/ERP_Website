@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title><%= plan ? 'Edit Plan' : 'New Plan' %> | EPR Access Admin</title>
+  <%- include('../../partials/head') %>
+</head>
+<body class="dashboard-body">
+  <%- include('../../partials/sidebar') %>
+  <div class="dashboard-main" id="dashboardMain">
+    <%- include('../../partials/topbar', { pageTitle: plan ? 'Edit Plan' : 'New Investment Plan' }) %>
+    <div class="dashboard-content">
+      <%- include('../../partials/flash') %>
+
+      <div class="form-page">
+        <a href="/admin/plans" class="back-link">← Back to Plans</a>
+        <h2><%= plan ? 'Edit Investment Plan' : 'Create Investment Plan' %></h2>
+
+        <form action="<%= plan ? '/admin/plans/' + plan.id + '/edit' : '/admin/plans/new' %>" method="POST" class="auth-form">
+          <div class="form-group">
+            <label>Plan Name</label>
+            <input type="text" name="name" required placeholder="e.g. Premium Fixed Deposit" value="<%= plan ? plan.name : '' %>" />
+          </div>
+          <div class="form-group">
+            <label>Investment Type</label>
+            <select name="type" required>
+              <option value="">Select type</option>
+              <option value="FIXED_DEPOSIT" <%= plan && plan.type === 'FIXED_DEPOSIT' ? 'selected' : '' %>>Fixed Deposit</option>
+              <option value="REAL_ESTATE" <%= plan && plan.type === 'REAL_ESTATE' ? 'selected' : '' %>>Real Estate</option>
+              <option value="STOCK_EQUITY" <%= plan && plan.type === 'STOCK_EQUITY' ? 'selected' : '' %>>Stock / Equity</option>
+              <option value="SAVINGS" <%= plan && plan.type === 'SAVINGS' ? 'selected' : '' %>>General Savings</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea name="description" rows="4" required placeholder="Describe this investment plan..."><%= plan ? plan.description : '' %></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Return Rate (% per annum)</label>
+              <input type="number" name="returnRate" step="0.1" min="0" required placeholder="e.g. 15" value="<%= plan ? plan.returnRate : '' %>" />
+            </div>
+            <div class="form-group">
+              <label>Duration (days)</label>
+              <input type="number" name="duration" min="1" required placeholder="e.g. 90" value="<%= plan ? plan.duration : '' %>" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Minimum Amount (₦)</label>
+              <input type="number" name="minAmount" min="100" step="100" required placeholder="e.g. 10000" value="<%= plan ? Number(plan.minAmount) : '' %>" />
+            </div>
+            <div class="form-group">
+              <label>Maximum Amount (₦) <span class="optional">optional</span></label>
+              <input type="number" name="maxAmount" min="100" step="100" placeholder="Leave blank for no limit" value="<%= plan && plan.maxAmount ? Number(plan.maxAmount) : '' %>" />
+            </div>
+          </div>
+          <% if (plan) { %>
+          <div class="form-group">
+            <label>Status</label>
+            <select name="status">
+              <option value="ACTIVE" <%= plan.status === 'ACTIVE' ? 'selected' : '' %>>Active</option>
+              <option value="PAUSED" <%= plan.status === 'PAUSED' ? 'selected' : '' %>>Paused</option>
+              <option value="CLOSED" <%= plan.status === 'CLOSED' ? 'selected' : '' %>>Closed</option>
+            </select>
+          </div>
+          <% } %>
+          <button type="submit" class="btn btn-gold"><%= plan ? 'Update Plan' : 'Create Plan' %></button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

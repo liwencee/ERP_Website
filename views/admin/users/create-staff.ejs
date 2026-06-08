@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Create Staff | EPR Access Admin</title>
+  <%- include('../../partials/head') %>
+</head>
+<body class="dashboard-body">
+  <%- include('../../partials/sidebar') %>
+  <div class="dashboard-main" id="dashboardMain">
+    <%- include('../../partials/topbar', { pageTitle: 'Create Staff Account' }) %>
+    <div class="dashboard-content">
+      <%- include('../../partials/flash') %>
+
+      <a href="/admin/users" class="back-link">← Back to Users</a>
+
+      <div class="dash-section" style="max-width:560px">
+        <h3>Create Customer Care / Staff Account</h3>
+        <p class="section-sub">Staff accounts can access the admin panel to manage users and transactions.</p>
+
+        <% if (locals.errors && errors.length) { %>
+        <div class="flash flash-error">
+          <ul><% errors.forEach(e => { %><li><%= e %></li><% }) %></ul>
+        </div>
+        <% } %>
+
+        <form action="/admin/users/create-staff" method="POST" class="auth-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>First Name</label>
+              <input type="text" name="firstName" required placeholder="First name" />
+            </div>
+            <div class="form-group">
+              <label>Last Name</label>
+              <input type="text" name="lastName" required placeholder="Last name" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" name="email" required placeholder="staff@epraccess.com" />
+          </div>
+          <div class="form-group">
+            <label>Phone <span class="optional">(optional)</span></label>
+            <input type="tel" name="phone" placeholder="+234 800 000 0000" />
+          </div>
+          <div class="form-group">
+            <label>Initial Password</label>
+            <input type="password" name="password" required placeholder="Min. 8 characters" />
+          </div>
+          <p class="form-note">The staff member can change their password after logging in.</p>
+          <button type="submit" class="btn btn-gold">Create Staff Account</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

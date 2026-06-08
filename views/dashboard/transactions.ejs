@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Transactions | EPR Access</title>
+  <%- include('../partials/head') %>
+</head>
+<body class="dashboard-body">
+  <%- include('../partials/sidebar') %>
+  <div class="dashboard-main" id="dashboardMain">
+    <%- include('../partials/topbar', { pageTitle: 'Transactions' }) %>
+    <div class="dashboard-content">
+      <%- include('../partials/flash') %>
+
+      <div class="dash-section">
+        <h3>Transaction History</h3>
+        <% if (transactions.length) { %>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead><tr><th>Type</th><th>Amount</th><th>Description</th><th>Method</th><th>Reference</th><th>Date</th><th>Status</th></tr></thead>
+            <tbody>
+              <% transactions.forEach(function(tx) { %>
+              <tr>
+                <td><span class="tx-type tx-<%= tx.type.toLowerCase() %>"><%= tx.type %></span></td>
+                <td><%= formatCurrency(Number(tx.amount)) %></td>
+                <td><%= tx.description || '—' %></td>
+                <td><%= tx.paymentMethod || '—' %></td>
+                <td class="mono"><%= tx.reference %></td>
+                <td><%= formatDate(tx.createdAt) %></td>
+                <td><span class="badge-status status-<%= tx.status.toLowerCase() %>"><%= tx.status %></span></td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <% if (totalPages > 1) { %>
+        <div class="pagination">
+          <% if (page > 1) { %><a href="?page=<%= page-1 %>" class="btn btn-sm btn-outline-gold">Previous</a><% } %>
+          <span>Page <%= page %> of <%= totalPages %></span>
+          <% if (page < totalPages) { %><a href="?page=<%= page+1 %>" class="btn btn-sm btn-outline-gold">Next</a><% } %>
+        </div>
+        <% } %>
+        <% } else { %>
+        <div class="empty-state"><p>No transactions yet.</p></div>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

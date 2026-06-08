@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Wallet | EPR Access</title>
+  <%- include('../partials/head') %>
+</head>
+<body class="dashboard-body">
+  <%- include('../partials/sidebar') %>
+  <div class="dashboard-main" id="dashboardMain">
+    <%- include('../partials/topbar', { pageTitle: 'Wallet' }) %>
+    <div class="dashboard-content">
+      <%- include('../partials/flash') %>
+
+      <div class="wallet-header">
+        <div class="wallet-balance-card">
+          <span class="balance-label">Available Balance</span>
+          <span class="balance-amount"><%= formatCurrency(wallet ? Number(wallet.balance) : 0) %></span>
+        </div>
+        <div class="wallet-actions">
+          <button class="btn btn-gold" onclick="showModal('fundModal')">Fund Wallet</button>
+          <button class="btn btn-outline-gold" onclick="showModal('withdrawModal')">Withdraw</button>
+        </div>
+      </div>
+
+      <div class="dash-section">
+        <h3>Wallet Transactions</h3>
+        <% if (transactions.length) { %>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead><tr><th>Type</th><th>Amount</th><th>Method</th><th>Reference</th><th>Date</th><th>Status</th></tr></thead>
+            <tbody>
+              <% transactions.forEach(function(tx) { %>
+              <tr>
+                <td><span class="tx-type tx-<%= tx.type.toLowerCase() %>"><%= tx.type %></span></td>
+                <td><%= formatCurrency(Number(tx.amount)) %></td>
+                <td><%= tx.paymentMethod || '—' %></td>
+                <td class="mono"><%= tx.reference %></td>
+                <td><%= formatDate(tx.createdAt) %></td>
+                <td><span class="badge-status status-<%= tx.status.toLowerCase() %>"><%= tx.status %></span></td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <% } else { %>
+        <div class="empty-state"><p>No wallet transactions yet.</p></div>
+        <% } %>
+      </div>
+
+      <!-- Fund Modal -->
+      <div class="modal" id="fundModal">
+        <div class="modal-box">
+          <h3>Fund Your Wallet</h3>
+          <button class="modal-close" onclick="closeModal('fundModal')">&times;</button>
+          <form action="/dashboard/wallet/fund" method="POST">
+            <div class="form-group">
+              <label>Amount (₦)</label>
+              <input type="number" name="amount" min="100" step="100" required placeholder="e.g. 10000" />
+            </div>
+            <div class="form-group">
+              <label>Payment Method</label>
+              <select name="method" required>
+                <option value="SQUADCO">Card Payment (Squad by GTBank)</option>
+                <option value="BANK_TRANSFER">Manual Bank Transfer</option>
+                <option value="PAYSTACK">Paystack</option>
+                <option value="FLUTTERWAVE">Flutterwave</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-gold btn-block">Proceed</button>
+          </form>
+
+          <div class="bank-details">
+            <h4>Our Bank Details</h4>
+            <p><strong>Bank:</strong> First Bank Nigeria</p>
+            <p><strong>Account Name:</strong> EPR Access Limited</p>
+            <p><strong>Account Number:</strong> 0123456789</p>
+            <p class="note">After transfer, upload proof below with your transaction reference.</p>
+          </div>
+
+          <form action="/dashboard/wallet/fund/upload" method="POST" enctype="multipart/form-data" style="margin-top:16px;">
+            <div class="form-group">
+              <label>Transaction Reference</label>
+              <input type="text" name="reference" placeholder="EPR-BNK-..." required />
+            </div>
+            <div class="form-group">
+              <label>Upload Payment Proof</label>
+              <input type="file" name="proof" accept=".jpg,.jpeg,.png,.pdf" required />
+            </div>
+            <button type="submit" class="btn btn-outline-gold btn-block">Upload Proof</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Withdraw Modal -->
+      <div class="modal" id="withdrawModal">
+        <div class="modal-box">
+          <h3>Request Withdrawal</h3>
+          <button class="modal-close" onclick="closeModal('withdrawModal')">&times;</button>
+          <p>Available: <strong class="text-gold"><%= formatCurrency(wallet ? Number(wallet.balance) : 0) %></strong></p>
+          <form action="/dashboard/wallet/withdraw" method="POST">
+            <div class="form-group">
+              <label>Amount (₦)</label>
+              <input type="number" name="amount" min="1000" step="100" required placeholder="Min ₦1,000" />
+            </div>
+            <p class="form-note">Withdrawals are processed within 24 hours to your registered bank account.</p>
+            <button type="submit" class="btn btn-gold btn-block">Submit Request</button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <script src="/js/dashboard.js"></script>
+  <script>
+    function showModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    document.querySelectorAll('.modal').forEach(function(m) {
+      m.addEventListener('click', function(e) { if (e.target === m) m.classList.remove('open'); });
+    });
+  </script>
+</body>
+</html>

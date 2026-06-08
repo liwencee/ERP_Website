@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Admin Dashboard | EPR Access</title>
+  <%- include('../partials/head') %>
+</head>
+<body class="dashboard-body">
+  <%- include('../partials/sidebar') %>
+  <div class="dashboard-main" id="dashboardMain">
+    <%- include('../partials/topbar', { pageTitle: 'Admin Dashboard' }) %>
+    <div class="dashboard-content">
+      <%- include('../partials/flash') %>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-body"><span class="stat-label">Total Investors</span><span class="stat-value"><%= totalUsers %></span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📈</div>
+          <div class="stat-body"><span class="stat-label">Active Investments</span><span class="stat-value"><%= totalInvestments %></span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">💰</div>
+          <div class="stat-body"><span class="stat-label">Total AUM</span><span class="stat-value"><%= formatCurrency(totalAUM) %></span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-alert">⏳</div>
+          <div class="stat-body"><span class="stat-label">Pending Deposits</span><span class="stat-value"><a href="/admin/transactions?status=PENDING&type=DEPOSIT"><%= pendingDeposits %></a></span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-alert">🪪</div>
+          <div class="stat-body"><span class="stat-label">Pending KYC</span><span class="stat-value"><a href="/admin/users"><%= pendingKyc %></a></span></div>
+        </div>
+      </div>
+
+      <div class="admin-grid">
+        <div class="dash-section">
+          <div class="section-header-row">
+            <h3>Recent Users</h3>
+            <a href="/admin/users" class="btn btn-sm btn-outline-gold">View All</a>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead><tr><th>Name</th><th>Email</th><th>KYC</th><th>Joined</th></tr></thead>
+              <tbody>
+                <% recentUsers.forEach(function(u) { %>
+                <tr>
+                  <td><a href="/admin/users/<%= u.id %>"><%= u.firstName %> <%= u.lastName %></a></td>
+                  <td><%= u.email %></td>
+                  <td><span class="badge-status status-<%= u.kycStatus.toLowerCase() %>"><%= u.kycStatus %></span></td>
+                  <td><%= formatDate(u.createdAt) %></td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="dash-section">
+          <div class="section-header-row">
+            <h3>Recent Transactions</h3>
+            <a href="/admin/transactions" class="btn btn-sm btn-outline-gold">View All</a>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead><tr><th>User</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead>
+              <tbody>
+                <% recentTransactions.forEach(function(tx) { %>
+                <tr>
+                  <td><%= tx.user.firstName %> <%= tx.user.lastName %></td>
+                  <td><span class="tx-type tx-<%= tx.type.toLowerCase() %>"><%= tx.type %></span></td>
+                  <td><%= formatCurrency(Number(tx.amount)) %></td>
+                  <td><span class="badge-status status-<%= tx.status.toLowerCase() %>"><%= tx.status %></span></td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-quick-links">
+        <a href="/admin/plans/new" class="quick-link-card"><span>➕</span><strong>New Investment Plan</strong></a>
+        <a href="/admin/transactions?status=PENDING" class="quick-link-card"><span>✅</span><strong>Confirm Deposits</strong></a>
+        <a href="/admin/users" class="quick-link-card"><span>🪪</span><strong>Review KYC</strong></a>
+      </div>
+
+    </div>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

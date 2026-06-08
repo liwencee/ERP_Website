@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Contact Us | EPR Access Limited</title>
+  <%- include('../partials/head') %>
+</head>
+<body class="public-body">
+  <%- include('../partials/public-nav') %>
+  <main>
+    <%- include('../partials/flash') %>
+
+    <section class="page-hero">
+      <div class="container">
+        <h1>Contact Us</h1>
+        <p>We are here to answer your questions and guide your investment journey.</p>
+      </div>
+    </section>
+
+    <section class="section section-light">
+      <div class="container two-col">
+        <div class="col-text">
+          <h2>Get in Touch</h2>
+          <p>Whether you have a question about our plans, need help with your account, or want to explore partnership opportunities, our team is ready to help.</p>
+
+          <div class="contact-info">
+            <div class="contact-item">
+              <span class="contact-icon">📍</span>
+              <div>
+                <strong>Office Address</strong>
+                <p>54b, Adeniyi Jones, Ikeja 101233</p>
+                <p>Lagos, Nigeria.</p>
+              </div>
+            </div>
+            <div class="contact-item">
+              <span class="contact-icon">✉️</span>
+              <div>
+                <strong>Business Inquiries</strong>
+                <p><a href="mailto:info@epraaccess.com">info@epraaccess.com</a></p>
+                <p><a href="mailto:epraccessltd@gmail.com">epraccessltd@gmail.com</a></p>
+              </div>
+            </div>
+            <div class="contact-item">
+              <span class="contact-icon">📞</span>
+              <div>
+                <strong>Telephone</strong>
+                <p><a href="tel:+2348036660392">(+234) 803-666-0392</a></p>
+                <p><a href="tel:+2348103330394">(+234) 810-333-0394</a></p>
+              </div>
+            </div>
+            <div class="contact-item">
+              <span class="contact-icon">🕐</span>
+              <div>
+                <strong>Business Hours</strong>
+                <p>Monday – Friday: 9am – 5pm WAT</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-form">
+          <form action="/contact" method="POST" class="contact-form">
+            <div class="form-group">
+              <label for="name">Full Name</label>
+              <input type="text" id="name" name="name" required placeholder="Your full name" />
+            </div>
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <input type="email" id="email" name="email" required placeholder="your@email.com" />
+            </div>
+            <div class="form-group">
+              <label for="phone">Phone Number</label>
+              <input type="tel" id="phone" name="phone" placeholder="+234 800 000 0000" />
+            </div>
+            <div class="form-group">
+              <label for="subject">Subject</label>
+              <select id="subject" name="subject">
+                <option value="">Select a subject</option>
+                <option value="investment">Investment Inquiry</option>
+                <option value="account">Account Support</option>
+                <option value="partnership">Partnership</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="message">Message</label>
+              <textarea id="message" name="message" rows="5" required placeholder="How can we help you?"></textarea>
+            </div>
+            <button type="submit" class="btn btn-gold btn-block">Send Message</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Map / Location Section -->
+    <section class="section section-dark">
+      <div class="container text-center">
+        <h2>Find Our Office</h2>
+        <p style="color:rgba(255,255,255,0.7);margin-bottom:32px;">54b Adeniyi Jones, Ikeja, Lagos — Nigeria's commercial capital</p>
+        <div class="contact-map-wrapper">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3963.228!2d3.3514!3d6.6019!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103b9228!2sAdeniyi+Jones+Ave%2C+Ikeja%2C+Lagos!5e0!3m2!1sen!2sng!4v1"
+            width="100%" height="380" style="border:0;border-radius:12px;" allowfullscreen="" loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade" title="EPR Access Limited office location">
+          </iframe>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <%- include('../partials/public-footer') %>
+  <script src="/js/main.js"></script>
+</body>
+</html>

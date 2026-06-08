@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Profile | EPR Access</title>
+  <%- include('../partials/head') %>
+</head>
+<body class="dashboard-body">
+  <%- include('../partials/sidebar') %>
+  <div class="dashboard-main" id="dashboardMain">
+    <%- include('../partials/topbar', { pageTitle: 'Profile' }) %>
+    <div class="dashboard-content">
+      <%- include('../partials/flash') %>
+
+      <!-- Avatar + Referral Row -->
+      <div class="profile-top-row">
+
+        <!-- Avatar Card -->
+        <div class="profile-section profile-avatar-section">
+          <div class="avatar-display">
+            <% if (profileUser.avatar) { %>
+              <img src="<%= profileUser.avatar %>" alt="Profile Photo" class="avatar-img" />
+            <% } else { %>
+              <div class="avatar-placeholder">
+                <%= profileUser.firstName.charAt(0) %><%= profileUser.lastName.charAt(0) %>
+              </div>
+            <% } %>
+          </div>
+          <h4 class="avatar-name"><%= profileUser.firstName %> <%= profileUser.lastName %></h4>
+          <p class="avatar-email"><%= profileUser.email %></p>
+          <span class="badge-status status-<%= profileUser.kycStatus.toLowerCase() %>">KYC: <%= profileUser.kycStatus %></span>
+          <form action="/dashboard/profile/avatar" method="POST" enctype="multipart/form-data" class="avatar-upload-form">
+            <label class="avatar-upload-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Change Photo
+              <input type="file" name="avatar" accept="image/jpeg,image/png,image/webp" onchange="this.form.submit()" style="display:none" />
+            </label>
+          </form>
+        </div>
+
+        <!-- Referral Card -->
+        <div class="profile-section profile-referral-section">
+          <h3>Your Referral Code</h3>
+          <p class="referral-desc">Invite friends and family to EPR Access Limited using your unique referral code.</p>
+          <div class="referral-code-box">
+            <span class="referral-code" id="refCode"><%= profileUser.referralCode || 'Not assigned' %></span>
+            <button class="btn-copy" onclick="copyReferralCode()" title="Copy code">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+          <div class="referral-link-box">
+            <span class="referral-link-text">Share link:</span>
+            <a href="/auth/register?ref=<%= profileUser.referralCode %>" class="referral-link" id="refLink">/auth/register?ref=<%= profileUser.referralCode %></a>
+            <button class="btn-copy" onclick="copyReferralLink()" title="Copy link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+            </button>
+          </div>
+          <div class="referral-stats">
+            <div class="referral-stat">
+              <strong><%= referralCount %></strong>
+              <span>Friends Referred</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Personal Info + Password -->
+      <div class="profile-grid">
+        <div class="profile-section">
+          <h3>Personal Information</h3>
+          <form action="/dashboard/profile" method="POST" class="auth-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label>First Name</label>
+                <input type="text" name="firstName" required value="<%= profileUser.firstName %>" />
+              </div>
+              <div class="form-group">
+                <label>Last Name</label>
+                <input type="text" name="lastName" required value="<%= profileUser.lastName %>" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" value="<%= profileUser.email %>" disabled />
+            </div>
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="tel" name="phone" value="<%= profileUser.phone || '' %>" placeholder="+234 800 000 0000" />
+            </div>
+            <button type="submit" class="btn btn-gold">Save Changes</button>
+          </form>
+        </div>
+
+        <div class="profile-section">
+          <h3>Change Password</h3>
+          <form action="/dashboard/profile/password" method="POST" class="auth-form">
+            <div class="form-group">
+              <label>Current Password</label>
+              <input type="password" name="currentPassword" required placeholder="••••••••" />
+            </div>
+            <div class="form-group">
+              <label>New Password</label>
+              <input type="password" name="newPassword" required placeholder="Min. 8 characters" />
+            </div>
+            <div class="form-group">
+              <label>Confirm New Password</label>
+              <input type="password" name="confirmPassword" required placeholder="Repeat new password" />
+            </div>
+            <button type="submit" class="btn btn-gold">Update Password</button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <script src="/js/dashboard.js"></script>
+  <script>
+    function copyReferralCode() {
+      const code = document.getElementById('refCode').textContent.trim();
+      navigator.clipboard.writeText(code).then(() => {
+        const btn = event.currentTarget;
+        btn.innerHTML = '✓ Copied!';
+        setTimeout(() => btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>', 2000);
+      });
+    }
+    function copyReferralLink() {
+      const link = window.location.origin + document.getElementById('refLink').getAttribute('href');
+      navigator.clipboard.writeText(link).then(() => {
+        const btn = event.currentTarget;
+        btn.innerHTML = '✓ Copied!';
+        setTimeout(() => btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>', 2000);
+      });
+    }
+  </script>
+</body>
+</html>

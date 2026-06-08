@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Investment Plans | EPR Access Admin</title>
+  <%- include('../../partials/head') %>
+</head>
+<body class="dashboard-body">
+  <%- include('../../partials/sidebar') %>
+  <div class="dashboard-main" id="dashboardMain">
+    <%- include('../../partials/topbar', { pageTitle: 'Investment Plans' }) %>
+    <div class="dashboard-content">
+      <%- include('../../partials/flash') %>
+
+      <div class="dash-section">
+        <div class="section-header-row">
+          <h3>Investment Plans</h3>
+          <a href="/admin/plans/new" class="btn btn-gold">+ New Plan</a>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Return Rate</th>
+                <th>Duration</th>
+                <th>Min Amount</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% plans.forEach(function(plan) { %>
+              <tr>
+                <td><%= plan.name %></td>
+                <td><span class="plan-type plan-type-<%= plan.type.toLowerCase().replace('_','-') %>"><%= plan.type.replace('_',' ') %></span></td>
+                <td class="text-gold"><%= plan.returnRate %>%</td>
+                <td><%= plan.duration %> days</td>
+                <td><%= formatCurrency(Number(plan.minAmount)) %></td>
+                <td><span class="badge-status status-<%= plan.status.toLowerCase() %>"><%= plan.status %></span></td>
+                <td>
+                  <a href="/admin/plans/<%= plan.id %>/edit" class="btn btn-sm btn-outline-gold">Edit</a>
+                  <form action="/admin/plans/<%= plan.id %>/delete" method="POST" style="display:inline">
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Close this plan?')">Close</button>
+                  </form>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <% if (!plans.length) { %>
+        <div class="empty-state"><p>No investment plans yet. <a href="/admin/plans/new">Create one</a>.</p></div>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

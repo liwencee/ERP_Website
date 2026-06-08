@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Home | EPR Access Limited</title>
+  <%- include('../partials/head') %>
+</head>
+<body class="public-body">
+  <%- include('../partials/public-nav') %>
+  <main>
+    <%- include('../partials/flash') %>
+
+    <!-- Hero Carousel -->
+    <section class="hero-carousel" id="heroCarousel">
+
+      <div class="carousel-slide active">
+        <div class="carousel-bg" style="background-image: url('https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=1920&q=80&fit=crop')"></div>
+        <div class="carousel-overlay"></div>
+        <div class="carousel-content">
+          <span class="hero-badge">Nigeria's Trusted Investment Platform</span>
+          <h1>Grow Your Wealth<br><span class="text-gold">With Confidence</span></h1>
+          <p>EPR Access Limited delivers professionally managed investment plans with consistent, above-market returns — built for every Nigerian investor.</p>
+          <div class="hero-actions">
+            <a href="/auth/register" class="btn btn-gold btn-lg">Start Investing Today</a>
+            <a href="/services" class="btn btn-carousel-outline btn-lg">View Our Plans</a>
+          </div>
+          <div class="carousel-stats">
+            <div class="c-stat"><strong>15%+</strong><span>Annual Returns</span></div>
+            <div class="c-stat-divider"></div>
+            <div class="c-stat"><strong>500+</strong><span>Active Investors</span></div>
+            <div class="c-stat-divider"></div>
+            <div class="c-stat"><strong>4</strong><span>Investment Types</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="carousel-slide">
+        <div class="carousel-bg" style="background-image: url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1920&q=80&fit=crop')"></div>
+        <div class="carousel-overlay"></div>
+        <div class="carousel-content">
+          <span class="hero-badge">Real Estate Investment</span>
+          <h1>Prime Property Returns<br><span class="text-gold">Without the Hassle</span></h1>
+          <p>Invest in a professionally managed portfolio of Nigerian real estate assets and earn up to 18% per annum — no property management required.</p>
+          <div class="hero-actions">
+            <a href="/auth/register" class="btn btn-gold btn-lg">Invest in Real Estate</a>
+            <a href="/services" class="btn btn-carousel-outline btn-lg">Learn More</a>
+          </div>
+          <div class="carousel-stats">
+            <div class="c-stat"><strong>18%</strong><span>Annual Return</span></div>
+            <div class="c-stat-divider"></div>
+            <div class="c-stat"><strong>365</strong><span>Day Plans</span></div>
+            <div class="c-stat-divider"></div>
+            <div class="c-stat"><strong>₦100K</strong><span>Minimum</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="carousel-slide">
+        <div class="carousel-bg" style="background-image: url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1920&q=80&fit=crop')"></div>
+        <div class="carousel-overlay"></div>
+        <div class="carousel-content">
+          <span class="hero-badge">Fixed Income &amp; Savings</span>
+          <h1>Your Money Working<br><span class="text-gold">Every Single Day</span></h1>
+          <p>Start with as little as ₦10,000. Our fixed deposit and savings plans give you guaranteed returns with zero stress — your capital stays protected.</p>
+          <div class="hero-actions">
+            <a href="/auth/register" class="btn btn-gold btn-lg">Open an Account</a>
+            <a href="/services" class="btn btn-carousel-outline btn-lg">See Deposit Plans</a>
+          </div>
+          <div class="carousel-stats">
+            <div class="c-stat"><strong>₦10K</strong><span>Start From</span></div>
+            <div class="c-stat-divider"></div>
+            <div class="c-stat"><strong>12–15%</strong><span>p.a. Returns</span></div>
+            <div class="c-stat-divider"></div>
+            <div class="c-stat"><strong>90+</strong><span>Day Plans</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="carousel-slide">
+        <div class="carousel-bg" style="background-image: url('https://images.unsplash.com/photo-1521791136064-7986c2920216?w=1920&q=80&fit=crop')"></div>
+        <div class="carousel-overlay"></div>
+        <div class="carousel-content">
+          <span class="hero-badge">CAC Registered — Fully Compliant</span>
+          <h1>Join Hundreds of Nigerians<br><span class="text-gold">Building Real Wealth</span></h1>
+          <p>EPR Access Limited is fully registered with the Corporate Affairs Commission of Nigeria. Your investment is protected by transparent, legally binding agreements.</p>
+          <div class="hero-actions">
+            <a href="/auth/register" class="btn btn-gold btn-lg">Join Us Today</a>
+            <a href="/compliance" class="btn btn-carousel-outline btn-lg">Our Compliance</a>
+          </div>
+          <div class="carousel-stats">
+            <div class="c-stat"><strong>CAC</strong><span>Registered</span></div>
+            <div class="c-stat-divider"></div>
+            <div class="c-stat"><strong>100%</strong><span>Transparent</span></div>
+            <div class="c-stat-divider"></div>
+            <div class="c-stat"><strong>7+</strong><span>Expert Team</span></div>
+          </div>
+        </div>
+      </div>
+
+      <button class="carousel-prev" id="carouselPrev" aria-label="Previous slide">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="carousel-next" id="carouselNext" aria-label="Next slide">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <div class="carousel-dots" id="carouselDots">
+        <button class="carousel-dot active" data-index="0" aria-label="Slide 1"></button>
+        <button class="carousel-dot" data-index="1" aria-label="Slide 2"></button>
+        <button class="carousel-dot" data-index="2" aria-label="Slide 3"></button>
+        <button class="carousel-dot" data-index="3" aria-label="Slide 4"></button>
+      </div>
+    </section>
+
+    <!-- Investment Plans Preview -->
+    <section class="section section-light">
+      <div class="container">
+        <div class="section-header">
+          <h2>Our Investment Plans</h2>
+          <p>Choose from a range of expertly curated investment opportunities</p>
+        </div>
+        <div class="plans-grid">
+          <% if (plans.length) { %>
+            <% plans.forEach(function(plan) { %>
+            <div class="plan-card">
+              <div class="plan-type plan-type-<%= plan.type.toLowerCase().replace('_','-') %>"><%= plan.type.replace('_', ' ') %></div>
+              <h3 class="plan-name"><%= plan.name %></h3>
+              <p class="plan-desc"><%= plan.description.substring(0, 120) %>...</p>
+              <div class="plan-details">
+                <div class="plan-detail">
+                  <span class="detail-label">Returns</span>
+                  <span class="detail-value text-gold"><%= plan.returnRate %>% p.a.</span>
+                </div>
+                <div class="plan-detail">
+                  <span class="detail-label">Duration</span>
+                  <span class="detail-value"><%= plan.duration %> days</span>
+                </div>
+                <div class="plan-detail">
+                  <span class="detail-label">Min. Amount</span>
+                  <span class="detail-value">₦<%= Number(plan.minAmount).toLocaleString() %></span>
+                </div>
+              </div>
+              <a href="/auth/register" class="btn btn-gold btn-block">Invest Now</a>
+            </div>
+            <% }) %>
+          <% } else { %>
+            <p class="text-center">Investment plans coming soon. <a href="/contact">Contact us</a> for details.</p>
+          <% } %>
+        </div>
+        <div class="text-center mt-8">
+          <a href="/services" class="btn btn-outline-gold">View All Plans</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Why EPR Access -->
+    <section class="section section-dark">
+      <div class="container">
+        <div class="section-header">
+          <h2>Why Choose EPR Access</h2>
+          <p>Built on trust, transparency, and proven results</p>
+        </div>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">🏛️</div>
+            <h3>CAC Registered</h3>
+            <p>Fully registered and compliant with Nigerian corporate laws and financial regulations.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🔒</div>
+            <h3>Secure Platform</h3>
+            <p>Bank-grade security protects your investments and personal data at all times.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">📈</div>
+            <h3>Consistent Returns</h3>
+            <p>Our professionally managed portfolios have delivered consistent returns for investors.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">👥</div>
+            <h3>Expert Team</h3>
+            <p>Decades of combined experience in Nigerian and international markets.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Team Teaser -->
+    <section class="section section-light">
+      <div class="container">
+        <div class="section-header">
+          <h2>Meet Our Leadership</h2>
+          <p>Experienced professionals committed to your financial growth</p>
+        </div>
+        <div class="team-teaser">
+          <div class="team-thumb"><img src="/images/team/Dr. Femi Adebayo .jpeg" alt="Dr. Femi Adebayo" /><span>Dr. Femi Adebayo</span></div>
+          <div class="team-thumb"><img src="/images/team/KEHINDE ADEWOYIN.jpeg" alt="Kehinde Adewoyin" /><span>Kehinde Adewoyin</span></div>
+          <div class="team-thumb"><img src="/images/team/GODWIN AIGBE.jpeg" alt="Godwin Aigbe" /><span>Godwin Aigbe</span></div>
+          <div class="team-thumb"><img src="/images/team/TAIWO ADEBAYO .jpeg" alt="Taiwo Adebayo" /><span>Taiwo Adebayo</span></div>
+        </div>
+        <div class="text-center mt-8">
+          <a href="/team" class="btn btn-outline-gold">View Full Team</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quotes Section -->
+    <section class="section section-dark quotes-section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Words That Inspire Wealth</h2>
+          <p>Wisdom from the world's greatest financial minds</p>
+        </div>
+        <div class="quotes-carousel" id="quotesCarousel">
+          <div class="quote-card active">
+            <blockquote>"The stock market is a device for transferring money from the impatient to the patient."</blockquote>
+            <cite>— Warren Buffett</cite>
+          </div>
+          <div class="quote-card">
+            <blockquote>"An investment in knowledge pays the best interest."</blockquote>
+            <cite>— Benjamin Franklin</cite>
+          </div>
+          <div class="quote-card">
+            <blockquote>"Do not save what is left after spending, but spend what is left after saving."</blockquote>
+            <cite>— Warren Buffett</cite>
+          </div>
+          <div class="quote-card">
+            <blockquote>"The habit of saving is itself an education; it fosters every virtue, teaches self-denial, cultivates the sense of order, trains to forethought, and broadens the mind."</blockquote>
+            <cite>— T.T. Munger</cite>
+          </div>
+          <div class="quote-card">
+            <blockquote>"Every time you borrow money, you're robbing your future self."</blockquote>
+            <cite>— Nathan W. Morris</cite>
+          </div>
+          <div class="quote-card">
+            <blockquote>"Invest for the long haul. Don't get too greedy and don't get too scared."</blockquote>
+            <cite>— Shelby M.C. Davis</cite>
+          </div>
+          <div class="quote-card">
+            <blockquote>"Real estate cannot be lost or stolen, nor can it be carried away. Purchased with common sense, paid for in full, and managed with reasonable care, it is about the safest investment in the world."</blockquote>
+            <cite>— Franklin D. Roosevelt</cite>
+          </div>
+          <div class="quote-card">
+            <blockquote>"The best time to plant a tree was 20 years ago. The second best time is now."</blockquote>
+            <cite>— Chinese Proverb</cite>
+          </div>
+          <div class="quotes-nav">
+            <button class="quote-prev" id="quotePrev" aria-label="Previous quote">&#8592;</button>
+            <button class="quote-next" id="quoteNext" aria-label="Next quote">&#8594;</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section cta-section">
+      <div class="container text-center">
+        <h2>Ready to Start Your Investment Journey?</h2>
+        <p>Join hundreds of Nigerians growing their wealth with EPR Access Limited.</p>
+        <a href="/auth/register" class="btn btn-gold btn-lg">Create Free Account</a>
+      </div>
+    </section>
+
+  </main>
+  <%- include('../partials/public-footer') %>
+  <script src="/js/main.js"></script>
+</body>
+</html>

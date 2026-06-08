@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Role: INVESTOR | ADMIN | STAFF
+// UserStatus: ACTIVE | SUSPENDED
+// KYCStatus: PENDING | SUBMITTED | APPROVED | REJECTED
+
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  password        String
+  firstName       String
+  lastName        String
+  phone           String?
+  role            String    @default("INVESTOR")
+  status          String    @default("ACTIVE")
+  emailVerified   Boolean   @default(false)
+  emailToken      String?
+  resetToken      String?
+  resetTokenExp   DateTime?
+  kycStatus       String    @default("PENDING")
+  avatar          String?
+  referralCode    String?   @unique
+  referredBy      String?
+  sessionVersion  Int       @default(0)
+
+  wallet        Wallet?
+  investments   UserInvestment[]
+  transactions  Transaction[]
+  documents     Document[]
+  notifications Notification[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Wallet {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  balance   Decimal  @default(0)
+  currency  String   @default("NGN")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// InvestmentType: FIXED_DEPOSIT | REAL_ESTATE | STOCK_EQUITY | SAVINGS
+// PlanStatus: ACTIVE | PAUSED | CLOSED
+
+model InvestmentPlan {
+  id          String   @id @default(uuid())
+  name        String
+  type        String
+  description String
+  minAmount   Decimal
+  maxAmount   Decimal?
+  returnRate  Decimal
+  duration    Int
+  status      String   @default("ACTIVE")
+
+  investments UserInvestment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// InvestmentStatus: ACTIVE | MATURED | WITHDRAWN | CANCELLED
+
+model UserInvestment {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId         String
+  plan           InvestmentPlan @relation(fields: [planId], references: [id])
+  amount         Decimal
+  expectedReturn Decimal
+  status         String   @default("ACTIVE")
+  startDate      DateTime
+  maturityDate   DateTime
+
+  transactions Transaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// TransactionType: DEPOSIT | WITHDRAWAL | INVESTMENT | RETURN | BONUS
+// TransactionStatus: PENDING | CONFIRMED | REJECTED | CANCELLED
+// PaymentMethod: BANK_TRANSFER | PAYSTACK | FLUTTERWAVE | WALLET
+
+model Transaction {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type          String
+  amount        Decimal
+  status        String   @default("PENDING")
+  reference     String   @unique
+  description   String?
+  paymentMethod String?
+  proofUrl      String?
+
+  investmentId String?
+  investment   UserInvestment? @relation(fields: [investmentId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+// DocumentType: ID_CARD | PASSPORT | UTILITY_BILL | BANK_STATEMENT
+// DocumentStatus: PENDING | APPROVED | REJECTED
+
+model Document {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  url       String
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+}

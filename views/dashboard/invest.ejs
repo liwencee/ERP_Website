@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Invest | EPR Access</title>
+  <%- include('../partials/head') %>
+</head>
+<body class="dashboard-body">
+  <%- include('../partials/sidebar') %>
+  <div class="dashboard-main" id="dashboardMain">
+    <%- include('../partials/topbar', { pageTitle: 'Invest' }) %>
+    <div class="dashboard-content">
+      <%- include('../partials/flash') %>
+
+      <div class="form-page">
+        <a href="/dashboard/investments" class="back-link">← Back to Plans</a>
+
+        <div class="invest-layout">
+          <div class="plan-summary-card">
+            <div class="plan-type plan-type-<%= plan.type.toLowerCase().replace('_','-') %>"><%= plan.type.replace('_',' ') %></div>
+            <h2><%= plan.name %></h2>
+            <p><%= plan.description %></p>
+            <div class="plan-specs">
+              <div class="plan-spec"><span>Return Rate</span><strong class="text-gold"><%= plan.returnRate %>% per annum</strong></div>
+              <div class="plan-spec"><span>Duration</span><strong><%= plan.duration %> days</strong></div>
+              <div class="plan-spec"><span>Min Investment</span><strong>₦<%= Number(plan.minAmount).toLocaleString() %></strong></div>
+              <% if (plan.maxAmount) { %>
+              <div class="plan-spec"><span>Max Investment</span><strong>₦<%= Number(plan.maxAmount).toLocaleString() %></strong></div>
+              <% } %>
+            </div>
+          </div>
+
+          <div class="invest-form-card">
+            <h3>Make an Investment</h3>
+            <p>Wallet Balance: <strong class="text-gold"><%= formatCurrency(wallet ? Number(wallet.balance) : 0) %></strong></p>
+
+            <form action="/dashboard/investments/<%= plan.id %>/invest" method="POST" class="auth-form" id="investForm">
+              <div class="form-group">
+                <label for="amount">Investment Amount (₦)</label>
+                <input type="number" id="amount" name="amount"
+                  min="<%= Number(plan.minAmount) %>"
+                  <% if (plan.maxAmount) { %>max="<%= Number(plan.maxAmount) %>"<% } %>
+                  step="100" required placeholder="Enter amount" />
+              </div>
+              <div class="return-preview" id="returnPreview" style="display:none;">
+                <span>Expected Return at Maturity:</span>
+                <strong class="text-gold" id="expectedReturn">—</strong>
+              </div>
+              <button type="submit" class="btn btn-gold btn-block">Confirm Investment</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <script src="/js/dashboard.js"></script>
+  <script>
+    var rate = <%= plan.returnRate %>;
+    var amountInput = document.getElementById('amount');
+    var preview = document.getElementById('returnPreview');
+    var returnEl = document.getElementById('expectedReturn');
+    amountInput.addEventListener('input', function() {
+      var val = parseFloat(amountInput.value);
+      if (val > 0) {
+        var ret = val * (1 + rate / 100);
+        returnEl.textContent = '₦' + ret.toLocaleString('en-NG', { minimumFractionDigits: 2 });
+        preview.style.display = 'flex';
+      } else {
+        preview.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>

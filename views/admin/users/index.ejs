@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Users | EPR Access Admin</title>
+  <%- include('../../partials/head') %>
+</head>
+<body class="dashboard-body">
+  <%- include('../../partials/sidebar') %>
+  <div class="dashboard-main" id="dashboardMain">
+    <%- include('../../partials/topbar', { pageTitle: 'Users' }) %>
+    <div class="dashboard-content">
+      <%- include('../../partials/flash') %>
+
+      <div class="dash-section">
+        <div class="section-header-row">
+          <h3>All Users</h3>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <form action="/admin/users" method="GET" class="search-form">
+              <input type="text" name="search" placeholder="Search name or email" value="<%= search %>" />
+              <select name="role" onchange="this.form.submit()">
+                <option value="">All Roles</option>
+                <option value="INVESTOR" <%= roleFilter === 'INVESTOR' ? 'selected' : '' %>>Investors</option>
+                <option value="STAFF" <%= roleFilter === 'STAFF' ? 'selected' : '' %>>Staff</option>
+                <option value="ADMIN" <%= roleFilter === 'ADMIN' ? 'selected' : '' %>>Admins</option>
+              </select>
+              <button type="submit" class="btn btn-gold btn-sm">Search</button>
+            </form>
+            <a href="/admin/users/create-staff" class="btn btn-sm btn-outline-gold">+ Create Staff</a>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>KYC</th><th>Status</th><th>Joined</th><th></th></tr></thead>
+            <tbody>
+              <% users.forEach(function(u) { %>
+              <tr>
+                <td><a href="/admin/users/<%= u.id %>"><%= u.firstName %> <%= u.lastName %></a></td>
+                <td><%= u.email %></td>
+                <td><%= u.phone || '—' %></td>
+                <td><span class="badge-role role-<%= u.role.toLowerCase() %>"><%= u.role %></span></td>
+                <td><span class="badge-status status-<%= u.kycStatus.toLowerCase() %>"><%= u.kycStatus %></span></td>
+                <td><span class="badge-status status-<%= u.status.toLowerCase() %>"><%= u.status %></span></td>
+                <td><%= formatDate(u.createdAt) %></td>
+                <td><a href="/admin/users/<%= u.id %>" class="btn btn-sm btn-outline-gold">View</a></td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <% if (totalPages > 1) { %>
+        <div class="pagination">
+          <% if (page > 1) { %><a href="?page=<%= page-1 %>&search=<%= search %>" class="btn btn-sm btn-outline-gold">Previous</a><% } %>
+          <span>Page <%= page %> of <%= totalPages %></span>
+          <% if (page < totalPages) { %><a href="?page=<%= page+1 %>&search=<%= search %>" class="btn btn-sm btn-outline-gold">Next</a><% } %>
+        </div>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

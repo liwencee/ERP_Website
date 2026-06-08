@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Notifications | EPR Access</title>
+  <%- include('../partials/head') %>
+</head>
+<body class="dashboard-body">
+  <%- include('../partials/sidebar') %>
+  <div class="dashboard-main" id="dashboardMain">
+    <%- include('../partials/topbar', { pageTitle: 'Notifications' }) %>
+    <div class="dashboard-content">
+      <%- include('../partials/flash') %>
+
+      <div class="dash-section">
+        <h3>Notifications</h3>
+        <% if (notifications.length) { %>
+        <div class="notifications-list">
+          <% notifications.forEach(function(n) { %>
+          <div class="notification-item <%= n.read ? 'read' : 'unread' %>">
+            <div class="notification-dot"></div>
+            <div class="notification-body">
+              <strong><%= n.title %></strong>
+              <p><%= n.message %></p>
+              <span class="notification-time"><%= formatDate(n.createdAt) %></span>
+            </div>
+          </div>
+          <% }) %>
+        </div>
+        <% } else { %>
+        <div class="empty-state"><p>You have no notifications.</p></div>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

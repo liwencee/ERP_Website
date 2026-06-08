@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Login | EPR Access Limited</title>
+  <%- include('../partials/head') %>
+</head>
+<body class="auth-body">
+  <div class="auth-container">
+    <div class="auth-brand">
+      <a href="/" class="nav-logo"><img src="/images/logo.png" alt="EPR Access Limited" class="site-logo site-logo-auth" /></a>
+    </div>
+    <div class="auth-card">
+      <h2>Welcome Back</h2>
+      <p class="auth-sub">Sign in to your investor account</p>
+
+      <%- include('../partials/flash') %>
+
+      <form action="/auth/login" method="POST" class="auth-form">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" required placeholder="your@email.com" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label for="password">
+            Password
+            <a href="/auth/forgot-password" class="form-link">Forgot password?</a>
+          </label>
+          <input type="password" id="password" name="password" required placeholder="••••••••" autocomplete="current-password" />
+        </div>
+        <button type="submit" class="btn btn-gold btn-block">Login</button>
+      </form>
+
+      <p class="auth-footer">Don't have an account? <a href="/auth/register">Create one free</a></p>
+    </div>
+  </div>
+</body>
+</html>

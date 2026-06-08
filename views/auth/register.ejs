@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Create Account | EPR Access Limited</title>
+  <%- include('../partials/head') %>
+</head>
+<body class="auth-body">
+  <div class="auth-container">
+    <div class="auth-brand">
+      <a href="/" class="nav-logo"><img src="/images/logo.png" alt="EPR Access Limited" class="site-logo site-logo-auth" /></a>
+    </div>
+    <div class="auth-card">
+      <h2>Create Your Account</h2>
+      <p class="auth-sub">Start your investment journey today</p>
+
+      <%- include('../partials/flash') %>
+
+      <% if (locals.errors && errors.length) { %>
+        <div class="flash flash-error">
+          <ul><% errors.forEach(e => { %><li><%= e %></li><% }) %></ul>
+        </div>
+      <% } %>
+
+      <form action="/auth/register" method="POST" class="auth-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" name="firstName" required placeholder="John" value="<%= locals.body ? body.firstName || '' : '' %>" />
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" name="lastName" required placeholder="Doe" value="<%= locals.body ? body.lastName || '' : '' %>" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" required placeholder="your@email.com" value="<%= locals.body ? body.email || '' : '' %>" />
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone Number <span class="optional">(optional)</span></label>
+          <input type="tel" id="phone" name="phone" placeholder="+234 800 000 0000" value="<%= locals.body ? body.phone || '' : '' %>" />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required placeholder="Min. 8 characters" autocomplete="new-password" />
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Repeat password" autocomplete="new-password" />
+        </div>
+        <div class="form-group">
+          <label for="refCode">Referral Code <span class="optional">(optional)</span></label>
+          <input type="text" id="refCode" name="refCode" placeholder="e.g. EPRABC123" value="<%= locals.refCode || (locals.body ? body.refCode || '' : '') %>" style="text-transform:uppercase" />
+        </div>
+        <p class="form-note">By registering, you agree to our terms and conditions.</p>
+        <button type="submit" class="btn btn-gold btn-block">Create Account</button>
+      </form>
+
+      <p class="auth-footer">Already have an account? <a href="/auth/login">Log in</a></p>
+    </div>
+  </div>
+</body>
+</html>
