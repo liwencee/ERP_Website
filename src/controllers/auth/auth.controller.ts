@@ -107,11 +107,21 @@ export async function loginPost(req: Request, res: Response): Promise<void> {
   req.session.userName = `${user.firstName} ${user.lastName}`;
   req.session.sessionVersion = user.sessionVersion;
 
-  if (user.role === 'ADMIN' || user.role === 'STAFF') {
-    res.redirect('/admin');
-  } else {
-    res.redirect('/dashboard');
-  }
+  // Explicitly save session before redirecting — required with file-based
+  // session stores to avoid a race condition where the redirect fires before
+  // the session data is written to disk, leaving the next request with no userId.
+  req.session.save((err) => {
+    if (err) {
+      req.flash('error', 'Login failed. Please try again.');
+      res.redirect('/auth/login');
+      return;
+    }
+    if (user.role === 'ADMIN' || user.role === 'STAFF') {
+      res.redirect('/admin');
+    } else {
+      res.redirect('/dashboard');
+    }
+  });
 }
 
 // ─── Logout ──────────────────────────────────────────────────────────────────
