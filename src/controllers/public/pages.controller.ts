@@ -4,8 +4,9 @@ import prisma from '../../config/database';
 export async function home(req: Request, res: Response): Promise<void> {
   const plans = await prisma.investmentPlan.findMany({
     where: { status: 'ACTIVE' },
-    take: 4,
+    take: 6,
     orderBy: { createdAt: 'desc' },
+    include: { tenures: { orderBy: { sortOrder: 'asc' } } },
   });
   res.render('public/index', { title: 'Home', plans });
 }
@@ -18,6 +19,7 @@ export async function services(_req: Request, res: Response): Promise<void> {
   const plans = await prisma.investmentPlan.findMany({
     where: { status: 'ACTIVE' },
     orderBy: { type: 'asc' },
+    include: { tenures: { orderBy: { sortOrder: 'asc' } } },
   });
   res.render('public/services', { title: 'Investment Services', plans });
 }
