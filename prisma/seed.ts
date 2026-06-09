@@ -45,14 +45,20 @@ async function main() {
   // Each tier offers multiple tenures (6 months / 9 months / 1 year & above),
   // each with its own total return rate. The plan-level returnRate/duration
   // is the headline (1-year) value used for display and as a fallback.
+  // Build standard tenures: 6m, 9m, 1yr, 2yr, 3yr, 4yr, 5yr
+  // Rates for 2–5 years extrapolated proportionally from 1-year rate.
   const tenures = (
     six: number, nine: number, year: number, ref: number,
     sixDays = 180, nineDays = 270, yearDays = 365,
-    sixLabel = '6 Months', nineLabel = '9 Months', yearLabel = '1 Year & Above'
+    sixLabel = '6 Months', nineLabel = '9 Months', yearLabel = '1 Year'
   ) => [
-    { label: sixLabel,  durationDays: sixDays,  returnRate: six,  referralRate: ref, sortOrder: 1 },
-    { label: nineLabel, durationDays: nineDays, returnRate: nine, referralRate: ref, sortOrder: 2 },
-    { label: yearLabel, durationDays: yearDays, returnRate: year, referralRate: ref, sortOrder: 3 },
+    { label: sixLabel,    durationDays: sixDays,  returnRate: six,             referralRate: ref, sortOrder: 1 },
+    { label: nineLabel,   durationDays: nineDays, returnRate: nine,            referralRate: ref, sortOrder: 2 },
+    { label: yearLabel,   durationDays: yearDays, returnRate: year,            referralRate: ref, sortOrder: 3 },
+    { label: '2 Years',   durationDays: 730,      returnRate: +(year * 2).toFixed(1),  referralRate: ref, sortOrder: 4 },
+    { label: '3 Years',   durationDays: 1095,     returnRate: +(year * 3).toFixed(1),  referralRate: ref, sortOrder: 5 },
+    { label: '4 Years',   durationDays: 1460,     returnRate: +(year * 4).toFixed(1),  referralRate: ref, sortOrder: 6 },
+    { label: '5 Years',   durationDays: 1825,     returnRate: +(year * 5).toFixed(1),  referralRate: ref, sortOrder: 7 },
   ];
 
   const plans = [
@@ -117,7 +123,15 @@ async function main() {
       maxAmount: null,
       returnRate: 14.5,
       duration: 360,
-      tenures: tenures(8, 11.5, 14.5, 2, 180, 270, 360, '30–180 Days', '270 Days', '360 Days & Above'),
+      tenures: [
+        { label: '30–180 Days',  durationDays: 180,  returnRate: 8,    referralRate: 2, sortOrder: 1 },
+        { label: '270 Days',     durationDays: 270,  returnRate: 11.5, referralRate: 2, sortOrder: 2 },
+        { label: '1 Year',       durationDays: 360,  returnRate: 14.5, referralRate: 2, sortOrder: 3 },
+        { label: '2 Years',      durationDays: 720,  returnRate: 29,   referralRate: 2, sortOrder: 4 },
+        { label: '3 Years',      durationDays: 1080, returnRate: 43.5, referralRate: 2, sortOrder: 5 },
+        { label: '4 Years',      durationDays: 1440, returnRate: 58,   referralRate: 2, sortOrder: 6 },
+        { label: '5 Years',      durationDays: 1800, returnRate: 72.5, referralRate: 2, sortOrder: 7 },
+      ],
     },
     // ── Trading Investment ───────────────────────────────────────────────────
     {
@@ -129,9 +143,13 @@ async function main() {
       returnRate: 60,
       duration: 180,
       tenures: [
-        { label: '6 Months',       durationDays: 180, returnRate: 60, referralRate: 2.5, sortOrder: 1 },
-        { label: '9 Months',       durationDays: 270, returnRate: 60, referralRate: 2.5, sortOrder: 2 },
-        { label: '1 Year & Above', durationDays: 365, returnRate: 60, referralRate: 2.5, sortOrder: 3 },
+        { label: '6 Months', durationDays: 180,  returnRate: 60, referralRate: 2.5, sortOrder: 1 },
+        { label: '9 Months', durationDays: 270,  returnRate: 60, referralRate: 2.5, sortOrder: 2 },
+        { label: '1 Year',   durationDays: 365,  returnRate: 60, referralRate: 2.5, sortOrder: 3 },
+        { label: '2 Years',  durationDays: 730,  returnRate: 60, referralRate: 2.5, sortOrder: 4 },
+        { label: '3 Years',  durationDays: 1095, returnRate: 60, referralRate: 2.5, sortOrder: 5 },
+        { label: '4 Years',  durationDays: 1460, returnRate: 60, referralRate: 2.5, sortOrder: 6 },
+        { label: '5 Years',  durationDays: 1825, returnRate: 60, referralRate: 2.5, sortOrder: 7 },
       ],
     },
     // ── Dollar Investment ────────────────────────────────────────────────────
@@ -144,9 +162,13 @@ async function main() {
       returnRate: 5,
       duration: 365,
       tenures: [
-        { label: '6 Months',       durationDays: 180, returnRate: 5, referralRate: 2, sortOrder: 1 },
-        { label: '9 Months',       durationDays: 270, returnRate: 5, referralRate: 2, sortOrder: 2 },
-        { label: '1 Year & Above', durationDays: 365, returnRate: 5, referralRate: 2, sortOrder: 3 },
+        { label: '6 Months', durationDays: 180,  returnRate: 5,  referralRate: 2, sortOrder: 1 },
+        { label: '9 Months', durationDays: 270,  returnRate: 5,  referralRate: 2, sortOrder: 2 },
+        { label: '1 Year',   durationDays: 365,  returnRate: 5,  referralRate: 2, sortOrder: 3 },
+        { label: '2 Years',  durationDays: 730,  returnRate: 10, referralRate: 2, sortOrder: 4 },
+        { label: '3 Years',  durationDays: 1095, returnRate: 15, referralRate: 2, sortOrder: 5 },
+        { label: '4 Years',  durationDays: 1460, returnRate: 20, referralRate: 2, sortOrder: 6 },
+        { label: '5 Years',  durationDays: 1825, returnRate: 25, referralRate: 2, sortOrder: 7 },
       ],
     },
     // ── Real Estate ──────────────────────────────────────────────────────────
@@ -159,7 +181,11 @@ async function main() {
       returnRate: 18,
       duration: 365,
       tenures: [
-        { label: '1 Year', durationDays: 365, returnRate: 18, referralRate: 1, sortOrder: 1 },
+        { label: '1 Year',  durationDays: 365,  returnRate: 18, referralRate: 1, sortOrder: 1 },
+        { label: '2 Years', durationDays: 730,  returnRate: 36, referralRate: 1, sortOrder: 2 },
+        { label: '3 Years', durationDays: 1095, returnRate: 54, referralRate: 1, sortOrder: 3 },
+        { label: '4 Years', durationDays: 1460, returnRate: 72, referralRate: 1, sortOrder: 4 },
+        { label: '5 Years', durationDays: 1825, returnRate: 90, referralRate: 1, sortOrder: 5 },
       ],
     },
   ];
@@ -174,6 +200,105 @@ async function main() {
       data: { ...planData, tenures: { create: planTenures } },
     });
     console.log(`Plan created: ${created.name} (${planTenures.length} tenures)`);
+  }
+
+  // Real Estate Properties
+  await prisma.realEstateProperty.deleteMany({});
+  const properties = [
+    {
+      title: '5-Bedroom Luxury Duplex',
+      location: 'Lekki Phase 1, Lagos',
+      price: 250000000,
+      currency: 'NGN',
+      type: 'Duplex',
+      bedrooms: 5,
+      bathrooms: 5,
+      areaSqm: 450,
+      description: 'Exquisite 5-bedroom duplex with modern finishes, BQ, 3 en-suite rooms, fitted kitchen, and 24/7 power. Gated estate with ample parking.',
+      imageUrl: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80',
+      status: 'AVAILABLE',
+      featured: true,
+      sortOrder: 1,
+    },
+    {
+      title: '4-Bedroom Terrace House',
+      location: 'Ikeja GRA, Lagos',
+      price: 120000000,
+      currency: 'NGN',
+      type: 'Terrace',
+      bedrooms: 4,
+      bathrooms: 4,
+      areaSqm: 300,
+      description: 'Beautifully finished 4-bedroom terrace in Ikeja GRA with boys quarter, fitted kitchen, and secure estate compound. Close to major landmarks.',
+      imageUrl: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80',
+      status: 'AVAILABLE',
+      featured: true,
+      sortOrder: 2,
+    },
+    {
+      title: '3-Bedroom Bungalow',
+      location: 'Abuja, FCT',
+      price: 85000000,
+      currency: 'NGN',
+      type: 'Bungalow',
+      bedrooms: 3,
+      bathrooms: 3,
+      areaSqm: 220,
+      description: 'Modern 3-bedroom bungalow in a serene Abuja neighbourhood with solar power backup, security post, and landscaped compound.',
+      imageUrl: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&q=80',
+      status: 'AVAILABLE',
+      featured: false,
+      sortOrder: 3,
+    },
+    {
+      title: '2-Bedroom Apartment',
+      location: 'Victoria Island, Lagos',
+      price: 65000000,
+      currency: 'NGN',
+      type: 'Apartment',
+      bedrooms: 2,
+      bathrooms: 2,
+      areaSqm: 130,
+      description: 'Contemporary 2-bedroom apartment on the 8th floor with ocean views, central AC, fitted kitchen, and serviced building. Perfect for professionals.',
+      imageUrl: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80',
+      status: 'AVAILABLE',
+      featured: false,
+      sortOrder: 4,
+    },
+    {
+      title: '6-Bedroom Mansion',
+      location: 'Banana Island, Lagos',
+      price: 750000000,
+      currency: 'NGN',
+      type: 'Mansion',
+      bedrooms: 6,
+      bathrooms: 7,
+      areaSqm: 800,
+      description: 'Ultra-luxury 6-bedroom mansion on Banana Island with swimming pool, home theatre, generator house, staff quarters, and premium security.',
+      imageUrl: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800&q=80',
+      status: 'AVAILABLE',
+      featured: true,
+      sortOrder: 5,
+    },
+    {
+      title: 'Commercial Plaza (6 Shops)',
+      location: 'Surulere, Lagos',
+      price: 180000000,
+      currency: 'NGN',
+      type: 'Commercial',
+      bedrooms: null,
+      bathrooms: null,
+      areaSqm: 500,
+      description: 'Newly built commercial plaza with 6 large shops, toilets, and security. Excellent for retail or office use in a high-traffic area.',
+      imageUrl: 'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=800&q=80',
+      status: 'AVAILABLE',
+      featured: false,
+      sortOrder: 6,
+    },
+  ];
+  for (const prop of properties) {
+    await prisma.realEstateProperty.create({ data: prop });
+    console.log(`Property created: ${prop.title}`);
   }
 }
 

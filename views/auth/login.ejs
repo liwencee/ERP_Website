@@ -25,7 +25,15 @@
             Password
             <a href="/auth/forgot-password" class="form-link">Forgot password?</a>
           </label>
-          <input type="password" id="password" name="password" required placeholder="••••••••" autocomplete="current-password" />
+          <div class="password-wrap">
+            <input type="password" id="password" name="password" required placeholder="••••••••" autocomplete="current-password" />
+            <button type="button" class="password-toggle" data-target="password" aria-label="Show password">
+              <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
         </div>
         <button type="submit" class="btn btn-gold btn-block">Login</button>
       </form>
@@ -33,5 +41,15 @@
       <p class="auth-footer">Don't have an account? <a href="/auth/register">Create one free</a></p>
     </div>
   </div>
+  <script>
+    document.querySelectorAll('.password-toggle').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var input = document.getElementById(btn.dataset.target);
+        var isText = input.type === 'text';
+        input.type = isText ? 'password' : 'text';
+        btn.querySelector('.eye-icon').style.opacity = isText ? '1' : '0.4';
+      });
+    });
+  </script>
 </body>
 </html>

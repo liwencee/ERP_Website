@@ -79,12 +79,12 @@
       </div>
 
       <div class="carousel-slide">
-        <div class="carousel-bg" style="background-image: url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1920&q=80&fit=crop')"></div>
+        <div class="carousel-bg" style="background-image: url('https://images.unsplash.com/photo-1642790551116-18e4f6456cd8?w=1920&q=80&fit=crop')"></div>
         <div class="carousel-overlay"></div>
         <div class="carousel-content">
-          <span class="hero-badge">Smart Investment Tools</span>
-          <h1>Empower Your<br><span class="text-gold">Financial Decisions</span></h1>
-          <p>Use our investment calculator to know exactly what your interest and earnings should be before you commit. Total clarity, total control over your money.</p>
+          <span class="hero-badge">Trading &amp; Market Intelligence</span>
+          <h1>Trade Smarter,<br><span class="text-gold">Earn Faster</span></h1>
+          <p>Our expert trading team executes across Forex, stocks, indices and crypto. Watch your portfolio climb — powered by disciplined, data-driven strategies and green upward momentum.</p>
           <div class="hero-actions">
             <a href="/auth/register" class="btn btn-gold btn-lg">Open an Account</a>
             <a href="/#calculator" class="btn btn-carousel-outline btn-lg">Try the Calculator</a>
@@ -175,10 +175,11 @@
           <p>Expertly curated plans for every investor — from first-timer to seasoned pro</p>
         </div>
         <div class="plans-grid stagger">
-          <% if (plans.length) { %>
-            <% plans.forEach(function(plan, idx) { %>
+          <% var displayPlans = (typeof featuredPlans !== 'undefined' && featuredPlans.length) ? featuredPlans : plans; %>
+          <% if (displayPlans.length) { %>
+            <% displayPlans.forEach(function(plan, idx) { %>
             <%
-              var maxRate = Math.max.apply(null, plans.map(function(p){ return p.returnRate; }));
+              var maxRate = Math.max.apply(null, displayPlans.map(function(p){ return p.returnRate; }));
               var isFeatured = plan.returnRate === maxRate;
               var barWidth = Math.round((plan.returnRate / 20) * 100);
             %>
@@ -201,7 +202,9 @@
                 </div>
                 <div class="plan-detail">
                   <span class="detail-label">Min. Amount</span>
-                  <span class="detail-value">₦<%= Number(plan.minAmount).toLocaleString() %></span>
+                  <span class="detail-value">
+                    <% if (plan.type === 'DOLLAR') { %>$50<% } else { %>₦<%= Number(plan.minAmount).toLocaleString() %><% } %>
+                  </span>
                 </div>
               </div>
               <a href="/auth/register" class="btn btn-gold btn-block">Invest Now</a>
@@ -209,7 +212,7 @@
             <% }) %>
           <% } else { %>
             <p class="text-center">Investment plans coming soon. <a href="/contact">Contact us</a> for details.</p>
-          <% } %>
+          <% } /* end displayPlans */ %>
         </div>
         <div class="text-center mt-8">
           <a href="/services" class="btn btn-outline-gold">View All Plans</a>

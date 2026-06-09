@@ -14,7 +14,8 @@ export function registerGet(req: Request, res: Response): void {
 
 export async function registerPost(req: Request, res: Response): Promise<void> {
   const errors: string[] = [];
-  const { firstName, lastName, email, phone, password, confirmPassword, refCode } = req.body;
+  const { firstName, lastName, email, phone, password, confirmPassword, refCode,
+          dateOfBirth, gender, address, state, city } = req.body;
 
   if (!firstName || !lastName || !email || !password) errors.push('All fields are required.');
   if (password !== confirmPassword) errors.push('Passwords do not match.');
@@ -55,6 +56,11 @@ export async function registerPost(req: Request, res: Response): Promise<void> {
       lastName,
       email: email.toLowerCase(),
       phone: phone || null,
+      dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+      gender: gender || null,
+      address: address || null,
+      state: state || null,
+      city: city || null,
       password: hash,
       emailToken,
       referralCode,

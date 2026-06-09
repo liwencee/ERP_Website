@@ -208,6 +208,63 @@
       </div>
     </section>
 
+    <!-- Real Estate Properties Listings -->
+    <section class="section section-light" id="properties">
+      <div class="container">
+        <div class="section-header stagger">
+          <span class="section-eyebrow">Properties For Sale</span>
+          <h2>Our <span class="gradient-text">Available Properties</span></h2>
+          <p>Browse our curated selection of premium Nigerian real estate — each property vetted and ready for investment</p>
+        </div>
+        <% if (typeof properties !== 'undefined' && properties.length) { %>
+        <div class="property-grid stagger">
+          <% properties.forEach(function(prop) { %>
+          <div class="property-card <%= prop.featured ? 'property-featured' : '' %>">
+            <% if (prop.featured) { %><div class="property-featured-badge">Featured</div><% } %>
+            <div class="property-img-wrap">
+              <% if (prop.imageUrl) { %>
+              <img src="<%= prop.imageUrl %>" alt="<%= prop.title %>" class="property-img" loading="lazy" />
+              <% } else { %>
+              <div class="property-img-placeholder">🏢</div>
+              <% } %>
+              <div class="property-status-badge"><%= prop.status %></div>
+            </div>
+            <div class="property-body">
+              <div class="property-type-tag"><%= prop.type %></div>
+              <h3 class="property-title"><%= prop.title %></h3>
+              <p class="property-location">📍 <%= prop.location %></p>
+              <p class="property-desc"><%= prop.description ? prop.description.substring(0, 100) + '...' : '' %></p>
+              <div class="property-meta">
+                <% if (prop.bedrooms) { %><span>🛏 <%= prop.bedrooms %> Bed</span><% } %>
+                <% if (prop.bathrooms) { %><span>🚿 <%= prop.bathrooms %> Bath</span><% } %>
+                <% if (prop.areaSqm) { %><span>📐 <%= Number(prop.areaSqm) %>m²</span><% } %>
+              </div>
+              <div class="property-price">
+                <span class="price-label">Price</span>
+                <strong class="price-value">
+                  <% if (prop.currency === 'USD') { %>
+                    $<%= Number(prop.price).toLocaleString('en-US') %>
+                  <% } else { %>
+                    ₦<%= Number(prop.price).toLocaleString('en-NG') %>
+                  <% } %>
+                </strong>
+              </div>
+              <a href="/contact?subject=property&ref=<%= prop.id %>" class="btn btn-gold btn-block" style="margin-top:12px;">Enquire Now</a>
+            </div>
+          </div>
+          <% }) %>
+        </div>
+        <% } else { %>
+        <div class="text-center" style="padding:40px 0;">
+          <p style="color:#6b7280;">Property listings are being updated. Please <a href="/contact" style="color:#2ECC2E;font-weight:600;">contact us</a> for the latest available properties.</p>
+        </div>
+        <% } %>
+        <div class="text-center" style="margin-top:32px;">
+          <a href="/auth/register" class="btn btn-gold btn-lg">Invest in Real Estate</a>
+        </div>
+      </div>
+    </section>
+
     <!-- Investment Tiers -->
     <section class="section section-light" id="plans">
       <div class="container">

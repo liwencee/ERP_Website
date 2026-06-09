@@ -18,6 +18,11 @@ model User {
   firstName       String
   lastName        String
   phone           String?
+  dateOfBirth     DateTime?
+  gender          String?
+  address         String?
+  state           String?
+  city            String?
   role            String    @default("INVESTOR")
   status          String    @default("ACTIVE")
   emailVerified   Boolean   @default(false)
@@ -154,4 +159,25 @@ model Document {
   url       String
   status    String   @default("PENDING")
   createdAt DateTime @default(now())
+}
+
+// PropertyStatus: AVAILABLE | SOLD | RESERVED
+model RealEstateProperty {
+  id          String   @id @default(uuid())
+  title       String
+  location    String
+  price       Decimal
+  currency    String   @default("NGN")
+  type        String   // e.g. Duplex, Bungalow, Apartment, Terrace
+  bedrooms    Int?
+  bathrooms   Int?
+  areaSqm     Decimal?
+  description String?
+  imageUrl    String?
+  status      String   @default("AVAILABLE")
+  featured    Boolean  @default(false)
+  sortOrder   Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

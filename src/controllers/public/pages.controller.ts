@@ -1,14 +1,26 @@
 import { Request, Response } from 'express';
 import prisma from '../../config/database';
 
+const PLAN_ORDER = ['Silver', 'Bronze', 'Gold', 'Diamond', 'Save Future', 'Fixed Deposit', 'Trading', 'Dollar', 'Real Estate'];
+
+function sortPlans<T extends { name: string }>(plans: T[]): T[] {
+  return [...plans].sort((a, b) => {
+    const ai = PLAN_ORDER.findIndex(k => a.name.includes(k));
+    const bi = PLAN_ORDER.findIndex(k => b.name.includes(k));
+    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+  });
+}
+
 export async function home(req: Request, res: Response): Promise<void> {
-  const plans = await prisma.investmentPlan.findMany({
+  const allPlans = await prisma.investmentPlan.findMany({
     where: { status: 'ACTIVE' },
-    take: 6,
-    orderBy: { createdAt: 'desc' },
     include: { tenures: { orderBy: { sortOrder: 'asc' } } },
   });
-  res.render('public/index', { title: 'Home', plans });
+  const plans = sortPlans(allPlans);
+  // Featured cards: Silver, Bronze, Fixed Deposit, Dollar, Real Estate
+  const featuredTypes = ['Silver', 'Bronze', 'Fixed Deposit', 'Dollar', 'Real Estate'];
+  const featuredPlans = plans.filter(p => featuredTypes.some(t => p.name.includes(t)));
+  res.render('public/index', { title: 'Home', plans, featuredPlans });
 }
 
 export function about(_req: Request, res: Response): void {
@@ -16,12 +28,18 @@ export function about(_req: Request, res: Response): void {
 }
 
 export async function services(_req: Request, res: Response): Promise<void> {
-  const plans = await prisma.investmentPlan.findMany({
-    where: { status: 'ACTIVE' },
-    orderBy: { type: 'asc' },
-    include: { tenures: { orderBy: { sortOrder: 'asc' } } },
-  });
-  res.render('public/services', { title: 'Investment Services', plans });
+  const [raw, properties] = await Promise.all([
+    prisma.investmentPlan.findMany({
+      where: { status: 'ACTIVE' },
+      include: { tenures: { orderBy: { sortOrder: 'asc' } } },
+    }),
+    prisma.realEstateProperty.findMany({
+      where: { status: 'AVAILABLE' },
+      orderBy: { sortOrder: 'asc' },
+    }),
+  ]);
+  const plans = sortPlans(raw);
+  res.render('public/services', { title: 'Investment Services', plans, properties });
 }
 
 export function team(_req: Request, res: Response): void {
