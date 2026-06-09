@@ -232,22 +232,50 @@
       rateVal.textContent = '—';
       return;
     }
-    const [rate, duration, planName] = val.split('|');
-    const r = parseFloat(rate);
-    const d = parseInt(duration);
-    const interest = amount * (r / 100) * (d / 365);
+
+    // Format: rate|durationDays|planLabel|minAmount|type
+    const parts = val.split('|');
+    const r       = parseFloat(parts[0]);   // total return % for this tenure
+    const d       = parseInt(parts[1]);     // duration in days
+    const planName = parts[2] || '';
+    const minAmt  = parseFloat(parts[3]) || 0;
+    const pType   = (parts[4] || '').toUpperCase();
+
+    // Validate minimum investment
+    if (minAmt > 0 && amount < minAmt) {
+      body.style.display = 'none';
+      empty.style.display = 'block';
+      empty.innerHTML = '<div style="font-size:3rem">⚠️</div><p>Minimum investment for this plan is <strong>₦' +
+        minAmt.toLocaleString('en-NG') + '</strong></p>';
+      rateVal.textContent = r;
+      return;
+    }
+    empty.innerHTML = '<div style="font-size:3rem">📊</div><p>Select a plan and enter an amount to see your projected returns</p>';
+
+    // EPR rates are TOTAL returns for the tenure period (not annual).
+    // e.g. Silver 12% for 6 months means ₦100,000 earns exactly ₦12,000.
+    // Trading is profit-sharing (60–75% of profits) — shown as approximate.
+    const interest = amount * (r / 100);
     const payout = amount + interest;
     const maturity = new Date();
     maturity.setDate(maturity.getDate() + d);
 
+    const isTradingNote = pType === 'TRADING'
+      ? ' (of trading profits — actual return varies)' : '';
+    const isDollar = pType === 'DOLLAR';
+    const symbol = isDollar ? '$' : '₦';
+    const fmtAmt = isDollar
+      ? n => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      : n => '₦' + Number(n).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
     rateVal.textContent = r;
-    document.getElementById('pcInvested').textContent = fmt(amount);
+    document.getElementById('pcInvested').textContent = fmtAmt(amount);
     document.getElementById('pcPlan').textContent = planName;
-    document.getElementById('pcRate').textContent = r + '%';
+    document.getElementById('pcRate').textContent = r + '%' + isTradingNote;
     document.getElementById('pcDuration').textContent = d + ' days';
     document.getElementById('pcMaturity').textContent = maturity.toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
-    document.getElementById('pcInterest').textContent = fmt(interest);
-    document.getElementById('pcPayout').textContent = fmt(payout);
+    document.getElementById('pcInterest').textContent = fmtAmt(interest) + (isTradingNote ? ' (estimated)' : '');
+    document.getElementById('pcPayout').textContent = fmtAmt(payout);
 
     empty.style.display = 'none';
     body.style.display = 'flex';

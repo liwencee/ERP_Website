@@ -236,19 +236,27 @@
             </div>
 
             <div class="pub-calc-field">
-              <label for="pubCalcPlan">Select Investment Plan</label>
+              <label for="pubCalcPlan">Select Plan &amp; Tenure</label>
               <select id="pubCalcPlan">
-                <option value="">— Choose a plan —</option>
+                <option value="">— Choose a plan &amp; tenure —</option>
                 <% plans.forEach(function(p) { %>
-                <option value="<%= p.returnRate %>|<%= p.duration %>|<%= p.name %>">
-                  <%= p.name %> — <%= p.returnRate %>% / <%= p.duration %> days
-                </option>
+                  <% if (p.tenures && p.tenures.length > 0) { %>
+                    <% p.tenures.forEach(function(t) { %>
+                    <option value="<%= Number(t.returnRate) %>|<%= t.durationDays %>|<%= p.name %> (<%= t.label %>)|<%= Number(p.minAmount) %>|<%= p.type %>">
+                      <%= p.name %> · <%= t.label %> — <%= Number(t.returnRate) %>%
+                    </option>
+                    <% }) %>
+                  <% } else { %>
+                  <option value="<%= Number(p.returnRate) %>|<%= p.duration %>|<%= p.name %>|<%= Number(p.minAmount) %>|<%= p.type %>">
+                    <%= p.name %> — <%= p.returnRate %>%
+                  </option>
+                  <% } %>
                 <% }) %>
               </select>
             </div>
 
             <div class="pub-calc-field">
-              <label>Annualized Returns</label>
+              <label>Return Rate (for selected tenure)</label>
               <div class="pub-calc-rate-display">
                 <span id="pubCalcRateVal">—</span>
                 <span class="rate-pct">%</span>
@@ -269,7 +277,7 @@
                 <h4>Calculation Details</h4>
                 <div class="pub-calc-row"><span>Invested Capital</span><strong id="pcInvested">—</strong></div>
                 <div class="pub-calc-row"><span>Plan</span><strong id="pcPlan">—</strong></div>
-                <div class="pub-calc-row"><span>Interest Rate (Annual)</span><strong id="pcRate">—</strong></div>
+                <div class="pub-calc-row"><span>Return Rate (Total for Period)</span><strong id="pcRate">—</strong></div>
                 <div class="pub-calc-row"><span>Duration</span><strong id="pcDuration">—</strong></div>
                 <div class="pub-calc-row"><span>Maturity Date</span><strong id="pcMaturity">—</strong></div>
               </div>

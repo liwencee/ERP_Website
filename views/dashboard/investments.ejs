@@ -22,13 +22,21 @@
               <input type="number" id="calcAmount" placeholder="e.g. 100000" min="0" step="1000" />
             </div>
             <div class="form-group">
-              <label>Select Plan</label>
+              <label>Select Plan &amp; Tenure</label>
               <select id="calcPlan">
-                <option value="">— Choose a plan —</option>
+                <option value="">— Choose a plan &amp; tenure —</option>
                 <% plans.forEach(function(plan) { %>
-                <option value="<%= plan.returnRate %>|<%= plan.duration %>|<%= plan.minAmount %>|<%= plan.name %>">
-                  <%= plan.name %> — <%= plan.returnRate %>% / <%= plan.duration %> days
-                </option>
+                  <% if (plan.tenures && plan.tenures.length > 0) { %>
+                    <% plan.tenures.forEach(function(t) { %>
+                    <option value="<%= Number(t.returnRate) %>|<%= t.durationDays %>|<%= Number(plan.minAmount) %>|<%= plan.name %> (<%= t.label %>)|<%= plan.type %>">
+                      <%= plan.name %> · <%= t.label %> @ <%= Number(t.returnRate) %>%
+                    </option>
+                    <% }) %>
+                  <% } else { %>
+                  <option value="<%= Number(plan.returnRate) %>|<%= plan.duration %>|<%= Number(plan.minAmount) %>|<%= plan.name %>|<%= plan.type %>">
+                    <%= plan.name %> — <%= plan.returnRate %>%
+                  </option>
+                  <% } %>
                 <% }) %>
               </select>
             </div>
@@ -77,9 +85,24 @@
               <h4><%= plan.name %></h4>
               <p class="plan-desc"><%= plan.description.substring(0, 100) %>...</p>
               <div class="plan-details">
+                <% if (plan.tenures && plan.tenures.length > 0) { %>
+                <div class="plan-detail" style="flex-direction:column; align-items:flex-start; gap:4px;">
+                  <span>Tenure Rates</span>
+                  <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:2px;">
+                    <% plan.tenures.forEach(function(t) { %>
+                    <span style="font-size:0.75rem; font-weight:700; color:#2ECC2E; background:rgba(46,204,46,0.1); padding:2px 8px; border-radius:100px; border:1px solid rgba(46,204,46,0.3);">
+                      <%= t.label %>: <%= Number(t.returnRate) %>%
+                    </span>
+                    <% }) %>
+                  </div>
+                </div>
+                <% } else { %>
                 <div class="plan-detail"><span>Returns</span><strong class="text-gold"><%= plan.returnRate %>%</strong></div>
-                <div class="plan-detail"><span>Duration</span><strong><%= plan.duration %> days</strong></div>
-                <div class="plan-detail"><span>Min</span><strong>₦<%= Number(plan.minAmount).toLocaleString() %></strong></div>
+                <% } %>
+                <div class="plan-detail"><span>Min Capital</span><strong>₦<%= Number(plan.minAmount).toLocaleString() %></strong></div>
+                <% if (plan.maxAmount) { %>
+                <div class="plan-detail"><span>Max Capital</span><strong>₦<%= Number(plan.maxAmount).toLocaleString() %></strong></div>
+                <% } %>
               </div>
               <a href="/dashboard/investments/<%= plan.id %>/invest" class="btn btn-gold btn-block">Invest Now</a>
             </div>
@@ -158,24 +181,39 @@
       const placeholder = document.getElementById('calcPlaceholder');
 
       if (!amount || !planVal) {
-        alert('Please enter an amount and select a plan.');
+        alert('Please enter an amount and select a plan & tenure.');
         return;
       }
 
-      const [rate, duration, minAmount, planName] = planVal.split('|');
-      if (amount < parseFloat(minAmount)) {
-        alert(`Minimum investment for this plan is ₦${Number(minAmount).toLocaleString()}`);
+      // Format: rate|durationDays|minAmount|planLabel|type
+      const parts = planVal.split('|');
+      const rate     = parseFloat(parts[0]);   // total return % for this tenure
+      const duration = parseInt(parts[1]);     // days
+      const minAmount = parseFloat(parts[2]) || 0;
+      const planName = parts[3] || '';
+      const pType    = (parts[4] || '').toUpperCase();
+
+      if (minAmount > 0 && amount < minAmount) {
+        alert('Minimum investment for this plan is ₦' + Number(minAmount).toLocaleString('en-NG'));
         return;
       }
 
-      const interest = amount * (parseFloat(rate) / 100);
+      // Rate is TOTAL return for the period — not annual. Multiply directly.
+      const interest = amount * (rate / 100);
       const total = amount + interest;
 
+      // Maturity date
+      const maturity = new Date();
+      maturity.setDate(maturity.getDate() + duration);
+      const maturityStr = maturity.toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
+
+      const isTradingNote = pType === 'TRADING' ? ' (of trading profits)' : '';
+
       document.getElementById('rPrincipal').textContent = formatNGN(amount);
-      document.getElementById('rRate').textContent = rate + '% p.a.';
-      document.getElementById('rDuration').textContent = duration + ' days';
+      document.getElementById('rRate').textContent = rate + '%' + isTradingNote + ' for ' + duration + ' days';
+      document.getElementById('rDuration').textContent = duration + ' days (matures ' + maturityStr + ')';
       document.getElementById('rTotal').textContent = formatNGN(total);
-      document.getElementById('rProfit').textContent = '+' + formatNGN(interest);
+      document.getElementById('rProfit').textContent = '+' + formatNGN(interest) + (isTradingNote ? ' (est.)' : '');
 
       results.style.display = 'block';
       placeholder.style.display = 'none';
