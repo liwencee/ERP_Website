@@ -133,7 +133,7 @@ h3 { font-size: 1.3rem; }
 .nav-logo { display: flex; align-items: center; flex-shrink: 0; }
 .logo-epr { color: var(--brand); }
 .logo-access { color: var(--white); }
-.site-logo { height: 52px; width: auto; max-width: 300px; display: block; object-fit: contain; }
+.site-logo { height: 52px; width: auto; max-width: 300px; display: block; object-fit: contain; filter: brightness(0) invert(1); }
 .site-logo-sidebar { height: 48px; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4)); }
 .site-logo-footer { height: 52px; }
 .site-logo-auth { height: 80px; }
@@ -257,7 +257,7 @@ h3 { font-size: 1.3rem; }
 .detail-label { color: var(--gray-600); }
 
 /* ─── Team ────────────────────────────────────────── */
-.team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 28px; }
+.team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 24px; }
 .team-card {
   border-radius: 16px;
   overflow: hidden;
@@ -272,7 +272,7 @@ h3 { font-size: 1.3rem; }
 .team-photo { position: relative; overflow: hidden; background: #0a1628; }
 .team-photo img {
   width: 100%;
-  height: 380px;
+  height: 280px;
   object-fit: cover;
   object-position: center top;
   display: block;
