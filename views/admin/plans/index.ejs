@@ -21,7 +21,6 @@
             <thead>
               <tr>
                 <th>Name</th>
-                <th>Type</th>
                 <th>Return Rate</th>
                 <th>Duration</th>
                 <th>Min Amount</th>
@@ -33,7 +32,6 @@
               <% plans.forEach(function(plan) { %>
               <tr>
                 <td><%= plan.name %></td>
-                <td><span class="plan-type plan-type-<%= plan.type.toLowerCase().replace('_','-') %>"><%= plan.type.replace('_',' ') %></span></td>
                 <td class="text-gold"><%= plan.returnRate %>%</td>
                 <td><%= plan.duration %> days</td>
                 <td><%= formatCurrency(Number(plan.minAmount)) %></td>
