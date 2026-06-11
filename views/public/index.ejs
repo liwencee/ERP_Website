@@ -185,8 +185,7 @@
             %>
             <div class="plan-card <%= isFeatured ? 'featured' : '' %>" data-type="<%= plan.type %>" style="--bar-w:<%= barWidth %>%">
               <% if (isFeatured) { %><div class="plan-featured-badge">Top Pick</div><% } %>
-              <div class="plan-type plan-type-<%= plan.type.toLowerCase().replace('_','-') %>"><%= plan.type.replace(/_/g, ' ') %></div>
-              <h3 class="plan-name"><%= plan.name %></h3>
+                            <h3 class="plan-name"><%= plan.name %></h3>
               <p class="plan-desc"><%= plan.description.substring(0, 120) %>...</p>
               <div class="plan-details">
                 <div class="plan-detail">
@@ -481,6 +480,17 @@
               <div class="testimonial-meta">
                 <strong>Yinka Olubiyi</strong>
                 <span>Verified Investor · 0803 437 7963</span>
+              </div>
+            </div>
+          </div>
+          <div class="testimonial-card">
+            <div class="testimonial-stars">★★★★★</div>
+            <p class="testimonial-quote">"Investing with EPR Access Limited was straightforward and transparent from day one. The team kept me informed at every stage, and I received my full investment plus returns exactly as scheduled. Their discipline and professionalism gave me real confidence. I'm already planning my next placement with them."</p>
+            <div class="testimonial-author">
+              <div class="testimonial-avatar">GO</div>
+              <div class="testimonial-meta">
+                <strong>Gideon Onyekachi</strong>
+                <span>Verified Investor · 0808 826 4672</span>
               </div>
             </div>
           </div>

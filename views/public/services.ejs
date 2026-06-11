@@ -92,6 +92,12 @@
             <p>Tailored project financing to fuel growth — flexible capital for business expansion or new ventures, expert guidance for project success and competitive rates to boost your ROI. Smart financing that drives your projects forward.</p>
           </div>
 
+          <div class="service-card" id="portfolio-management">
+            <div class="service-icon">📋</div>
+            <h3>Portfolio Management</h3>
+            <p>Professional portfolio management designed to preserve capital, optimize returns, and align investments with each client's financial goals and risk appetite. Our approach combines rigorous market research, data-driven asset allocation, and active risk management. We construct and monitor diversified portfolios across fixed income, equities, money market instruments, and alternative investments.</p>
+          </div>
+
         </div>
       </div>
     </section>
@@ -287,8 +293,7 @@
             %>
             <div class="plan-full-card" id="<%= planSlug %>">
               <div class="plan-header">
-                <div class="plan-type plan-type-<%= plan.type.toLowerCase().replace('_','-') %>"><%= plan.type.replace(/_/g, ' ') %></div>
-                <h3><%= plan.name %></h3>
+                                <h3><%= plan.name %></h3>
               </div>
               <p class="plan-description"><%= plan.description %></p>
               <div class="plan-specs">

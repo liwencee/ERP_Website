@@ -65,17 +65,19 @@ export async function registerPost(req: Request, res: Response): Promise<void> {
       emailToken,
       referralCode,
       referredBy: referredById || null,
+      emailVerified: true,  // auto-verify so users can log in immediately
       wallet: { create: { balance: 0 } },
     },
   });
 
+  // Welcome email (non-blocking — registration succeeds even if email fails)
   try {
     await emailService.sendVerificationEmail(user.email, user.firstName, emailToken);
   } catch {
-    // don't block registration if email fails
+    // silent
   }
 
-  req.flash('info', 'Account created! Please check your email to verify your account.');
+  req.flash('success', 'Account created successfully! You can now log in.');
   res.redirect('/auth/login');
 }
 
@@ -95,11 +97,7 @@ export async function loginPost(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  if (!user.emailVerified) {
-    req.flash('error', 'Please verify your email address before logging in.');
-    res.redirect('/auth/login');
-    return;
-  }
+  // Email verification not required — anyone who registers can log in immediately.
 
   if (user.status === 'SUSPENDED') {
     req.flash('error', 'Your account has been suspended. Please contact support.');

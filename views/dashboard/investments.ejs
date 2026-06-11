@@ -81,8 +81,7 @@
           <% if (plans.length) { %>
             <% plans.forEach(function(plan) { %>
             <div class="plan-card">
-              <div class="plan-type plan-type-<%= plan.type.toLowerCase().replace('_','-') %>"><%= plan.type.replace('_',' ') %></div>
-              <h4><%= plan.name %></h4>
+                            <h4><%= plan.name %></h4>
               <p class="plan-desc"><%= plan.description.substring(0, 100) %>...</p>
               <div class="plan-details">
                 <% if (plan.tenures && plan.tenures.length > 0) { %>

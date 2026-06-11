@@ -17,9 +17,8 @@ export async function home(req: Request, res: Response): Promise<void> {
     include: { tenures: { orderBy: { sortOrder: 'asc' } } },
   });
   const plans = sortPlans(allPlans);
-  // Featured cards: Silver, Bronze, Fixed Deposit, Dollar, Real Estate
-  const featuredTypes = ['Silver', 'Bronze', 'Fixed Deposit', 'Dollar', 'Real Estate'];
-  const featuredPlans = plans.filter(p => featuredTypes.some(t => p.name.includes(t)));
+  // Featured cards: all plans shown (Savings, Silver, Bronze, Gold, Diamond, Fixed Deposit, Trading, Dollar, Real Estate)
+  const featuredPlans = plans;
   res.render('public/index', { title: 'Home', plans, featuredPlans });
 }
 
