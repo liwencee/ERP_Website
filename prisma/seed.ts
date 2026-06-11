@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { upsertTestAccounts } from './test-accounts';
 
 const prisma = new PrismaClient();
 
@@ -300,6 +301,10 @@ async function main() {
     await prisma.realEstateProperty.create({ data: prop });
     console.log(`Property created: ${prop.title}`);
   }
+
+  // Super test accounts (admin / staff / pre-funded investor) — shareable
+  console.log('\nCreating super test accounts...');
+  await upsertTestAccounts(prisma);
 }
 
 main()
