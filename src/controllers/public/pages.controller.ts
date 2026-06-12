@@ -26,19 +26,25 @@ export function about(_req: Request, res: Response): void {
   res.render('public/about', { title: 'About Us' });
 }
 
-export async function services(_req: Request, res: Response): Promise<void> {
-  const [raw, properties] = await Promise.all([
-    prisma.investmentPlan.findMany({
-      where: { status: 'ACTIVE' },
-      include: { tenures: { orderBy: { sortOrder: 'asc' } } },
-    }),
-    prisma.realEstateProperty.findMany({
-      where: { status: 'AVAILABLE' },
-      orderBy: { sortOrder: 'asc' },
-    }),
-  ]);
+export function services(_req: Request, res: Response): void {
+  res.render('public/services', { title: 'Investment Services' });
+}
+
+export async function investmentPlans(_req: Request, res: Response): Promise<void> {
+  const raw = await prisma.investmentPlan.findMany({
+    where: { status: 'ACTIVE' },
+    include: { tenures: { orderBy: { sortOrder: 'asc' } } },
+  });
   const plans = sortPlans(raw);
-  res.render('public/services', { title: 'Investment Services', plans, properties });
+  res.render('public/investment-plans', { title: 'Investment Plans', plans });
+}
+
+export async function realEstate(_req: Request, res: Response): Promise<void> {
+  const properties = await prisma.realEstateProperty.findMany({
+    where: { status: 'AVAILABLE' },
+    orderBy: { sortOrder: 'asc' },
+  });
+  res.render('public/real-estate', { title: 'Real Estate', properties });
 }
 
 export function team(_req: Request, res: Response): void {

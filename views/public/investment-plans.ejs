@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Investment Plans | EPR Access Limited</title>
+  <%- include('../partials/head') %>
+</head>
+<body class="public-body">
+  <%- include('../partials/public-nav') %>
+  <main>
+    <%- include('../partials/flash') %>
+
+    <section class="page-hero">
+      <div class="container">
+        <h1>Investment Plans</h1>
+        <p>A full range of investment packages — each designed to match your investment level and financial goals.</p>
+      </div>
+    </section>
+
+    <!-- Investment Tiers -->
+    <section class="section section-light" id="plans">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-eyebrow">Investment Plan Packages</span>
+          <h2>Choose Your <span class="gradient-text">Investment Tier</span></h2>
+          <p>A full range of investment packages — each designed to match your investment level and financial goals</p>
+        </div>
+        <div class="plans-full-grid">
+          <% if (plans.length) { %>
+            <% plans.forEach(function(plan) { %>
+            <%
+              var planSlug = plan.name.toLowerCase()
+                .replace(/[–—]/g, '-').replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+              var hasTenures = plan.tenures && plan.tenures.length > 0;
+              var rateRange = hasTenures
+                ? Math.min.apply(null, plan.tenures.map(function(t){ return Number(t.returnRate); })) + '% – ' +
+                  Math.max.apply(null, plan.tenures.map(function(t){ return Number(t.returnRate); })) + '%'
+                : Number(plan.returnRate) + '%';
+            %>
+            <div class="plan-full-card" id="<%= planSlug %>">
+              <div class="plan-header">
+                                <h3><%= plan.name %></h3>
+              </div>
+              <p class="plan-description"><%= plan.description %></p>
+              <div class="plan-specs">
+                <div class="plan-spec"><span>Return Rate</span><strong class="text-gold"><%= rateRange %></strong></div>
+                <div class="plan-spec"><span>Min Investment</span><strong>₦<%= Number(plan.minAmount).toLocaleString() %></strong></div>
+                <% if (plan.maxAmount) { %>
+                <div class="plan-spec"><span>Max Investment</span><strong>₦<%= Number(plan.maxAmount).toLocaleString() %></strong></div>
+                <% } %>
+                <% if (hasTenures) { %>
+                <div class="plan-spec" style="flex-direction:column; align-items:flex-start; gap:6px;">
+                  <span>Available Tenures</span>
+                  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <% plan.tenures.forEach(function(t) { %>
+                    <span style="background:rgba(46,204,46,0.1);border:1px solid rgba(46,204,46,0.3);padding:2px 10px;border-radius:100px;font-size:0.78rem;font-weight:600;color:#000;"><%= t.label %> — <%= Number(t.returnRate) %>%</span>
+                    <% }) %>
+                  </div>
+                </div>
+                <% } %>
+              </div>
+              <a href="/auth/register" class="btn btn-gold">Get Started</a>
+            </div>
+            <% }) %>
+          <% } else { %>
+            <div class="text-center">
+              <p>Investment plans are being configured. Please <a href="/contact">contact us</a> for details.</p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <%- include('../partials/public-footer') %>
+  <script src="/js/main.js"></script>
+</body>
+</html>

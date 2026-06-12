@@ -419,6 +419,11 @@
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 28px;
 }
+.investment-detail-grid.single-card {
+  grid-template-columns: 1fr;
+  max-width: 720px;
+  margin: 0 auto;
+}
 .inv-detail-card {
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.1);
