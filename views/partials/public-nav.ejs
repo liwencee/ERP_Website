@@ -61,29 +61,24 @@
             <li><a href="/services#money-market">Money Market</a></li>
             <li><a href="/services#savings">Savings Plan</a></li>
             <li><a href="/services#fixed-deposit">Fixed Deposit</a></li>
-            <li><a href="/services#real-estate">Real Estate</a></li>
             <li><a href="/services#portfolio-management">Portfolio Management</a></li>
           </ul>
         </li>
 
         <!-- Investment -->
-        <li class="nav-dropdown">
-          <a href="/investment-plans" class="nav-dropdown-toggle <%= ['/investment-plans','/real-estate'].includes(currentPath) ? 'active' : '' %>">
+        <li>
+          <a href="/investment-plans" class="<%= currentPath === '/investment-plans' ? 'active' : '' %>">
             <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
             Investment
-            <svg class="dropdown-arrow" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </a>
-          <ul class="dropdown-menu">
-            <li><a href="/investment-plans">Silver – SPlus</a></li>
-            <li><a href="/investment-plans">Bronze – BPlus</a></li>
-            <li><a href="/investment-plans">Gold – GPlus</a></li>
-            <li><a href="/investment-plans">Diamond – DPlus</a></li>
-            <li><a href="/services#savings-plan">Savings Plan</a></li>
-            <li><a href="/services#fixed-deposit">Fixed Deposit</a></li>
-            <li><a href="/services#trading-inv">Trading Investment</a></li>
-            <li><a href="/services#dollar-inv">Dollar Investment</a></li>
-            <li><a href="/real-estate#real-estate-inv">Real Estate</a></li>
-          </ul>
+        </li>
+
+        <!-- Real Estate -->
+        <li>
+          <a href="/real-estate" class="<%= currentPath === '/real-estate' ? 'active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 2a1 1 0 00-1 1v14a1 1 0 001 1h12a1 1 0 001-1V3a1 1 0 00-1-1H3zm1 2h2v2H4V4zm0 4h2v2H4V8zm0 4h2v2H4v-2zm4-8h2v2H8V4zm0 4h2v2H8V8zm0 4h2v2H8v-2zm4-8h2v2h-2V4zm0 4h2v2h-2V8zm0 4h2v2h-2v-2z" clip-rule="evenodd"/></svg>
+            Real Estate
+          </a>
         </li>
 
         <li>
