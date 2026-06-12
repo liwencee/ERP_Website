@@ -89,7 +89,7 @@
                   <span>Tenure Rates</span>
                   <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:2px;">
                     <% plan.tenures.forEach(function(t) { %>
-                    <span style="font-size:0.75rem; font-weight:700; color:#2ECC2E; background:rgba(46,204,46,0.1); padding:2px 8px; border-radius:100px; border:1px solid rgba(46,204,46,0.3);">
+                    <span style="font-size:0.75rem; font-weight:700; color:#000; background:rgba(46,204,46,0.1); padding:2px 8px; border-radius:100px; border:1px solid rgba(46,204,46,0.3);">
                       <%= t.label %>: <%= Number(t.returnRate) %>%
                     </span>
                     <% }) %>
