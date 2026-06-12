@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import prisma from '../../config/database';
 import * as investmentService from '../../services/investment.service';
 import * as emailService from '../../services/email.service';
+import { USD_NGN_RATE } from '../../utils/helpers';
 
 export async function index(req: Request, res: Response): Promise<void> {
   const userId = req.session.userId!;
@@ -33,7 +34,7 @@ export async function investGet(req: Request, res: Response): Promise<void> {
     return;
   }
   const wallet = await prisma.wallet.findUnique({ where: { userId: req.session.userId! } });
-  res.render('dashboard/invest', { pageTitle: 'Invest', plan, wallet });
+  res.render('dashboard/invest', { pageTitle: 'Invest', plan, wallet, usdRate: USD_NGN_RATE });
 }
 
 export async function investPost(req: Request, res: Response): Promise<void> {

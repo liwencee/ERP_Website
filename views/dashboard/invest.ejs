@@ -79,11 +79,14 @@
               <% } %>
 
               <div class="form-group">
-                <label for="amount">Investment Amount (₦)</label>
+                <label for="amount">Investment Amount (<%= plan.type === 'DOLLAR' ? '$' : '₦' %>)</label>
                 <input type="number" id="amount" name="amount"
                   min="<%= Number(plan.minAmount) %>"
                   <% if (plan.maxAmount) { %>max="<%= Number(plan.maxAmount) %>"<% } %>
-                  step="100" required placeholder="Enter amount" />
+                  step="<%= plan.type === 'DOLLAR' ? '1' : '100' %>" required placeholder="<%= plan.type === 'DOLLAR' ? 'Min $50' : 'Enter amount' %>" />
+                <% if (plan.type === 'DOLLAR') { %>
+                <p class="form-note" style="margin-top:6px;">Paid from your Naira wallet at ₦<%= Number(usdRate).toLocaleString() %> / $1. Returns are paid back in Naira at maturity.</p>
+                <% } %>
               </div>
 
               <div class="invest-preview" id="investPreview" style="display:none;">
@@ -95,6 +98,12 @@
                   <span>Maturity Date</span>
                   <strong id="previewMaturity">—</strong>
                 </div>
+                <% if (plan.type === 'DOLLAR') { %>
+                <div class="return-preview">
+                  <span>Debited from wallet now</span>
+                  <strong id="ngnDebit">—</strong>
+                </div>
+                <% } %>
                 <div class="return-preview" style="border-top:2px solid var(--gray-200); padding-top:12px; margin-top:4px;">
                   <span>Expected Return at Maturity</span>
                   <strong class="text-gold" id="expectedReturn">—</strong>
@@ -115,12 +124,15 @@
     (function () {
       var fallbackRate = <%= Number(plan.returnRate) %>;
       var fallbackDays = <%= plan.duration %>;
+      var isDollar = <%= plan.type === 'DOLLAR' ? 'true' : 'false' %>;
+      var usdRate = <%= Number(usdRate) %>;
       var amountInput   = document.getElementById('amount');
       var tenureSelect  = document.getElementById('tenureId');
       var preview       = document.getElementById('investPreview');
       var rateEl        = document.getElementById('previewRate');
       var maturityEl    = document.getElementById('previewMaturity');
       var returnEl      = document.getElementById('expectedReturn');
+      var ngnDebitEl    = document.getElementById('ngnDebit');
 
       function currentTenure() {
         if (tenureSelect) {
@@ -130,8 +142,11 @@
         return { rate: fallbackRate, days: fallbackDays };
       }
 
-      function fmt(n) {
+      function fmtNgn(n) {
         return '₦' + Number(n).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+      function fmtUsd(n) {
+        return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       }
 
       function update() {
@@ -143,7 +158,12 @@
           maturity.setDate(maturity.getDate() + t.days);
           rateEl.textContent = t.rate + '% over ' + t.days + ' days';
           maturityEl.textContent = maturity.toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
-          returnEl.textContent = fmt(ret);
+          if (isDollar) {
+            returnEl.textContent = fmtUsd(ret) + ' ≈ ' + fmtNgn(ret * usdRate);
+            if (ngnDebitEl) ngnDebitEl.textContent = fmtNgn(val * usdRate);
+          } else {
+            returnEl.textContent = fmtNgn(ret);
+          }
           preview.style.display = 'block';
         } else {
           preview.style.display = 'none';

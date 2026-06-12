@@ -1,5 +1,5 @@
 import prisma from '../config/database';
-import { addDays, generateRef } from '../utils/helpers';
+import { addDays, generateRef, USD_NGN_RATE, usdToNgn } from '../utils/helpers';
 import { debitWallet, creditWallet } from './wallet.service';
 
 export function calculateExpectedReturn(amount: number, rate: number): number {
@@ -18,11 +18,16 @@ export async function createInvestment(
   });
   if (!plan || plan.status !== 'ACTIVE') throw new Error('Investment plan is not available.');
 
+  // For the Dollar plan the entered `amount` is in US dollars; everything else
+  // is in Naira. Min/max are validated in the plan's own unit.
+  const isDollar = plan.type === 'DOLLAR';
+  const unit = isDollar ? '$' : '₦';
+
   if (amount < Number(plan.minAmount)) {
-    throw new Error(`Minimum investment amount is ₦${Number(plan.minAmount).toLocaleString()}.`);
+    throw new Error(`Minimum investment amount is ${unit}${Number(plan.minAmount).toLocaleString()}.`);
   }
   if (plan.maxAmount && amount > Number(plan.maxAmount)) {
-    throw new Error(`Maximum investment amount is ₦${Number(plan.maxAmount).toLocaleString()}.`);
+    throw new Error(`Maximum investment amount is ${unit}${Number(plan.maxAmount).toLocaleString()}.`);
   }
 
   // Resolve the chosen tenure. If the plan has tenures, one must be selected
@@ -45,12 +50,21 @@ export async function createInvestment(
     referralRate = Number(tenure.referralRate);
   }
 
-  const expectedReturn = calculateExpectedReturn(amount, rate);
+  // Amounts are stored and settled in Naira (the wallet currency). For the Dollar
+  // plan, convert the US-dollar figure to Naira at the current rate so the wallet
+  // debit, stored principal and dashboard totals all share one currency. Returns
+  // therefore settle in Naira at maturity.
+  const principalNgn = isDollar ? usdToNgn(amount) : amount;
+  const expectedReturn = calculateExpectedReturn(principalNgn, rate);
   const startDate = new Date();
   const maturityDate = addDays(startDate, durationDays);
 
+  const debitDesc = isDollar
+    ? `Investment in ${plan.name} ($${amount.toLocaleString()} at ₦${USD_NGN_RATE.toLocaleString()}/$)`
+    : `Investment in ${plan.name}`;
+
   // Debit wallet first (throws if insufficient)
-  const ref = await debitWallet(userId, amount, 'INVESTMENT', `Investment in ${plan.name}`);
+  const ref = await debitWallet(userId, principalNgn, 'INVESTMENT', debitDesc);
 
   // Create the investment record
   const investment = await prisma.userInvestment.create({
@@ -58,7 +72,7 @@ export async function createInvestment(
       userId,
       planId,
       tenureId: resolvedTenureId,
-      amount,
+      amount: principalNgn,
       expectedReturn,
       status: 'ACTIVE',
       startDate,
@@ -73,18 +87,21 @@ export async function createInvestment(
   });
 
   // Notify investor
+  const investedLabel = isDollar
+    ? `$${amount.toLocaleString()} (₦${principalNgn.toLocaleString()})`
+    : `₦${principalNgn.toLocaleString()}`;
   await prisma.notification.create({
     data: {
       userId,
       title: 'Investment Activated',
-      message: `Your investment of ₦${amount.toLocaleString()} in ${plan.name} is now active. Maturity: ${maturityDate.toLocaleDateString('en-NG')}.`,
+      message: `Your investment of ${investedLabel} in ${plan.name} is now active. Maturity: ${maturityDate.toLocaleDateString('en-NG')}.`,
     },
   });
 
   // Pay referral commission to whoever referred this investor (if any).
   // Non-critical: a failure here must never roll back the investment itself.
   try {
-    await payReferralCommission(userId, amount, referralRate, plan.name, investment.id);
+    await payReferralCommission(userId, principalNgn, referralRate, plan.name, investment.id);
   } catch {
     // swallow — referral payout is secondary to the investment succeeding
   }

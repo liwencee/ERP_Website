@@ -158,7 +158,7 @@ async function main() {
       name: 'Dollar Investment – Foreign Currency',
       type: 'DOLLAR' as const,
       description: 'Place capital in USD-denominated assets to protect against naira devaluation and generate returns in a stable currency. Options include US dollar money market funds, Eurobonds, offshore equities and USD-denominated fixed income instruments. Provides currency hedge, stability and access to global markets. Minimum: $50.',
-      minAmount: 50000,   // approximate NGN equivalent of $50 at time of seed
+      minAmount: 50,   // $50 — Dollar plan amounts are entered in USD, converted to NGN at invest time
       maxAmount: null,
       returnRate: 5,
       duration: 365,
