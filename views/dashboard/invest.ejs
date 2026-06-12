@@ -37,7 +37,7 @@
                   <% if (minRate === maxRate) { %><%= maxRate %>%<% } else { %><%= minRate %>% – <%= maxRate %>%<% } %>
                 </strong>
               </div>
-              <div class="plan-spec"><span>Min Investment</span><strong>₦<%= Number(plan.minAmount).toLocaleString() %></strong></div>
+              <div class="plan-spec"><span>Min Investment</span><strong><% if (plan.type === 'DOLLAR') { %>$50<% } else { %>₦<%= Number(plan.minAmount).toLocaleString() %><% } %></strong></div>
               <% if (plan.maxAmount) { %>
               <div class="plan-spec"><span>Max Investment</span><strong>₦<%= Number(plan.maxAmount).toLocaleString() %></strong></div>
               <% } %>
