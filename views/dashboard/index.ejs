@@ -20,15 +20,17 @@
         <div class="stat-card">
           <div class="stat-icon stat-icon-wallet">₦</div>
           <div class="stat-body">
-            <span class="stat-label">Wallet Balance</span>
+            <span class="stat-label">Available Balance</span>
             <span class="stat-value"><%= formatCurrency(wallet ? Number(wallet.balance) : 0) %></span>
+            <span class="stat-sub">Ready to invest or withdraw</span>
           </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon stat-icon-invest">📈</div>
+        <div class="stat-card stat-card-highlight">
+          <div class="stat-icon stat-icon-growth">📊</div>
           <div class="stat-body">
-            <span class="stat-label">Active Investments</span>
-            <span class="stat-value"><%= activeInvestments.length %></span>
+            <span class="stat-label">Investment Value</span>
+            <span class="stat-value"><%= formatCurrency(currentValue) %></span>
+            <span class="stat-sub stat-sub-up">+<%= formatCurrency(returnsEarned) %> earned · grows daily</span>
           </div>
         </div>
         <div class="stat-card">
@@ -36,6 +38,14 @@
           <div class="stat-body">
             <span class="stat-label">Total Invested</span>
             <span class="stat-value"><%= formatCurrency(totalInvested) %></span>
+            <span class="stat-sub">Capital you've committed</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-invest">📈</div>
+          <div class="stat-body">
+            <span class="stat-label">Active Investments</span>
+            <span class="stat-value"><%= activeInvestments.length %></span>
           </div>
         </div>
         <div class="stat-card">

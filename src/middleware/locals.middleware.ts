@@ -24,6 +24,9 @@ export default async function localsMiddleware(req: Request, res: Response, next
           role: true,
           status: true,
           kycStatus: true,
+          bankName: true,
+          bankAccountNumber: true,
+          bankAccountName: true,
         },
       });
 

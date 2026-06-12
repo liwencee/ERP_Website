@@ -115,7 +115,7 @@ export async function fundUpload(req: Request, res: Response): Promise<void> {
 }
 
 export async function withdrawPost(req: Request, res: Response): Promise<void> {
-  const { amount } = req.body;
+  const { amount, bankName, accountNumber, accountName } = req.body;
   const parsed = parseFloat(amount);
   const userId = req.session.userId!;
 
@@ -125,8 +125,27 @@ export async function withdrawPost(req: Request, res: Response): Promise<void> {
     return;
   }
 
+  const bank = String(bankName || '').trim();
+  const acctNo = String(accountNumber || '').trim();
+  const acctName = String(accountName || '').trim();
+
+  if (!bank || !acctNo || !acctName) {
+    req.flash('error', 'Please select your bank and enter your account name and number.');
+    res.redirect('/dashboard/wallet');
+    return;
+  }
+  if (!/^\d{10}$/.test(acctNo)) {
+    req.flash('error', 'Account number must be exactly 10 digits.');
+    res.redirect('/dashboard/wallet');
+    return;
+  }
+
   try {
-    await walletService.requestWithdrawal(userId, parsed);
+    await walletService.requestWithdrawal(userId, parsed, {
+      bankName: bank,
+      accountNumber: acctNo,
+      accountName: acctName,
+    });
     req.flash('success', 'Withdrawal request submitted. It will be processed within 24 hours.');
   } catch (err: unknown) {
     req.flash('error', err instanceof Error ? err.message : 'Withdrawal failed.');

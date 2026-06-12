@@ -35,6 +35,11 @@ model User {
   referredBy      String?
   sessionVersion  Int       @default(0)
 
+  // Saved payout/withdrawal bank details (defaults; can be overridden per request)
+  bankName          String?
+  bankAccountNumber String?
+  bankAccountName   String?
+
   wallet        Wallet?
   investments   UserInvestment[]
   transactions  Transaction[]
@@ -130,6 +135,11 @@ model Transaction {
   description   String?
   paymentMethod String?
   proofUrl      String?
+
+  // Destination bank details snapshot (for WITHDRAWAL payouts)
+  bankName          String?
+  bankAccountNumber String?
+  bankAccountName   String?
 
   investmentId String?
   investment   UserInvestment? @relation(fields: [investmentId], references: [id])

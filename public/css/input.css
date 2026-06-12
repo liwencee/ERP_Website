@@ -476,7 +476,7 @@ h3 { font-size: 1.3rem; }
 .badge { background: var(--brand); color: var(--white); font-size: 0.7rem; font-weight: 700; padding: 2px 7px; border-radius: 100px; margin-left: auto; }
 .badge-warning { background: #f59e0b; color: #fff; }
 .badge-success { background: var(--success); color: #fff; }
-.dashboard-main { margin-left: 260px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+.dashboard-main { margin-left: 260px; flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 100vh; }
 .topbar { background: var(--white); height: 64px; display: flex; align-items: center; padding: 0 24px; gap: 16px; border-bottom: 1px solid var(--gray-200); position: sticky; top: 0; z-index: 100; }
 .topbar-toggle { display: none; background: none; border: none; cursor: pointer; }
 .topbar-toggle svg { width: 22px; height: 22px; }
@@ -497,8 +497,12 @@ h3 { font-size: 1.3rem; }
 .stat-card { background: var(--white); border-radius: 12px; padding: 20px 24px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 16px; }
 .stat-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(94,165,95,0.1); color: var(--green); font-size: 1.4rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 700; }
 .stat-icon-alert { background: rgba(231,76,60,0.1); color: var(--danger); }
+.stat-icon-growth { background: rgba(212,175,55,0.14); color: var(--gold, #c9a227); }
 .stat-label { display: block; font-size: 0.8rem; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
 .stat-value { font-size: 1.4rem; font-weight: 700; color: var(--navy); display: block; }
+.stat-sub { display: block; font-size: 0.72rem; color: var(--gray-600); margin-top: 4px; }
+.stat-sub-up { color: var(--success); font-weight: 600; }
+.stat-card-highlight { border: 1px solid rgba(212,175,55,0.4); background: linear-gradient(180deg, rgba(212,175,55,0.06), var(--white)); }
 .stat-value a { color: inherit; }
 .kyc-pending { color: var(--gray-600); }
 .kyc-approved { color: var(--success); }

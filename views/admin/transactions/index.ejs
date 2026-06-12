@@ -37,7 +37,7 @@
                 <th>User</th>
                 <th>Type</th>
                 <th>Amount</th>
-                <th>Method</th>
+                <th>Method / Destination</th>
                 <th>Proof</th>
                 <th>Reference</th>
                 <th>Date</th>
@@ -51,7 +51,15 @@
                 <td><a href="/admin/users/<%= tx.userId %>"><%= tx.user.firstName %> <%= tx.user.lastName %></a></td>
                 <td><span class="tx-type tx-<%= tx.type.toLowerCase() %>"><%= tx.type %></span></td>
                 <td><%= formatCurrency(Number(tx.amount)) %></td>
-                <td><%= tx.paymentMethod || '—' %></td>
+                <td>
+                  <% if (tx.type === 'WITHDRAWAL' && tx.bankName) { %>
+                    <strong><%= tx.bankName %></strong><br />
+                    <span class="mono"><%= tx.bankAccountNumber %></span><br />
+                    <small><%= tx.bankAccountName %></small>
+                  <% } else { %>
+                    <%= tx.paymentMethod || '—' %>
+                  <% } %>
+                </td>
                 <td>
                   <% if (tx.proofUrl) { %>
                   <a href="<%= tx.proofUrl %>" target="_blank" class="btn btn-sm btn-outline-gold">View</a>

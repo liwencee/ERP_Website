@@ -1,5 +1,5 @@
 import prisma from '../config/database';
-import { addDays } from '../utils/helpers';
+import { addDays, generateRef } from '../utils/helpers';
 import { debitWallet, creditWallet } from './wallet.service';
 
 export function calculateExpectedReturn(amount: number, rate: number): number {
@@ -30,6 +30,7 @@ export async function createInvestment(
   let rate = Number(plan.returnRate);
   let durationDays = plan.duration;
   let resolvedTenureId: string | null = null;
+  let referralRate = 0;
 
   if (plan.tenures.length > 0) {
     const tenure = tenureId
@@ -41,6 +42,7 @@ export async function createInvestment(
     rate = Number(tenure.returnRate);
     durationDays = tenure.durationDays;
     resolvedTenureId = tenure.id;
+    referralRate = Number(tenure.referralRate);
   }
 
   const expectedReturn = calculateExpectedReturn(amount, rate);
@@ -79,7 +81,71 @@ export async function createInvestment(
     },
   });
 
+  // Pay referral commission to whoever referred this investor (if any).
+  // Non-critical: a failure here must never roll back the investment itself.
+  try {
+    await payReferralCommission(userId, amount, referralRate, plan.name, investment.id);
+  } catch {
+    // swallow — referral payout is secondary to the investment succeeding
+  }
+
   return investment.id;
+}
+
+// Credits the referrer's wallet with `amount × referralRate%` as a BONUS when a
+// referred investor puts money to work. Marketing-funded — no one is debited.
+// Idempotent by construction: called exactly once per investment creation.
+export async function payReferralCommission(
+  investorId: string,
+  amount: number,
+  referralRate: number,
+  planName: string,
+  investmentId: string
+): Promise<void> {
+  if (!referralRate || referralRate <= 0) return;
+
+  const investor = await prisma.user.findUnique({
+    where: { id: investorId },
+    select: { referredBy: true, firstName: true, lastName: true },
+  });
+  if (!investor?.referredBy) return;
+
+  const referrer = await prisma.user.findUnique({
+    where: { id: investor.referredBy },
+    select: { id: true, status: true, wallet: { select: { id: true } } },
+  });
+  if (!referrer || referrer.status === 'SUSPENDED' || !referrer.wallet) return;
+
+  const commission = parseFloat((amount * (referralRate / 100)).toFixed(2));
+  if (commission <= 0) return;
+
+  const reference = generateRef('REF');
+  const investorName = `${investor.firstName} ${investor.lastName}`;
+
+  await prisma.$transaction([
+    prisma.wallet.update({
+      where: { userId: referrer.id },
+      data: { balance: { increment: commission } },
+    }),
+    prisma.transaction.create({
+      data: {
+        userId: referrer.id,
+        type: 'BONUS',
+        amount: commission,
+        status: 'CONFIRMED',
+        reference,
+        description: `Referral commission (${referralRate}%) from ${investorName}'s investment in ${planName}`,
+        investmentId,
+      },
+    }),
+    prisma.notification.create({
+      data: {
+        userId: referrer.id,
+        title: 'Referral Commission Earned',
+        message: `You earned ₦${commission.toLocaleString()} (${referralRate}% referral bonus) because ${investorName} invested in ${planName}. It has been credited to your wallet.`,
+      },
+    }),
+  ]);
 }
 
 export async function matureInvestment(investmentId: string): Promise<void> {

@@ -68,7 +68,17 @@ export async function debitWallet(
   return reference;
 }
 
-export async function requestWithdrawal(userId: string, amount: number): Promise<void> {
+export interface WithdrawalBank {
+  bankName: string;
+  accountNumber: string;
+  accountName: string;
+}
+
+export async function requestWithdrawal(
+  userId: string,
+  amount: number,
+  bank: WithdrawalBank
+): Promise<void> {
   const wallet = await prisma.wallet.findUnique({ where: { userId } });
   if (!wallet || Number(wallet.balance) < amount) {
     throw new Error('Insufficient wallet balance.');
@@ -88,7 +98,19 @@ export async function requestWithdrawal(userId: string, amount: number): Promise
         amount,
         status: 'PENDING',
         reference,
-        description: 'Withdrawal request',
+        description: `Withdrawal to ${bank.bankName} — ${bank.accountNumber} (${bank.accountName})`,
+        bankName: bank.bankName,
+        bankAccountNumber: bank.accountNumber,
+        bankAccountName: bank.accountName,
+      },
+    }),
+    // Remember these details as the user's default payout bank for next time
+    prisma.user.update({
+      where: { id: userId },
+      data: {
+        bankName: bank.bankName,
+        bankAccountNumber: bank.accountNumber,
+        bankAccountName: bank.accountName,
       },
     }),
   ]);

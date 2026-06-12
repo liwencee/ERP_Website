@@ -71,9 +71,9 @@
 
           <div class="bank-details">
             <h4>Our Bank Details</h4>
-            <p><strong>Bank:</strong> First Bank Nigeria</p>
-            <p><strong>Account Name:</strong> EPR Access Limited</p>
-            <p><strong>Account Number:</strong> 0123456789</p>
+            <p><strong>Bank:</strong> GTBank</p>
+            <p><strong>Account Name:</strong> EPR ACCESS LIMITED</p>
+            <p><strong>Account Number:</strong> 3002590303</p>
             <p class="note">After transfer, upload proof below with your transaction reference.</p>
           </div>
 
@@ -97,12 +97,38 @@
           <h3>Request Withdrawal</h3>
           <button class="modal-close" data-close-modal="withdrawModal">&times;</button>
           <p>Available: <strong class="text-gold"><%= formatCurrency(wallet ? Number(wallet.balance) : 0) %></strong></p>
+          <%
+            var ngBanks = ['Access Bank','Citibank','Ecobank','Fidelity Bank','First Bank of Nigeria','First City Monument Bank (FCMB)','Globus Bank','Guaranty Trust Bank (GTBank)','Heritage Bank','Jaiz Bank','Keystone Bank','Kuda Bank','Lotus Bank','Moniepoint MFB','Opay','Optimus Bank','PalmPay','Parallex Bank','Polaris Bank','PremiumTrust Bank','Providus Bank','Stanbic IBTC Bank','Standard Chartered','Sterling Bank','SunTrust Bank','TAJBank','Titan Trust Bank','Union Bank','United Bank for Africa (UBA)','Unity Bank','Wema Bank','Zenith Bank'];
+            var savedBank = (user && user.bankName) ? user.bankName : '';
+          %>
           <form action="/dashboard/wallet/withdraw" method="POST">
             <div class="form-group">
               <label>Amount (₦)</label>
               <input type="number" name="amount" min="1000" step="100" required placeholder="Min ₦1,000" />
             </div>
-            <p class="form-note">Withdrawals are processed within 24 hours to your registered bank account.</p>
+            <div class="form-group">
+              <label>Bank Name</label>
+              <select name="bankName" required>
+                <option value="" disabled <%= savedBank ? '' : 'selected' %>>Select your bank</option>
+                <% ngBanks.forEach(function(b){ %>
+                <option value="<%= b %>" <%= savedBank === b ? 'selected' : '' %>><%= b %></option>
+                <% }) %>
+                <% if (savedBank && ngBanks.indexOf(savedBank) === -1) { %>
+                <option value="<%= savedBank %>" selected><%= savedBank %></option>
+                <% } %>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Account Number</label>
+              <input type="text" name="accountNumber" inputmode="numeric" pattern="\d{10}" maxlength="10" required
+                     placeholder="10-digit account number" value="<%= (user && user.bankAccountNumber) ? user.bankAccountNumber : '' %>" />
+            </div>
+            <div class="form-group">
+              <label>Account Name</label>
+              <input type="text" name="accountName" required placeholder="Name on the account"
+                     value="<%= (user && user.bankAccountName) ? user.bankAccountName : '' %>" />
+            </div>
+            <p class="form-note">Withdrawals are processed within 24 hours to the bank account you provide above.</p>
             <button type="submit" class="btn btn-gold btn-block">Submit Request</button>
           </form>
         </div>
