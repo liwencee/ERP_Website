@@ -363,6 +363,7 @@ h3 { font-size: 1.3rem; }
 .compliance-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 32px; }
 .compliance-item { text-align: center; }
 .compliance-img { width: 100%; max-width: 280px; height: 200px; object-fit: cover; border-radius: 12px; margin: 0 auto 16px; box-shadow: var(--shadow); }
+.compliance-img.logo-fit { object-fit: contain; background: var(--white); padding: 24px; box-sizing: border-box; }
 .compliance-item h3 { margin-bottom: 8px; }
 .compliance-item p { color: var(--gray-600); font-size: 0.9rem; }
 
