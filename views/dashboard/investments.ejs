@@ -98,7 +98,7 @@
                 <% } else { %>
                 <div class="plan-detail"><span>Returns</span><strong class="text-gold"><%= plan.returnRate %>%</strong></div>
                 <% } %>
-                <div class="plan-detail"><span>Min Capital</span><strong>₦<%= Number(plan.minAmount).toLocaleString() %></strong></div>
+                <div class="plan-detail"><span>Min Capital</span><strong><% if (plan.type === 'DOLLAR') { %>$50<% } else { %>₦<%= Number(plan.minAmount).toLocaleString() %><% } %></strong></div>
                 <% if (plan.maxAmount) { %>
                 <div class="plan-detail"><span>Max Capital</span><strong>₦<%= Number(plan.maxAmount).toLocaleString() %></strong></div>
                 <% } %>
