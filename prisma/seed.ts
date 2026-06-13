@@ -5,42 +5,6 @@ import { upsertTestAccounts } from './test-accounts';
 const prisma = new PrismaClient();
 
 async function main() {
-  // Admin user
-  const adminHash = await bcrypt.hash('admin123456', 12);
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@epraccess.com' },
-    update: {},
-    create: {
-      email: 'admin@epraccess.com',
-      password: adminHash,
-      firstName: 'Admin',
-      lastName: 'EPR',
-      role: 'ADMIN',
-      emailVerified: true,
-      kycStatus: 'APPROVED',
-      wallet: { create: { balance: 0 } },
-    },
-  });
-  console.log('Admin created:', admin.email);
-
-  // Demo investor
-  const investorHash = await bcrypt.hash('investor123', 12);
-  const investor = await prisma.user.upsert({
-    where: { email: 'demo@investor.com' },
-    update: {},
-    create: {
-      email: 'demo@investor.com',
-      password: investorHash,
-      firstName: 'Demo',
-      lastName: 'Investor',
-      role: 'INVESTOR',
-      emailVerified: true,
-      kycStatus: 'APPROVED',
-      wallet: { create: { balance: 500000 } },
-    },
-  });
-  console.log('Demo investor created:', investor.email);
-
   // Investment plans
   // Investment structure from EPR Access Limited official rate tables.
   // Each tier offers multiple tenures (6 months / 9 months / 1 year & above),
@@ -191,20 +155,23 @@ async function main() {
     },
   ];
 
-  // Clear and recreate plans for idempotency (cascade removes old tenures)
-  await prisma.userInvestment.deleteMany({});
-  await prisma.planTenure.deleteMany({});
-  await prisma.investmentPlan.deleteMany({});
-  for (const plan of plans) {
-    const { tenures: planTenures, ...planData } = plan;
-    const created = await prisma.investmentPlan.create({
-      data: { ...planData, tenures: { create: planTenures } },
-    });
-    console.log(`Plan created: ${created.name} (${planTenures.length} tenures)`);
+  // Seed plans ONLY on a fresh database. Never delete/recreate when plans
+  // already exist — that would cascade-delete live user investments. To change
+  // plan rates/bounds on a live DB, use a targeted update script instead.
+  const existingPlans = await prisma.investmentPlan.count();
+  if (existingPlans === 0) {
+    for (const plan of plans) {
+      const { tenures: planTenures, ...planData } = plan;
+      const created = await prisma.investmentPlan.create({
+        data: { ...planData, tenures: { create: planTenures } },
+      });
+      console.log(`Plan created: ${created.name} (${planTenures.length} tenures)`);
+    }
+  } else {
+    console.log(`Skipping plan seed — ${existingPlans} plans already exist (protecting live data).`);
   }
 
   // Real Estate Properties
-  await prisma.realEstateProperty.deleteMany({});
   const properties = [
     {
       title: '5-Bedroom Luxury Duplex',
@@ -297,14 +264,50 @@ async function main() {
       sortOrder: 6,
     },
   ];
-  for (const prop of properties) {
-    await prisma.realEstateProperty.create({ data: prop });
-    console.log(`Property created: ${prop.title}`);
+  const existingProps = await prisma.realEstateProperty.count();
+  if (existingProps === 0) {
+    for (const prop of properties) {
+      await prisma.realEstateProperty.create({ data: prop });
+      console.log(`Property created: ${prop.title}`);
+    }
+  } else {
+    console.log(`Skipping property seed — ${existingProps} already exist.`);
   }
 
-  // Super test accounts (admin / staff / pre-funded investor) — shareable
-  console.log('\nCreating super test accounts...');
-  await upsertTestAccounts(prisma);
+  // Production admin — created only from environment variables. No password is
+  // ever hardcoded; set ADMIN_EMAIL and ADMIN_PASSWORD in the environment.
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (adminEmail && adminPassword) {
+    const adminHash = await bcrypt.hash(adminPassword, 12);
+    const admin = await prisma.user.upsert({
+      where: { email: adminEmail.toLowerCase() },
+      update: { password: adminHash, role: 'ADMIN', status: 'ACTIVE', emailVerified: true },
+      create: {
+        email: adminEmail.toLowerCase(),
+        password: adminHash,
+        firstName: 'EPR',
+        lastName: 'Administrator',
+        role: 'ADMIN',
+        emailVerified: true,
+        kycStatus: 'APPROVED',
+        referralCode: 'EPRADMIN',
+        wallet: { create: { balance: 0 } },
+      },
+    });
+    console.log('Admin ready:', admin.email);
+  } else {
+    console.log('No ADMIN_EMAIL/ADMIN_PASSWORD set — skipping admin creation.');
+  }
+
+  // Demo / test accounts — created ONLY when explicitly opted in. Never runs in
+  // production. For local dev: set SEED_DEMO=true.
+  if (process.env.SEED_DEMO === 'true') {
+    console.log('\nSEED_DEMO=true → creating demo/test accounts...');
+    await upsertTestAccounts(prisma);
+  } else {
+    console.log('Skipping demo/test accounts (set SEED_DEMO=true in local dev only).');
+  }
 }
 
 main()

@@ -45,9 +45,18 @@ function buildStore(): session.Store | undefined {
 const store = buildStore();
 const isProduction = process.env.NODE_ENV === 'production' || !!process.env.VERCEL;
 
+// In production, refuse to boot with a missing or default session secret —
+// a predictable secret lets anyone forge a session cookie.
+const secret = process.env.SESSION_SECRET;
+if (isProduction && (!secret || secret === 'change-this-secret')) {
+  throw new Error(
+    'SESSION_SECRET must be set to a long random value in production. Refusing to start with an insecure session secret.'
+  );
+}
+
 const sessionConfig: session.SessionOptions = {
   ...(store ? { store } : {}),
-  secret: process.env.SESSION_SECRET || 'change-this-secret',
+  secret: secret || 'change-this-secret',
   resave: false,
   saveUninitialized: false,
   cookie: {
