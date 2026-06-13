@@ -13,6 +13,7 @@ router.get('/team', pages.team);
 router.get('/compliance', pages.compliance);
 router.get('/contact', pages.contactGet);
 router.post('/contact', pages.contactPost);
+router.get('/privacy', pages.privacy);
 router.post('/api/chat', chatbot.reply);
 
 export default router;

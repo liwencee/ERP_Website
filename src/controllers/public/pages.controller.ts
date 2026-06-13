@@ -59,6 +59,10 @@ export function contactGet(_req: Request, res: Response): void {
   res.render('public/contact', { title: 'Contact Us' });
 }
 
+export function privacy(_req: Request, res: Response): void {
+  res.render('public/privacy', { title: 'Privacy Policy' });
+}
+
 export function contactPost(req: Request, res: Response): void {
   // In production wire up to an email service
   req.flash('success', 'Thank you for your message. We will get back to you shortly.');
