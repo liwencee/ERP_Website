@@ -6,7 +6,7 @@
   },
   "deploy": {
     "startCommand": "npm run start",
-    "preDeployCommand": "npx prisma db push",
+    "preDeployCommand": "npx prisma db push && (npm run db:seed || echo 'SEED step skipped — seed manually if plans/admin are missing')",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 5
   }
