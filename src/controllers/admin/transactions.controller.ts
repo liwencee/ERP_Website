@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../../config/database';
 import * as emailService from '../../services/email.service';
+import { logAudit } from '../../services/audit.service';
 
 export async function index(req: Request, res: Response): Promise<void> {
   const page = parseInt(req.query.page as string) || 1;
@@ -101,6 +102,7 @@ export async function confirm(req: Request, res: Response): Promise<void> {
     req.flash('success', 'Transaction confirmed.');
   }
 
+  await logAudit(req, 'TX_CONFIRM', { targetType: 'Transaction', targetId: tx.id, detail: `${tx.type} ₦${Number(tx.amount).toLocaleString()}` });
   res.redirect('/admin/transactions');
 }
 
@@ -156,6 +158,7 @@ export async function reject(req: Request, res: Response): Promise<void> {
     req.flash('success', 'Transaction rejected.');
   }
 
+  await logAudit(req, 'TX_REJECT', { targetType: 'Transaction', targetId: tx.id, detail: `${tx.type} ₦${Number(tx.amount).toLocaleString()}` });
   res.redirect('/admin/transactions');
 }
 
@@ -182,6 +185,7 @@ export async function backdateInvestment(req: Request, res: Response): Promise<v
     data: { startDate: start, maturityDate: maturity },
   });
 
+  await logAudit(req, 'INVESTMENT_BACKDATE', { targetType: 'UserInvestment', targetId: investmentId, detail: `${startDate} → ${maturityDate}` });
   req.flash('success', 'Investment dates updated successfully.');
   res.redirect('/admin/investments');
 }

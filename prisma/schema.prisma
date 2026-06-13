@@ -171,6 +171,23 @@ model Document {
   createdAt DateTime @default(now())
 }
 
+// Append-only audit trail of sensitive admin/staff actions (money movements,
+// KYC decisions, account changes, plan edits) for accountability & compliance.
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String?
+  actorEmail String?
+  action     String   // e.g. WALLET_CREDIT, TX_CONFIRM, KYC_REVIEW
+  targetType String?  // e.g. User, Transaction, InvestmentPlan
+  targetId   String?
+  detail     String?
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([actorId])
+}
+
 // Session store table for connect-pg-simple. Declared here so `prisma db push`
 // recognises it as part of the schema and never tries to drop it as "drift"
 // on redeploys (which would log every user out).

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Audit Log | EPR Access Admin</title>
+  <%- include('../../partials/head') %>
+</head>
+<body class="dashboard-body">
+  <%- include('../../partials/admin-sidebar') %>
+  <div class="dashboard-main" id="dashboardMain">
+    <%- include('../../partials/topbar', { pageTitle: 'Audit Log' }) %>
+    <div class="dashboard-content">
+      <%- include('../../partials/flash') %>
+
+      <div class="dash-section">
+        <div class="section-header-row">
+          <h3>Admin Activity Audit Trail</h3>
+        </div>
+        <p style="color:var(--gray-600);margin-bottom:16px;font-size:0.9rem;">Append-only record of sensitive admin/staff actions — money movements, KYC decisions, account and plan changes.</p>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>When</th>
+                <th>Actor</th>
+                <th>Action</th>
+                <th>Target</th>
+                <th>Detail</th>
+                <th>IP</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% logs.forEach(function(log) { %>
+              <tr>
+                <td><%= formatDate(log.createdAt) %> <%= new Date(log.createdAt).toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' }) %></td>
+                <td><%= log.actorEmail || '—' %></td>
+                <td><span class="badge-status status-pending"><%= log.action %></span></td>
+                <td><%= log.targetType || '' %><% if (log.targetId) { %> <span class="mono" style="font-size:0.75rem;"><%= String(log.targetId).slice(0,8) %></span><% } %></td>
+                <td><%= log.detail || '—' %></td>
+                <td class="mono" style="font-size:0.78rem;"><%= log.ip || '—' %></td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <% if (!logs.length) { %>
+        <div class="empty-state"><p>No audit entries yet.</p></div>
+        <% } %>
+        <% if (totalPages > 1) { %>
+        <div class="pagination">
+          <% if (page > 1) { %><a href="?page=<%= page-1 %>" class="btn btn-sm btn-outline-gold">Previous</a><% } %>
+          <span>Page <%= page %> of <%= totalPages %></span>
+          <% if (page < totalPages) { %><a href="?page=<%= page+1 %>" class="btn btn-sm btn-outline-gold">Next</a><% } %>
+        </div>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

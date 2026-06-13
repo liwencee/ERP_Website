@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import prisma from '../../config/database';
+import { logAudit } from '../../services/audit.service';
 
 export async function index(_req: Request, res: Response): Promise<void> {
   const plans = await prisma.investmentPlan.findMany({ orderBy: { createdAt: 'desc' } });
@@ -23,6 +24,7 @@ export async function newPost(req: Request, res: Response): Promise<void> {
       duration: parseInt(duration),
     },
   });
+  await logAudit(req, 'PLAN_CREATE', { targetType: 'InvestmentPlan', detail: name });
   req.flash('success', 'Investment plan created.');
   res.redirect('/admin/plans');
 }
@@ -48,6 +50,7 @@ export async function editPost(req: Request, res: Response): Promise<void> {
       status,
     },
   });
+  await logAudit(req, 'PLAN_UPDATE', { targetType: 'InvestmentPlan', targetId: req.params.id, detail: name });
   req.flash('success', 'Plan updated.');
   res.redirect('/admin/plans');
 }
@@ -57,6 +60,7 @@ export async function deletePlan(req: Request, res: Response): Promise<void> {
     where: { id: req.params.id },
     data: { status: 'CLOSED' },
   });
+  await logAudit(req, 'PLAN_CLOSE', { targetType: 'InvestmentPlan', targetId: req.params.id });
   req.flash('success', 'Plan closed.');
   res.redirect('/admin/plans');
 }

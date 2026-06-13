@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import prisma from '../../config/database';
 import { generateReferralCode, generateRef } from '../../utils/helpers';
 import * as emailService from '../../services/email.service';
+import { logAudit } from '../../services/audit.service';
 
 export async function index(req: Request, res: Response): Promise<void> {
   const page = parseInt(req.query.page as string) || 1;
@@ -75,6 +76,7 @@ export async function reviewKyc(req: Request, res: Response): Promise<void> {
     },
   });
 
+  await logAudit(req, 'KYC_REVIEW', { targetType: 'User', targetId: userId, detail: kycStatus });
   req.flash('success', `KYC ${kycStatus.toLowerCase()} for user.`);
   res.redirect(`/admin/users/${userId}`);
 }
@@ -86,6 +88,7 @@ export async function toggleStatus(req: Request, res: Response): Promise<void> {
   const status = user.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
   await prisma.user.update({ where: { id: user.id }, data: { status } });
 
+  await logAudit(req, 'USER_STATUS', { targetType: 'User', targetId: user.id, detail: status });
   req.flash('success', `User account ${status.toLowerCase()}.`);
   res.redirect(`/admin/users/${user.id}`);
 }
@@ -108,6 +111,7 @@ export async function forceLogout(req: Request, res: Response): Promise<void> {
     },
   });
 
+  await logAudit(req, 'USER_FORCE_LOGOUT', { targetType: 'User', targetId: user.id });
   req.flash('success', `User ${user.firstName} has been logged out.`);
   res.redirect(`/admin/users/${user.id}`);
 }
@@ -157,6 +161,7 @@ export async function createStaffPost(req: Request, res: Response): Promise<void
     },
   });
 
+  await logAudit(req, 'STAFF_CREATE', { targetType: 'User', detail: email.toLowerCase() });
   req.flash('success', `Staff account created for ${firstName} ${lastName}.`);
   res.redirect('/admin/users');
 }
@@ -227,6 +232,7 @@ export async function creditWallet(req: Request, res: Response): Promise<void> {
     await emailService.sendDepositConfirmed(user.email, user.firstName, amount, reference);
   } catch { /* silent */ }
 
+  await logAudit(req, 'WALLET_CREDIT', { targetType: 'User', targetId: userId, detail: `₦${amount.toLocaleString()} — ${note} (ref ${reference})` });
   req.flash('success', `₦${amount.toLocaleString()} successfully credited to ${user.firstName} ${user.lastName}'s wallet. Ref: ${reference}`);
   res.redirect(`/admin/users/${userId}`);
 }

@@ -5,6 +5,7 @@ import * as adminUsers from '../controllers/admin/users.controller';
 import * as adminPlans from '../controllers/admin/plans.controller';
 import * as adminInvestments from '../controllers/admin/investments.controller';
 import * as adminTx from '../controllers/admin/transactions.controller';
+import * as adminAudit from '../controllers/admin/audit.controller';
 
 const router = Router();
 
@@ -42,5 +43,8 @@ router.post('/investments/backdate', isAdmin, adminTx.backdateInvestment);
 router.get('/transactions', adminTx.index);
 router.post('/transactions/:id/confirm', adminTx.confirm);
 router.post('/transactions/:id/reject', adminTx.reject);
+
+// ─── Audit log (ADMIN only) ───────────────────────────────────────────────────
+router.get('/audit', isAdmin, adminAudit.index);
 
 export default router;
