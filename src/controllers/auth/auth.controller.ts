@@ -105,26 +105,35 @@ export async function loginPost(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  req.session.userId = user.id;
-  req.session.userRole = user.role;
-  req.session.userEmail = user.email;
-  req.session.userName = `${user.firstName} ${user.lastName}`;
-  req.session.sessionVersion = user.sessionVersion;
-
-  // Explicitly save session before redirecting — required with file-based
-  // session stores to avoid a race condition where the redirect fires before
-  // the session data is written to disk, leaving the next request with no userId.
-  req.session.save((err) => {
-    if (err) {
+  // Regenerate the session on login to prevent session fixation — a new session
+  // ID is issued so any value an attacker may have planted pre-login is discarded.
+  req.session.regenerate((regenErr) => {
+    if (regenErr) {
       req.flash('error', 'Login failed. Please try again.');
       res.redirect('/auth/login');
       return;
     }
-    if (user.role === 'ADMIN' || user.role === 'STAFF') {
-      res.redirect('/admin');
-    } else {
-      res.redirect('/dashboard');
-    }
+
+    req.session.userId = user.id;
+    req.session.userRole = user.role;
+    req.session.userEmail = user.email;
+    req.session.userName = `${user.firstName} ${user.lastName}`;
+    req.session.sessionVersion = user.sessionVersion;
+
+    // Explicitly save the session before redirecting — avoids a race where the
+    // redirect fires before the new session is persisted to the store.
+    req.session.save((err) => {
+      if (err) {
+        req.flash('error', 'Login failed. Please try again.');
+        res.redirect('/auth/login');
+        return;
+      }
+      if (user.role === 'ADMIN' || user.role === 'STAFF') {
+        res.redirect('/admin');
+      } else {
+        res.redirect('/dashboard');
+      }
+    });
   });
 }
 

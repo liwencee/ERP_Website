@@ -17,6 +17,8 @@ import sessionConfig from './config/session';
 import logger from './utils/logger';
 import router from './routes';
 import localsMiddleware from './middleware/locals.middleware';
+import { sameOriginOnly } from './middleware/security.middleware';
+import { serveUpload } from './controllers/files.controller';
 import { runMaturityJob } from './jobs/mature-investments';
 
 const app = express();
@@ -102,6 +104,11 @@ app.use(morgan('combined', {
 // relative to the project root (process.cwd()) which always points to /var/task.
 const ROOT = process.env.VERCEL ? process.cwd() : path.join(__dirname, '..');
 
+// ─── Uploaded files (authenticated) ──────────────────────────────────────────
+// Gate /uploads (KYC documents, payment proofs, avatars) behind login + ownership
+// BEFORE the public static handler can serve them to anyone with the URL.
+app.use('/uploads', serveUpload);
+
 // ─── Static files ────────────────────────────────────────────────────────────
 app.use(express.static(path.join(ROOT, 'public')));
 
@@ -111,6 +118,9 @@ app.set('views', path.join(ROOT, 'views'));
 
 // ─── Locals ──────────────────────────────────────────────────────────────────
 app.use(localsMiddleware);
+
+// ─── CSRF (same-origin guard for state-changing requests) ─────────────────────
+app.use(sameOriginOnly);
 
 // ─── Routes ──────────────────────────────────────────────────────────────────
 app.use(router);

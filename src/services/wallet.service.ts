@@ -40,19 +40,20 @@ export async function debitWallet(
   description?: string,
   investmentId?: string
 ): Promise<string> {
-  const wallet = await prisma.wallet.findUnique({ where: { userId } });
-  if (!wallet || Number(wallet.balance) < amount) {
-    throw new Error('Insufficient wallet balance.');
-  }
-
   const reference = generateRef(type === 'WITHDRAWAL' ? 'WDR' : 'INV');
 
-  await prisma.$transaction([
-    prisma.wallet.update({
-      where: { userId },
+  await prisma.$transaction(async (tx) => {
+    // Atomic, race-safe debit: the decrement only applies if the balance still
+    // covers the amount, so two concurrent debits can never both overdraw.
+    const debit = await tx.wallet.updateMany({
+      where: { userId, balance: { gte: amount } },
       data: { balance: { decrement: amount } },
-    }),
-    prisma.transaction.create({
+    });
+    if (debit.count === 0) {
+      throw new Error('Insufficient wallet balance.');
+    }
+
+    await tx.transaction.create({
       data: {
         userId,
         type,
@@ -62,8 +63,8 @@ export async function debitWallet(
         description: description || type.toLowerCase(),
         investmentId: investmentId || null,
       },
-    }),
-  ]);
+    });
+  });
 
   return reference;
 }
@@ -79,19 +80,20 @@ export async function requestWithdrawal(
   amount: number,
   bank: WithdrawalBank
 ): Promise<void> {
-  const wallet = await prisma.wallet.findUnique({ where: { userId } });
-  if (!wallet || Number(wallet.balance) < amount) {
-    throw new Error('Insufficient wallet balance.');
-  }
-
   const reference = generateRef('WDR');
 
-  await prisma.$transaction([
-    prisma.wallet.update({
-      where: { userId },
+  await prisma.$transaction(async (tx) => {
+    // Atomic, race-safe debit — only succeeds while the balance still covers the
+    // amount, so concurrent withdrawal requests can't both overdraw the wallet.
+    const debit = await tx.wallet.updateMany({
+      where: { userId, balance: { gte: amount } },
       data: { balance: { decrement: amount } },
-    }),
-    prisma.transaction.create({
+    });
+    if (debit.count === 0) {
+      throw new Error('Insufficient wallet balance.');
+    }
+
+    await tx.transaction.create({
       data: {
         userId,
         type: 'WITHDRAWAL',
@@ -103,15 +105,16 @@ export async function requestWithdrawal(
         bankAccountNumber: bank.accountNumber,
         bankAccountName: bank.accountName,
       },
-    }),
+    });
+
     // Remember these details as the user's default payout bank for next time
-    prisma.user.update({
+    await tx.user.update({
       where: { id: userId },
       data: {
         bankName: bank.bankName,
         bankAccountNumber: bank.accountNumber,
         bankAccountName: bank.accountName,
       },
-    }),
-  ]);
+    });
+  });
 }
