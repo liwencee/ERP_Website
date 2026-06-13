@@ -59,6 +59,8 @@ app.use(helmet({
       frameSrc: [
         "'self'",
         'https://*.tawk.to',
+        'https://maps.google.com',
+        'https://www.google.com',
       ],
     },
   },
