@@ -38,7 +38,7 @@ export async function verifySquadco(transactionRef: string): Promise<{ success: 
   );
   const data = response.data.data;
   return {
-    success: data.transaction_status === 'Success',
+    success: String(data.transaction_status).toLowerCase() === 'success',
     amount: data.transaction_amount / 100,
   };
 }

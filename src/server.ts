@@ -77,7 +77,14 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // ─── Body parsing ────────────────────────────────────────────────────────────
-app.use(express.json({ limit: '10mb' }));
+// Capture the raw JSON body so webhook HMAC signatures can be verified against
+// the exact bytes the payment gateway signed (re-stringifying can break them).
+app.use(express.json({
+  limit: '10mb',
+  verify: (req, _res, buf) => {
+    (req as express.Request & { rawBody?: Buffer }).rawBody = buf;
+  },
+}));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
