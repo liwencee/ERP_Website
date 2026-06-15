@@ -15,14 +15,6 @@
         ? Math.min.apply(null, plan.tenures.map(function(t){ return Number(t.returnRate); })) + '% – ' +
           Math.max.apply(null, plan.tenures.map(function(t){ return Number(t.returnRate); })) + '%'
         : Number(plan.returnRate) + '%';
-      var typeLabels = {
-        SAVINGS: 'Savings Plan',
-        STOCK_EQUITY: 'Stock Equity Portfolio',
-        FIXED_DEPOSIT: 'Fixed Deposit',
-        TRADING: 'Trading Investment',
-        DOLLAR: 'Dollar Investment',
-        REAL_ESTATE: 'Real Estate Investment'
-      };
     %>
 
     <section class="page-hero">
@@ -46,7 +38,6 @@
           </div>
           <p class="plan-description"><%= plan.description %></p>
           <div class="plan-specs">
-            <div class="plan-spec"><span>Category</span><strong><%= typeLabels[plan.type] || plan.type %></strong></div>
             <div class="plan-spec"><span>Return Rate</span><strong class="text-gold"><%= rateRange %></strong></div>
             <div class="plan-spec"><span>Min Investment</span><strong><% if (plan.type === 'DOLLAR') { %>$50<% } else { %>₦<%= Number(plan.minAmount).toLocaleString() %><% } %></strong></div>
             <% if (plan.maxAmount) { %>
