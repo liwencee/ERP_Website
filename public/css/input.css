@@ -86,6 +86,7 @@
 .stagger.visible > *:nth-child(4) { opacity:1; transform:none; transition-delay: 0.35s; }
 .stagger.visible > *:nth-child(5) { opacity:1; transform:none; transition-delay: 0.45s; }
 .stagger.visible > *:nth-child(6) { opacity:1; transform:none; transition-delay: 0.55s; }
+.stagger.visible > *:nth-child(n+7) { opacity:1; transform:none; transition-delay: 0.6s; }
 
 /* ─── Base ────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
