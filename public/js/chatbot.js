@@ -106,7 +106,7 @@
       })
       .catch(function () {
         hideTyping();
-        addMessage('bot', "Sorry, I'm having trouble connecting right now. Please try again or reach us directly.", { link: { label: 'Contact Us', href: '/contact' } });
+        addMessage('bot', "Sorry, I'm having trouble connecting right now. Please try again or reach us directly.", { link: { label: 'Chat on WhatsApp', href: 'https://wa.me/2348036660392' } });
       });
   }
 

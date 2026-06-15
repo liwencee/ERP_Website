@@ -201,7 +201,7 @@ export async function reply(req: Request, res: Response): Promise<void> {
     result = {
       reply: CONTACT_TEXT,
       quickReplies: ['Investment plans & rates', 'How do I open an account?'],
-      link: { label: 'Open Contact Page', href: '/contact' },
+      link: { label: 'Chat on WhatsApp', href: 'https://wa.me/2348036660392' },
     };
   } else if (/regulat|complian|legit|scam|safe|\bcac\b|licen[cs]e|trust|registered/i.test(msg)) {
     result = {

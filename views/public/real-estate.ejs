@@ -100,6 +100,23 @@
                   <% } %>
                 </strong>
               </div>
+              <% var sym = prop.currency === 'USD' ? '$' : '₦'; var locale = prop.currency === 'USD' ? 'en-US' : 'en-NG'; var price = Number(prop.price); %>
+              <h4 class="property-subheading">Payment Plans</h4>
+              <ul class="property-plan-list">
+                <li><span>Initial Deposit (40%)</span><strong><%= sym %><%= Math.round(price * 0.40).toLocaleString(locale) %></strong></li>
+                <li><span>6 Months Plan</span><strong><%= sym %><%= Math.round(price * 1.05).toLocaleString(locale) %></strong></li>
+                <li><span>9 Months Plan</span><strong><%= sym %><%= Math.round(price * 1.075).toLocaleString(locale) %></strong></li>
+                <li><span>12 Months Plan</span><strong><%= sym %><%= Math.round(price * 1.10).toLocaleString(locale) %></strong></li>
+              </ul>
+              <h4 class="property-subheading">Estate Features</h4>
+              <ul class="property-feature-list">
+                <li>Good Road</li>
+                <li>24/7 Security</li>
+                <li>Swimming Pool</li>
+                <li>18-24hrs Power Supply</li>
+                <li>Children Playing Ground</li>
+                <li>Treated Water</li>
+              </ul>
               <a href="/contact?subject=property&ref=<%= prop.id %>" class="btn btn-gold btn-block" style="margin-top:12px;">Enquire Now</a>
             </div>
           </div>

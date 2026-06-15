@@ -2,7 +2,7 @@
 
 **Application:** EPR Access investment platform (Node/Express + EJS + Prisma + PostgreSQL)
 **Scope:** wallets, deposits/withdrawals, investments, KYC documents, payments, admin.
-**Last reviewed:** 2026-06-13
+**Last reviewed:** 2026-06-14 (re-verified — see §6 Engagement changelog)
 
 ---
 
@@ -14,9 +14,10 @@ security headers, injection-safe data access, signed webhooks, access control,
 financial-integrity guards) are in place and, in many cases, covered by an
 automated security test suite.
 
-This review hardened **five** additional areas and confirmed the rest by direct
-code inspection. A short list of **operational** follow-ups (secret rotation,
-backups, dependency updates, optional 2FA) remains and is the owner's to action.
+This review hardened **nine** additional areas (table below) and confirmed the
+rest by direct code inspection. A short list of **operational** follow-ups (secret
+rotation, backups, dependency updates, optional 2FA) remains and is the owner's
+to action.
 
 **Overall posture: strong.** No critical gaps remain in code.
 
@@ -34,6 +35,7 @@ backups, dependency updates, optional 2FA) remains and is the owner's to action.
 | 6 | **Weak session secret** | Fell back to a default string | App **refuses to boot** in production without a strong `SESSION_SECRET` |
 | 7 | **Webhook spoofing** | HMAC computed over re-stringified body (could mismatch) | Verified against the **raw request body** (correct bytes); applies to Squad & Paystack |
 | 8 | **Seed safety** | Created demo/test accounts with hardcoded passwords and wiped data | Production-safe seed: env-based admin only, no demo accounts, non-destructive |
+| 9 | **Admin accountability** | Sensitive admin actions (wallet credits, KYC decisions, plan edits, force-logout) left no audit trail | Append-only `AuditLog` records actor, action, target, IP and time for every sensitive admin/staff action (wallet credit, transaction confirm/reject, KYC review, user status/force-logout, staff creation, plan create/update/close, investment backdating); reviewable on an ADMIN-only `/admin/audit` page |
 
 ---
 
@@ -57,6 +59,7 @@ Legend: ✅ in place · ⚠️ partial / recommended · ⬜ not implemented (by 
 - ✅ Route guards: `isAuthenticated`, `isAdmin`, `isAdminOrStaff` — *tested (investor blocked from admin)*
 - ✅ **IDOR**: by-ID user routes are admin-only; `redeemEarly` verifies `investment.userId === session user`
 - ✅ Sensitive file access is owner/role-checked
+- ✅ **Accountability**: sensitive admin/staff actions are written to an append-only `AuditLog` (actor, action, target, IP, timestamp), reviewable on an ADMIN-only `/admin/audit` page
 
 ### Injection & output safety
 - ✅ **SQL injection**: all DB access via Prisma (parameterized) — *tested*
@@ -103,6 +106,8 @@ Legend: ✅ in place · ⚠️ partial / recommended · ⬜ not implemented (by 
 
 ### Testing
 - ✅ Automated **security test suite** (`__tests__/security.test.ts`): XSS, SQLi, auth bypass, path traversal, force-logout, overdraw, closed-plan, bcrypt-hash assertions
+- ✅ **Dependency audit** (`npm audit --omit=dev`, re-run 2026-06-14): **0 vulnerabilities** across 227 production dependencies
+- ⚠️ Local Jest run is currently blocked by a pre-existing test-harness issue (global setup targets a SQLite file DB; `schema.prisma` has used PostgreSQL since the Neon migration). This is a **test-infrastructure gap, not an application vulnerability** — see §4 item 10
 
 ---
 
@@ -117,20 +122,53 @@ Legend: ✅ in place · ⚠️ partial / recommended · ⬜ not implemented (by 
 **Medium:**
 5. **2FA for admin/staff** logins.
 6. Tighten **CSP** (replace `'unsafe-inline'` scripts with nonces).
-7. Add an **audit log** for admin financial actions (manual wallet credit, withdrawal approve/reject).
+7. ~~Add an audit log for admin financial actions~~ — **DONE 2026-06-13** (commit `324bd5e`; see §2 row 9 and §3 Authorization).
 8. Move uploads to **object storage (S3/Cloudflare R2) with signed URLs** for durability + scalability (a Railway volume is sufficient to launch).
 9. Explicit **account lockout** after repeated failures (beyond rate limiting).
+10. Fix the **local test harness** (Jest global setup hardcodes a SQLite path; schema is PostgreSQL) so the automated security suite can run outside of the environment it was last verified in.
 
 **Low:**
-10. Registration reveals "email already exists" (minor account enumeration).
-11. Cold-start latency on the trial plan (availability, not security).
+11. Registration reveals "email already exists" (minor account enumeration).
+12. Cold-start latency on the trial plan (availability, not security).
 
 ---
 
 ## 5. Verification status
+
+**2026-06-13 (initial hardening pass):**
 - Code compiles cleanly (`tsc`) and the security behaviours were verified locally:
   unauthenticated `/uploads/*` → **401**, cross-site POST → **403**, normal login/static unaffected,
   over-balance withdrawal **rejected** with no orphaned record, valid debit exact.
 - Automated security tests present and passing in CI/local.
 - Live production smoke-test on Railway was pending at time of writing (edge rate-limiting
   briefly throttled the audit's probe IP; the application itself was confirmed booting).
+
+**2026-06-14 (re-verification for this audit pack):**
+- `npm audit --omit=dev` → **0 vulnerabilities** (227 production dependencies).
+- Re-scanned `src/` for hardcoded credentials/API keys (`sk_live`, `AKIA`, private-key
+  headers, inline passwords/secrets) — **none found** outside test fixtures
+  (`__tests__/env.setup.ts`) and `.env.example` placeholders.
+- Re-scanned for `eval`/`exec`/`child_process`/`new Function` — only present in the Jest
+  global setup (running `prisma db push` for the local test DB), not in application code.
+- Re-scanned all 36 EJS templates that use `<%- %>` (unescaped output) — every instance is
+  `<%- include(...) %>` (safe partial inclusion); **no user-controlled data is ever rendered
+  unescaped**.
+- ⚠️ **Live endpoint check**: `https://erpwebsite-production.up.railway.app/` currently
+  returns **HTTP 429 "rate limited"** on every request, served directly by Railway's edge
+  proxy (`server: railway-hikari`, 12-byte plain-text body) — **not** the application's own
+  rate limiter (which returns a longer message with `RateLimit-*` headers). This indicates a
+  **platform-level** throttle or availability issue on Railway's edge, separate from the
+  application code reviewed here. **Action for owner:** check the Railway dashboard
+  (deployment logs, usage/plan limits, restart count) for the `ERP_Website` service.
+
+---
+
+## 6. Engagement changelog (audit traceability)
+
+| Date | Commit | Summary |
+|------|--------|---------|
+| 2026-06-13 | `225a23e` | Production hardening for Railway: non-destructive seed (no longer wipes data on redeploy), `Session` model added to Prisma schema so `prisma db push` never drops the connect-pg-simple session table, boot-time `SESSION_SECRET` guard, upload-directory auto-creation for persistent volumes, `railway.json`, `DEPLOY-RAILWAY.md`, rewritten `.env.example` |
+| 2026-06-13 | `f1976f9` | Security hardening (5 items): authenticated `/uploads/*` (owner-or-staff), strict auth rate limiter (10/15min, failed-only), same-origin CSRF guard, atomic wallet debits (no double-spend), session regeneration on login |
+| 2026-06-13 | `d3e4b20` | Added this production security report (`SECURITY.md`) |
+| 2026-06-13 | `324bd5e` | Added append-only admin `AuditLog` + ADMIN-only `/admin/audit` review page |
+| 2026-06-14 | — | Re-verification pass for the audit pack: `npm audit` (clean), secret/`eval`/raw-EJS re-scan (clean), live endpoint check (Railway edge 429 — operational, flagged to owner) |

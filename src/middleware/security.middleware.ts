@@ -14,6 +14,17 @@ export const authLimiter = rateLimit({
   skip: () => process.env.NODE_ENV === 'test',
 });
 
+// Throttles the public contact form so it can't be used to spam the business
+// inbox or run up the Resend API quota.
+export const contactLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: 'Too many messages sent. Please try again in an hour.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'test',
+});
+
 // CSRF hardening for a same-site app. Rejects state-changing requests whose
 // Origin/Referer is a DIFFERENT host than the one serving the app. Combined with
 // the SameSite=Lax session cookie (which already stops the cookie riding along

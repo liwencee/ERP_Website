@@ -17,7 +17,7 @@ export async function registerPost(req: Request, res: Response): Promise<void> {
   const { firstName, lastName, email, phone, password, confirmPassword, refCode,
           dateOfBirth, gender, address, state, city } = req.body;
 
-  if (!firstName || !lastName || !email || !password) errors.push('All fields are required.');
+  if (!firstName || !lastName || !email || !phone || !password) errors.push('All fields are required.');
   if (password !== confirmPassword) errors.push('Passwords do not match.');
   if (password && password.length < 8) errors.push('Password must be at least 8 characters.');
 
@@ -55,7 +55,7 @@ export async function registerPost(req: Request, res: Response): Promise<void> {
       firstName,
       lastName,
       email: email.toLowerCase(),
-      phone: phone || null,
+      phone,
       dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
       gender: gender || null,
       address: address || null,

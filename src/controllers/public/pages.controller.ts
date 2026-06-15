@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../../config/database';
+import logger from '../../utils/logger';
+import * as contactService from '../../services/contact.service';
 
 const PLAN_ORDER = ['Silver', 'Bronze', 'Gold', 'Diamond', 'Save Future', 'Fixed Deposit', 'Trading', 'Dollar', 'Real Estate'];
 
@@ -63,8 +65,35 @@ export function privacy(_req: Request, res: Response): void {
   res.render('public/privacy', { title: 'Privacy Policy' });
 }
 
-export function contactPost(req: Request, res: Response): void {
-  // In production wire up to an email service
-  req.flash('success', 'Thank you for your message. We will get back to you shortly.');
+export function terms(_req: Request, res: Response): void {
+  res.render('public/terms', { title: 'Terms and Conditions' });
+}
+
+export async function contactPost(req: Request, res: Response): Promise<void> {
+  const name = String(req.body.name || '').trim();
+  const email = String(req.body.email || '').trim();
+  const phone = String(req.body.phone || '').trim();
+  const subject = String(req.body.subject || '').trim();
+  const message = String(req.body.message || '').trim();
+
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!name || !emailValid || !message) {
+    req.flash('error', 'Please provide your name, a valid email address, and a message.');
+    res.redirect('/contact');
+    return;
+  }
+  if (name.length > 200 || message.length > 5000) {
+    req.flash('error', 'Your message is too long. Please shorten it and try again.');
+    res.redirect('/contact');
+    return;
+  }
+
+  try {
+    await contactService.sendContactEmail({ name, email, phone, subject, message });
+    req.flash('success', 'Thank you for your message. We will get back to you shortly.');
+  } catch (err) {
+    logger.error(`Contact form email failed: ${(err as Error).message}`);
+    req.flash('error', 'Sorry, we could not send your message right now. Please email us directly at info@epraaccess.com.');
+  }
   res.redirect('/contact');
 }

@@ -35,15 +35,31 @@
   100% { background-position: 200% 0%; }
 }
 
-/* --- Nav Scroll Glass --- */
+/* --- Nav Scroll Glass ---
+   The glass background lives on ::before (not on .site-header itself) because
+   backdrop-filter on an element makes it a containing block for position:fixed
+   descendants. .nav-drawer/.nav-overlay are fixed inside .site-header, so a
+   filter directly on .site-header would shrink them to the header's own height
+   once scrolled, exposing the page content underneath. */
 .site-header {
-  transition: background 0.4s, backdrop-filter 0.4s, box-shadow 0.4s;
+  transition: box-shadow 0.4s;
+}
+.site-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: transparent;
+  transition: background 0.4s, backdrop-filter 0.4s;
 }
 .site-header.scrolled {
-  background: rgba(10,22,40,0.82) !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.06), 0 8px 40px rgba(0,0,0,0.45) !important;
+}
+.site-header.scrolled::before {
+  background: rgba(10,22,40,0.82);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 1px 0 rgba(255,255,255,0.06), 0 8px 40px rgba(0,0,0,0.45) !important;
 }
 
 /* --- Gradient Text (logo green tones) --- */
@@ -756,6 +772,27 @@
 .property-price { display: flex; justify-content: space-between; align-items: center; }
 .price-label { font-size: 0.78rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
 .price-value { font-size: 1.25rem; font-weight: 700; color: #CC0000; }
+.property-subheading {
+  font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; color: #0a1628;
+  margin: 14px 0 8px;
+}
+.property-plan-list {
+  list-style: none; display: flex; flex-direction: column; gap: 6px;
+  margin-bottom: 4px;
+}
+.property-plan-list li {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 0.85rem; color: #374151;
+}
+.property-plan-list li strong { color: #0a1628; font-weight: 700; }
+.property-feature-list {
+  list-style: none; display: flex; flex-wrap: wrap; gap: 8px;
+}
+.property-feature-list li {
+  font-size: 0.76rem; color: #065f46; background: #d1fae5;
+  padding: 3px 10px; border-radius: 100px; font-weight: 600;
+}
 
 /* --- Manual Wallet Credit Box (admin user detail) --- */
 .wallet-balance-badge { font-size: 0.95rem; color: #4b5563; }
