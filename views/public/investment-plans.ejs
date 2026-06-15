@@ -58,7 +58,10 @@
                 </div>
                 <% } %>
               </div>
-              <a href="/auth/register" class="btn btn-gold">Get Started</a>
+              <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                <a href="<%= plan.type === 'REAL_ESTATE' ? '/real-estate' : '/investment-plans/' + plan.slug %>" class="btn btn-outline-gold">View Details</a>
+                <a href="/auth/register" class="btn btn-gold">Get Started</a>
+              </div>
             </div>
             <% }) %>
           <% } else { %>

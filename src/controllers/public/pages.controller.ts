@@ -13,6 +13,15 @@ function sortPlans<T extends { name: string }>(plans: T[]): T[] {
   });
 }
 
+function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[–—]/g, ' ')
+    .replace(/[^a-z0-9\s]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+}
+
 export async function home(req: Request, res: Response): Promise<void> {
   const allPlans = await prisma.investmentPlan.findMany({
     where: { status: 'ACTIVE' },
@@ -37,8 +46,29 @@ export async function investmentPlans(_req: Request, res: Response): Promise<voi
     where: { status: 'ACTIVE' },
     include: { tenures: { orderBy: { sortOrder: 'asc' } } },
   });
-  const plans = sortPlans(raw);
+  const plans = sortPlans(raw).map(plan => ({ ...plan, slug: slugify(plan.name) }));
   res.render('public/investment-plans', { title: 'Investment Plans', plans });
+}
+
+export async function investmentPlanDetail(req: Request, res: Response): Promise<void> {
+  const raw = await prisma.investmentPlan.findMany({
+    where: { status: 'ACTIVE' },
+    include: { tenures: { orderBy: { sortOrder: 'asc' } } },
+  });
+  const plans = sortPlans(raw);
+  const plan = plans.find(p => slugify(p.name) === req.params.slug);
+
+  if (!plan) {
+    res.status(404).render('errors/404', { title: 'Plan Not Found' });
+    return;
+  }
+
+  if (plan.type === 'REAL_ESTATE') {
+    res.redirect('/real-estate');
+    return;
+  }
+
+  res.render('public/investment-plan-detail', { title: plan.name, plan });
 }
 
 export async function realEstate(_req: Request, res: Response): Promise<void> {

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title><%= plan.name %> | EPR Access Limited</title>
+  <%- include('../partials/head') %>
+</head>
+<body class="public-body">
+  <%- include('../partials/public-nav') %>
+  <main>
+    <%- include('../partials/flash') %>
+
+    <%
+      var hasTenures = plan.tenures && plan.tenures.length > 0;
+      var rateRange = hasTenures
+        ? Math.min.apply(null, plan.tenures.map(function(t){ return Number(t.returnRate); })) + '% – ' +
+          Math.max.apply(null, plan.tenures.map(function(t){ return Number(t.returnRate); })) + '%'
+        : Number(plan.returnRate) + '%';
+      var typeLabels = {
+        SAVINGS: 'Savings Plan',
+        STOCK_EQUITY: 'Stock Equity Portfolio',
+        FIXED_DEPOSIT: 'Fixed Deposit',
+        TRADING: 'Trading Investment',
+        DOLLAR: 'Dollar Investment',
+        REAL_ESTATE: 'Real Estate Investment'
+      };
+    %>
+
+    <section class="page-hero">
+      <div class="container">
+        <h1><%= plan.name %></h1>
+        <p><%= plan.description %></p>
+      </div>
+    </section>
+
+    <!-- Plan Overview -->
+    <section class="section section-light" id="overview">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-eyebrow">Plan Overview</span>
+          <h2>Key <span class="gradient-text">Details</span></h2>
+          <p>Everything you need to know before you invest in <%= plan.name %></p>
+        </div>
+        <div class="plan-full-card" style="max-width:640px; margin:0 auto;">
+          <div class="plan-header">
+            <h3><%= plan.name %></h3>
+          </div>
+          <p class="plan-description"><%= plan.description %></p>
+          <div class="plan-specs">
+            <div class="plan-spec"><span>Category</span><strong><%= typeLabels[plan.type] || plan.type %></strong></div>
+            <div class="plan-spec"><span>Return Rate</span><strong class="text-gold"><%= rateRange %></strong></div>
+            <div class="plan-spec"><span>Min Investment</span><strong><% if (plan.type === 'DOLLAR') { %>$50<% } else { %>₦<%= Number(plan.minAmount).toLocaleString() %><% } %></strong></div>
+            <% if (plan.maxAmount) { %>
+            <div class="plan-spec"><span>Max Investment</span><strong>₦<%= Number(plan.maxAmount).toLocaleString() %></strong></div>
+            <% } %>
+          </div>
+          <a href="/auth/register" class="btn btn-gold">Get Started</a>
+        </div>
+      </div>
+    </section>
+
+    <% if (hasTenures) { %>
+    <!-- Tenure Options -->
+    <section class="section section-dark">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-eyebrow">Tenure Options</span>
+          <h2>Choose Your <span class="gradient-text">Duration</span></h2>
+          <p>Pick the tenure that matches your financial goals</p>
+        </div>
+        <div class="investment-detail-grid single-card">
+          <div class="inv-detail-card">
+            <h3>Available Tenures</h3>
+            <div class="tenure-breakdown">
+              <% plan.tenures.forEach(function(t) { %>
+              <div class="tenure-row">
+                <span><%= t.label %> (<%= t.durationDays %> days)</span>
+                <strong><%= Number(t.returnRate) %>% return</strong>
+              </div>
+              <% }) %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <% } %>
+
+    <!-- CTA -->
+    <section class="cta-section">
+      <div class="cta-mesh"></div>
+      <div class="container text-center">
+        <div class="cta-badge">Start Investing Today</div>
+        <h2 style="color:#fff; margin-bottom:16px;">Ready to Invest in<br><span class="gradient-text"><%= plan.name %></span></h2>
+        <p style="color:rgba(255,255,255,0.65); font-size:1.1rem; margin-bottom:36px; max-width:520px; margin-left:auto; margin-right:auto; line-height:1.7;">
+          Create your free account and start growing your wealth with EPR Access Limited.
+        </p>
+        <div class="cta-actions">
+          <a href="/auth/register" class="btn btn-gold btn-lg">Create Free Account</a>
+          <a href="/investment-plans" class="btn-cta-ghost">View All Plans</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <%- include('../partials/public-footer') %>
+  <script src="/js/main.js"></script>
+</body>
+</html>

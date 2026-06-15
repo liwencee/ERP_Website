@@ -56,12 +56,23 @@
           </a>
         </li>
 
-        <!-- Investment -->
-        <li>
-          <a href="/investment-plans" class="<%= currentPath === '/investment-plans' ? 'active' : '' %>">
+        <!-- Investments -->
+        <li class="nav-dropdown">
+          <a href="/investment-plans" class="nav-dropdown-toggle <%= (currentPath === '/investment-plans' || currentPath.startsWith('/investment-plans/')) ? 'active' : '' %>">
             <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
-            Investment
+            Investments
+            <svg class="dropdown-arrow" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </a>
+          <ul class="dropdown-menu">
+            <li><a href="/investment-plans/silver-my-investment-splus">Silver</a></li>
+            <li><a href="/investment-plans/bronze-my-investment-bplus">Bronze</a></li>
+            <li><a href="/investment-plans/gold-my-investment-gplus">Gold</a></li>
+            <li><a href="/investment-plans/diamond-my-investment-dplus">Diamond</a></li>
+            <li><a href="/investment-plans/save-future-my-savings-plan">Save Future</a></li>
+            <li><a href="/investment-plans/fixed-deposit-stop-unnecessary-spending">Fixed Deposit</a></li>
+            <li><a href="/investment-plans/trading-investment-earn-faster">Trading</a></li>
+            <li><a href="/investment-plans/dollar-investment-foreign-currency">Dollar</a></li>
+          </ul>
         </li>
 
         <!-- Real Estate -->
