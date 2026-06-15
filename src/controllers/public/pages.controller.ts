@@ -22,6 +22,21 @@ function slugify(name: string): string {
     .replace(/\s+/g, '-');
 }
 
+const DISPLAY_NAMES: Record<string, string> = {
+  'Silver – My Investment SPlus': 'Silver – Package',
+  'Bronze – My Investment BPlus': 'Bronze – Package',
+  'Gold – My Investment GPlus': 'Gold – Package',
+  'Diamond – My Investment DPlus': 'Diamond – Package',
+  'Save Future – My Savings Plan': 'Savings – Plan',
+  'Fixed Deposit – Stop Unnecessary Spending': 'Fixed Deposit',
+  'Trading Investment – Earn Faster': 'Trading Investment – Package',
+  'Dollar Investment – Foreign Currency': 'Dollar – Package',
+};
+
+function displayName(name: string): string {
+  return DISPLAY_NAMES[name] || name;
+}
+
 export async function home(req: Request, res: Response): Promise<void> {
   const allPlans = await prisma.investmentPlan.findMany({
     where: { status: 'ACTIVE' },
@@ -46,7 +61,7 @@ export async function investmentPlans(_req: Request, res: Response): Promise<voi
     where: { status: 'ACTIVE' },
     include: { tenures: { orderBy: { sortOrder: 'asc' } } },
   });
-  const plans = sortPlans(raw).map(plan => ({ ...plan, slug: slugify(plan.name) }));
+  const plans = sortPlans(raw).map(plan => ({ ...plan, slug: slugify(plan.name), displayName: displayName(plan.name) }));
   res.render('public/investment-plans', { title: 'Investment Plans', plans });
 }
 
@@ -68,7 +83,8 @@ export async function investmentPlanDetail(req: Request, res: Response): Promise
     return;
   }
 
-  res.render('public/investment-plan-detail', { title: plan.name, plan });
+  const planWithDisplay = { ...plan, displayName: displayName(plan.name) };
+  res.render('public/investment-plan-detail', { title: planWithDisplay.displayName, plan: planWithDisplay });
 }
 
 export async function realEstate(_req: Request, res: Response): Promise<void> {

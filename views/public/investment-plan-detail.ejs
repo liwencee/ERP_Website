@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title><%= plan.name %> | EPR Access Limited</title>
+  <title><%= plan.displayName %> | EPR Access Limited</title>
   <%- include('../partials/head') %>
 </head>
 <body class="public-body">
@@ -27,7 +27,7 @@
 
     <section class="page-hero">
       <div class="container">
-        <h1><%= plan.name %></h1>
+        <h1><%= plan.displayName %></h1>
         <p><%= plan.description %></p>
       </div>
     </section>
@@ -38,11 +38,11 @@
         <div class="section-header">
           <span class="section-eyebrow">Plan Overview</span>
           <h2>Key <span class="gradient-text">Details</span></h2>
-          <p>Everything you need to know before you invest in <%= plan.name %></p>
+          <p>Everything you need to know before you invest in <%= plan.displayName %></p>
         </div>
         <div class="plan-full-card" style="max-width:640px; margin:0 auto;">
           <div class="plan-header">
-            <h3><%= plan.name %></h3>
+            <h3><%= plan.displayName %></h3>
           </div>
           <p class="plan-description"><%= plan.description %></p>
           <div class="plan-specs">
@@ -89,7 +89,7 @@
       <div class="cta-mesh"></div>
       <div class="container text-center">
         <div class="cta-badge">Start Investing Today</div>
-        <h2 style="color:#fff; margin-bottom:16px;">Ready to Invest in<br><span class="gradient-text"><%= plan.name %></span></h2>
+        <h2 style="color:#fff; margin-bottom:16px;">Ready to Invest in<br><span class="gradient-text"><%= plan.displayName %></span></h2>
         <p style="color:rgba(255,255,255,0.65); font-size:1.1rem; margin-bottom:36px; max-width:520px; margin-left:auto; margin-right:auto; line-height:1.7;">
           Create your free account and start growing your wealth with EPR Access Limited.
         </p>
