@@ -44,7 +44,7 @@ export function sameOriginOnly(req: Request, res: Response, next: NextFunction):
   const source = req.get('origin') || req.get('referer');
   if (source) {
     try {
-      if (new URL(source).host !== req.get('host')) {
+      if (new URL(source).hostname !== req.hostname) {
         res.status(403).render('errors/404', { title: 'Request Blocked' });
         return;
       }
