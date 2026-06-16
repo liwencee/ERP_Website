@@ -9,6 +9,7 @@ router.get('/', pages.home);
 router.get('/about', pages.about);
 router.get('/services', pages.services);
 router.get('/real-estate', pages.realEstate);
+router.get('/real-estate-investment', pages.realEstateInvestment);
 router.get('/investment-plans', pages.investmentPlans);
 router.get('/investment-plans/:slug', pages.investmentPlanDetail);
 router.get('/team', pages.team);

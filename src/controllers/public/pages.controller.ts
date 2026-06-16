@@ -85,7 +85,11 @@ export async function realEstate(_req: Request, res: Response): Promise<void> {
     where: { status: 'AVAILABLE' },
     orderBy: { sortOrder: 'asc' },
   });
-  res.render('public/real-estate', { title: 'Real Estate Investment Packages', properties });
+  res.render('public/real-estate', { title: 'Real Estate', properties });
+}
+
+export function realEstateInvestment(_req: Request, res: Response): void {
+  res.render('public/real-estate-investment', { title: 'Real Estate Investment Packages' });
 }
 
 export function team(_req: Request, res: Response): void {
