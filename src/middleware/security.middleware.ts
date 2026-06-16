@@ -43,15 +43,22 @@ export function sameOriginOnly(req: Request, res: Response, next: NextFunction):
 
   const source = req.get('origin') || req.get('referer');
   if (source) {
+    // Treat the apex domain and the www subdomain as the same site, e.g.
+    // epraaccess.com === www.epraaccess.com.
+    const normalize = (h: string): string => h.replace(/^www\./i, '').toLowerCase();
     try {
-      const sourceHost = new URL(source).hostname;
-      // Railway's proxy can set X-Forwarded-Host to an internal hostname,
-      // making req.hostname differ from the public custom domain. Use APP_URL
-      // as the canonical allowed host when it's available.
-      const allowedHost = process.env.APP_URL
-        ? new URL(process.env.APP_URL).hostname
-        : req.hostname;
-      if (sourceHost !== allowedHost) {
+      const sourceHost = normalize(new URL(source).hostname);
+
+      // Build the set of hosts we accept as same-origin: the host this request
+      // actually arrived on (req.hostname, resolved from X-Forwarded-Host behind
+      // Railway's proxy) plus the configured canonical APP_URL host. This works
+      // whether the visitor uses the apex domain or the www subdomain.
+      const allowed = new Set<string>([normalize(req.hostname)]);
+      if (process.env.APP_URL) {
+        try { allowed.add(normalize(new URL(process.env.APP_URL).hostname)); } catch { /* ignore */ }
+      }
+
+      if (!allowed.has(sourceHost)) {
         res.status(403).render('errors/404', { title: 'Request Blocked' });
         return;
       }
