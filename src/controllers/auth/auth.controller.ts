@@ -4,6 +4,7 @@ import { body, validationResult } from 'express-validator';
 import prisma from '../../config/database';
 import { generateToken, generateReferralCode } from '../../utils/helpers';
 import * as emailService from '../../services/email.service';
+import logger from '../../utils/logger';
 
 // ─── Register ────────────────────────────────────────────────────────────────
 
@@ -109,6 +110,7 @@ export async function loginPost(req: Request, res: Response): Promise<void> {
   // ID is issued so any value an attacker may have planted pre-login is discarded.
   req.session.regenerate((regenErr) => {
     if (regenErr) {
+      logger.error(`[Auth] Session regeneration failed for user ${user.id}: ${regenErr.message}`);
       req.flash('error', 'Login failed. Please try again.');
       res.redirect('/auth/login');
       return;
@@ -122,12 +124,14 @@ export async function loginPost(req: Request, res: Response): Promise<void> {
 
     // Explicitly save the session before redirecting — avoids a race where the
     // redirect fires before the new session is persisted to the store.
-    req.session.save((err) => {
-      if (err) {
+    req.session.save((saveErr) => {
+      if (saveErr) {
+        logger.error(`[Auth] Session save failed for user ${user.id}: ${saveErr.message}`);
         req.flash('error', 'Login failed. Please try again.');
         res.redirect('/auth/login');
         return;
       }
+      logger.info(`[Auth] User ${user.id} (${user.email}) logged in successfully`);
       if (user.role === 'ADMIN' || user.role === 'STAFF') {
         res.redirect('/admin');
       } else {
