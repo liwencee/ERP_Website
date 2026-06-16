@@ -44,7 +44,14 @@ export function sameOriginOnly(req: Request, res: Response, next: NextFunction):
   const source = req.get('origin') || req.get('referer');
   if (source) {
     try {
-      if (new URL(source).hostname !== req.hostname) {
+      const sourceHost = new URL(source).hostname;
+      // Railway's proxy can set X-Forwarded-Host to an internal hostname,
+      // making req.hostname differ from the public custom domain. Use APP_URL
+      // as the canonical allowed host when it's available.
+      const allowedHost = process.env.APP_URL
+        ? new URL(process.env.APP_URL).hostname
+        : req.hostname;
+      if (sourceHost !== allowedHost) {
         res.status(403).render('errors/404', { title: 'Request Blocked' });
         return;
       }
