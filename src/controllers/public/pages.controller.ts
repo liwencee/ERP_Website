@@ -23,14 +23,7 @@ function slugify(name: string): string {
 }
 
 const DISPLAY_NAMES: Record<string, string> = {
-  'Silver – My Investment SPlus': 'Silver – Package',
-  'Bronze – My Investment BPlus': 'Bronze – Package',
-  'Gold – My Investment GPlus': 'Gold – Package',
-  'Diamond – My Investment DPlus': 'Diamond – Package',
-  'Save Future – My Savings Plan': 'Savings – Plan',
-  'Fixed Deposit – Stop Unnecessary Spending': 'Fixed Deposit',
-  'Trading Investment – Earn Faster': 'Trading Investment – Package',
-  'Dollar Investment – Foreign Currency': 'Dollar – Package',
+  'Save Future – My Savings Plan': 'My Savings Plan - Save Future SF',
 };
 
 function displayName(name: string): string {
@@ -92,7 +85,7 @@ export async function realEstate(_req: Request, res: Response): Promise<void> {
     where: { status: 'AVAILABLE' },
     orderBy: { sortOrder: 'asc' },
   });
-  res.render('public/real-estate', { title: 'Real Estate', properties });
+  res.render('public/real-estate', { title: 'Real Estate Investment Packages', properties });
 }
 
 export function team(_req: Request, res: Response): void {
