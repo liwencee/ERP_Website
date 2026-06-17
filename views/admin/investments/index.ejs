@@ -93,7 +93,7 @@
   </div>
 
   <script src="/js/dashboard.js"></script>
-  <script>
+  <script nonce="<%= cspNonce %>">
     function openBackdate(invId) {
       document.getElementById('backdateInvId').value = invId;
       document.getElementById('backdateModal').classList.add('open');

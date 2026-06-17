@@ -169,7 +169,7 @@
   </div>
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
   <script src="/js/dashboard.js"></script>
-  <script>
+  <script nonce="<%= cspNonce %>">
     function formatNGN(n) {
       return '₦' + Number(n).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }

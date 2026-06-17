@@ -223,25 +223,27 @@ export function verifyNoticeGet(req: Request, res: Response): void {
 }
 
 export async function resendVerification(req: Request, res: Response): Promise<void> {
-  const email = String(req.body.email || req.session.pendingVerifyEmail || '')
-    .toLowerCase()
-    .trim();
+  // Only trust the server-set session value — never req.body.email, which would
+  // let anyone trigger verification emails to arbitrary addresses.
+  const email = String(req.session.pendingVerifyEmail || '').toLowerCase().trim();
+  if (!email) {
+    res.redirect('/auth/login');
+    return;
+  }
 
-  if (email) {
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (user && !user.emailVerified) {
-      const emailToken = generateToken();
-      const emailTokenExp = new Date(Date.now() + VERIFY_TTL_MS);
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { emailToken, emailTokenExp },
-      });
-      req.session.pendingVerifyEmail = user.email;
-      try {
-        await emailService.sendVerificationEmail(user.email, user.firstName, emailToken);
-      } catch (err) {
-        console.error('Resend verification email failed:', err);
-      }
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (user && !user.emailVerified) {
+    const emailToken = generateToken();
+    const emailTokenExp = new Date(Date.now() + VERIFY_TTL_MS);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { emailToken, emailTokenExp },
+    });
+    req.session.pendingVerifyEmail = user.email;
+    try {
+      await emailService.sendVerificationEmail(user.email, user.firstName, emailToken);
+    } catch (err) {
+      console.error('Resend verification email failed:', err);
     }
   }
 

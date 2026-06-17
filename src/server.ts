@@ -2,6 +2,7 @@ import 'express-async-errors';
 import express from 'express';
 import path from 'path';
 import helmet from 'helmet';
+import { randomBytes } from 'crypto';
 import morgan from 'morgan';
 import cors from 'cors';
 import hpp from 'hpp';
@@ -29,6 +30,14 @@ const PORT = process.env.PORT || 3000;
 // connection is plain HTTP, which it is behind the proxy without this).
 app.set('trust proxy', 1);
 
+// ─── Per-request CSP nonce ───────────────────────────────────────────────────
+// Must run before helmet so the nonce is available when the CSP header is built,
+// and before views so EJS templates can inject it via <%= cspNonce %>.
+app.use((_req, res, next) => {
+  res.locals.cspNonce = randomBytes(16).toString('base64');
+  next();
+});
+
 // ─── Security ────────────────────────────────────────────────────────────────
 app.use(helmet({
   contentSecurityPolicy: {
@@ -47,7 +56,10 @@ app.use(helmet({
       ],
       scriptSrc: [
         "'self'",
-        "'unsafe-inline'",
+        // Nonce covers all inline <script nonce="..."> blocks in EJS views.
+        // External scripts still validate against the domain allowlist below.
+        (_req: unknown, res: unknown) =>
+          `'nonce-${(res as { locals: { cspNonce: string } }).locals.cspNonce}'`,
         'https://js.paystack.co',
         'https://embed.tawk.to',
         'https://*.tawk.to',
@@ -65,6 +77,11 @@ app.use(helmet({
         'https://www.google.com',
       ],
     },
+  },
+  hsts: {
+    maxAge: 31536000,       // 1 year — required for HSTS preload list
+    includeSubDomains: true,
+    preload: true,
   },
 }));
 app.use(hpp());

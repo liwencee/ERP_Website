@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID, randomInt } from 'crypto';
 
 // Exchange rate used for the Dollar Investment plan: how many Naira per US$1.
 // Override per-environment with the USD_NGN_RATE env var (e.g. on Vercel).
@@ -50,7 +50,7 @@ export function generateReferralCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = 'EPR';
   for (let i = 0; i < 6; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
+    code += chars.charAt(randomInt(chars.length));
   }
   return code;
 }

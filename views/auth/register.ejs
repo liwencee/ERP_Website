@@ -421,7 +421,7 @@
       <p class="auth-footer">Already have an account? <a href="/auth/login">Log in</a></p>
     </div>
   </div>
-  <script>
+  <script nonce="<%= cspNonce %>">
     // Password show/hide toggle
     document.querySelectorAll('.password-toggle').forEach(function(btn) {
       btn.addEventListener('click', function() {

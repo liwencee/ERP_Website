@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /admin
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /uploads
+
+Sitemap: https://www.epraaccess.com/sitemap.xml

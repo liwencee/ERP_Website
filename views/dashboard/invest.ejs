@@ -120,7 +120,7 @@
   </div>
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
   <script src="/js/dashboard.js"></script>
-  <script>
+  <script nonce="<%= cspNonce %>">
     (function () {
       var fallbackRate = <%= Number(plan.returnRate) %>;
       var fallbackDays = <%= plan.duration %>;

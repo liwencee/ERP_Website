@@ -45,7 +45,7 @@
       <p class="auth-footer">Don't have an account? <a href="/auth/register">Create one free</a></p>
     </div>
   </div>
-  <script>
+  <script nonce="<%= cspNonce %>">
     document.querySelectorAll('.password-toggle').forEach(function(btn) {
       btn.addEventListener('click', function() {
         var input = document.getElementById(btn.dataset.target);

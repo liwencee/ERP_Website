@@ -24,10 +24,14 @@ const avatarStorage = multer.diskStorage({
   filename: (_req, file, cb) => cb(null, `${randomUUID()}${path.extname(file.originalname)}`),
 });
 
+const DOC_EXTS  = new Set(['.jpg', '.jpeg', '.png', '.pdf']);
+const IMG_EXTS  = new Set(['.jpg', '.jpeg', '.png', '.webp']);
+const DOC_MIME  = new Set(['image/jpeg', 'image/png', 'application/pdf']);
+const IMG_MIME  = new Set(['image/jpeg', 'image/png', 'image/webp']);
+
 const fileFilter = (_req: Express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  const allowed = ['.jpg', '.jpeg', '.png', '.pdf'];
   const ext = path.extname(file.originalname).toLowerCase();
-  if (allowed.includes(ext)) {
+  if (DOC_EXTS.has(ext) && DOC_MIME.has(file.mimetype)) {
     cb(null, true);
   } else {
     cb(new Error('Only JPG, PNG, and PDF files are allowed.'));
@@ -35,9 +39,8 @@ const fileFilter = (_req: Express.Request, file: Express.Multer.File, cb: multer
 };
 
 const imageFilter = (_req: Express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  const allowed = ['.jpg', '.jpeg', '.png', '.webp'];
   const ext = path.extname(file.originalname).toLowerCase();
-  if (allowed.includes(ext)) {
+  if (IMG_EXTS.has(ext) && IMG_MIME.has(file.mimetype)) {
     cb(null, true);
   } else {
     cb(new Error('Only JPG and PNG images are allowed.'));
