@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Verify Your Email | EPR Access Limited</title>
+  <%- include('../partials/head') %>
+</head>
+<body class="auth-body">
+  <div class="auth-container">
+    <div class="auth-brand">
+      <a href="/" class="nav-logo"><img src="/images/logo.png" alt="EPR Access Limited" class="site-logo site-logo-auth" /></a>
+    </div>
+    <div class="auth-card">
+      <h2>Check Your Email</h2>
+      <p class="auth-sub">
+        <% if (email) { %>
+          We've sent a verification link to <strong><%= email %></strong>.
+        <% } else { %>
+          We've sent you a verification link.
+        <% } %>
+        Click it to activate your account — the link expires in 10 minutes.
+      </p>
+
+      <%- include('../partials/flash') %>
+
+      <p style="font-size:0.9rem;color:#6b7280;margin:0 0 1.25rem;">
+        Didn't receive it? Check your spam folder, or request a fresh link below.
+      </p>
+
+      <form action="/auth/resend-verification" method="POST" class="auth-form">
+        <% if (!email) { %>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" required placeholder="your@email.com" autocomplete="email" />
+        </div>
+        <% } else { %>
+        <input type="hidden" name="email" value="<%= email %>" />
+        <% } %>
+        <button type="submit" class="btn btn-gold btn-block">Resend verification link</button>
+      </form>
+
+      <p class="auth-footer">Already verified? <a href="/auth/login">Sign in</a></p>
+    </div>
+  </div>
+</body>
+</html>

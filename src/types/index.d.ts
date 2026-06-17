@@ -13,6 +13,9 @@ declare module 'express-session' {
     userEmail?: string;
     userName?: string;
     sessionVersion?: number;
+    // Email captured at register/login so the "verify your email" notice and the
+    // resend-verification form work without putting the address in the URL.
+    pendingVerifyEmail?: string;
   }
 }
 

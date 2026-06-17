@@ -27,6 +27,7 @@ model User {
   status          String    @default("ACTIVE")
   emailVerified   Boolean   @default(false)
   emailToken      String?
+  emailTokenExp   DateTime?
   resetToken      String?
   resetTokenExp   DateTime?
   kycStatus       String    @default("PENDING")

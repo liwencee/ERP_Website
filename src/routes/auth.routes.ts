@@ -11,6 +11,8 @@ router.get('/login', isGuest, auth.loginGet);
 router.post('/login', isGuest, authLimiter, auth.loginPost);
 router.get('/logout', auth.logout);
 router.get('/verify-email/:token', auth.verifyEmail);
+router.get('/verify-notice', auth.verifyNoticeGet);
+router.post('/resend-verification', authLimiter, auth.resendVerification);
 router.get('/forgot-password', isGuest, auth.forgotGet);
 router.post('/forgot-password', isGuest, authLimiter, auth.forgotPost);
 router.get('/reset-password/:token', isGuest, auth.resetGet);

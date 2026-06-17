@@ -1,7 +1,6 @@
-import transporter from '../config/email';
+import { sendMail } from '../config/email';
 
 const APP_URL = process.env.APP_URL || 'http://localhost:3000';
-const FROM = `"EPR Access Limited" <${process.env.SMTP_USER}>`;
 
 // ─── Brand colours ───────────────────────────────────────────────────────────
 const BRAND_RED   = '#CC1A1A';
@@ -44,8 +43,7 @@ export async function sendVerificationEmail(
   email: string, firstName: string, token: string
 ): Promise<void> {
   const url = `${APP_URL}/auth/verify-email/${token}`;
-  await transporter.sendMail({
-    from: FROM,
+  await sendMail({
     to: email,
     subject: 'Verify your EPR Access account',
     html: emailWrapper(`
@@ -55,7 +53,7 @@ export async function sendVerificationEmail(
       <p style="font-size:0.85rem;color:#6b7280;">Or copy this link into your browser:<br>
         <a href="${url}" style="color:${BRAND_RED};word-break:break-all;">${url}</a>
       </p>
-      <p style="font-size:0.82rem;color:#9ca3af;">This link expires in 24 hours.</p>
+      <p style="font-size:0.82rem;color:#9ca3af;">This link expires in 10 minutes.</p>
     `),
   });
 }
@@ -65,8 +63,7 @@ export async function sendPasswordReset(
   email: string, firstName: string, token: string
 ): Promise<void> {
   const url = `${APP_URL}/auth/reset-password/${token}`;
-  await transporter.sendMail({
-    from: FROM,
+  await sendMail({
     to: email,
     subject: 'Reset your EPR Access password',
     html: emailWrapper(`
@@ -88,8 +85,7 @@ export async function sendInvestmentConfirmation(
   amount: number,
   maturityDate: Date
 ): Promise<void> {
-  await transporter.sendMail({
-    from: FROM,
+  await sendMail({
     to: email,
     subject: 'Investment Confirmed — EPR Access',
     html: emailWrapper(`
@@ -123,8 +119,7 @@ export async function sendDepositConfirmed(
   amount: number,
   reference: string
 ): Promise<void> {
-  await transporter.sendMail({
-    from: FROM,
+  await sendMail({
     to: email,
     subject: 'Deposit Confirmed — EPR Access',
     html: emailWrapper(`
@@ -158,8 +153,7 @@ export async function sendWithdrawalNotice(
     ? 'has been processed and sent to your bank account.'
     : 'was rejected and the amount has been refunded to your wallet.';
 
-  await transporter.sendMail({
-    from: FROM,
+  await sendMail({
     to: email,
     subject: `Withdrawal ${status} — EPR Access`,
     html: emailWrapper(`
