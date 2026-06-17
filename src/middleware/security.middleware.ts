@@ -2,15 +2,15 @@ import { Request, Response, NextFunction } from 'express';
 import rateLimit from 'express-rate-limit';
 
 // Stricter limiter for authentication endpoints to blunt brute-force and
-// credential-stuffing attacks. `skipSuccessfulRequests` means only FAILED
-// attempts count, so legitimate users who log in cleanly are never penalised.
+// credential-stuffing attacks. All requests count regardless of outcome —
+// failed logins redirect with 302 (not 4xx), so skipSuccessfulRequests:true
+// would skip them entirely, making the limiter useless against brute-force.
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
   message: 'Too many attempts. Please wait 15 minutes and try again.',
   standardHeaders: true,
   legacyHeaders: false,
-  skipSuccessfulRequests: true,
   skip: () => process.env.NODE_ENV === 'test',
 });
 
