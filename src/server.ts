@@ -88,10 +88,27 @@ app.use(hpp());
 app.use(cors({ origin: process.env.APP_URL, credentials: true }));
 
 // ─── Rate limiting ───────────────────────────────────────────────────────────
+// Static assets (CSS/JS/images/fonts/uploads) are NOT counted — a single image-
+// heavy page can fire 40+ asset requests, which would otherwise burn the budget
+// in a couple of page loads. We also run a generous cap because Nigerian mobile
+// networks place many users behind a single carrier-grade-NAT IP, so a per-IP
+// limit is effectively shared across many real people. Only dynamic requests
+// count; brute-force on auth endpoints is handled separately by `authLimiter`.
+const STATIC_ASSET = /\.(css|js|mjs|map|png|jpe?g|gif|svg|webp|ico|bmp|woff2?|ttf|eot|mp4|webm|pdf)$/i;
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 200,
+  max: 1000,
   message: 'Too many requests, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) =>
+    req.method === 'GET' &&
+    (STATIC_ASSET.test(req.path) ||
+      req.path.startsWith('/css/') ||
+      req.path.startsWith('/js/') ||
+      req.path.startsWith('/images/') ||
+      req.path.startsWith('/fonts/') ||
+      req.path.startsWith('/uploads/')),
 });
 app.use(limiter);
 

@@ -60,7 +60,10 @@
                 <span class="doc-type"><%= doc.type.replace('_',' ') %></span>
                 <span class="doc-date"><%= formatDate(doc.createdAt) %></span>
               </div>
-              <span class="badge-status status-<%= doc.status.toLowerCase() %>"><%= doc.status %></span>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <a href="<%= doc.url %>" target="_blank" rel="noopener" class="btn btn-sm btn-outline-gold">View</a>
+                <span class="badge-status status-<%= doc.status.toLowerCase() %>"><%= doc.status %></span>
+              </div>
             </div>
             <% }) %>
           </div>
