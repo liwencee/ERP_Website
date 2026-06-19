@@ -895,10 +895,10 @@
   min-width: 0;            /* lets the flex child shrink below its content size */
 }
 .stat-value {
-  font-size: clamp(0.92rem, 1.6vw, 1.25rem) !important;
+  font-size: clamp(0.85rem, 1.5vw, 1.2rem) !important;
   font-weight: 700 !important;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   display: block !important;
+  white-space: normal;       /* wrap long values (e.g. large AUM) instead of */
+  overflow-wrap: anywhere;   /* hard-clipping them inside the card */
+  line-height: 1.2;
 }
