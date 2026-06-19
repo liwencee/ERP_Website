@@ -61,8 +61,7 @@
                 Use this to manually credit the user's wallet when automatic payment confirmation is not working.
                 A transaction record will be created and the user will be notified.
               </p>
-              <form action="/admin/users/<%= profileUser.id %>/credit-wallet" method="POST"
-                    onsubmit="return confirm('Credit ₦' + document.getElementById('creditAmount').value + ' to this user\'s wallet?')">
+              <form action="/admin/users/<%= profileUser.id %>/credit-wallet" method="POST" id="creditForm">
                 <div class="manual-credit-row">
                   <div class="manual-credit-field">
                     <label for="creditAmount">Amount (₦)</label>
@@ -70,9 +69,14 @@
                            min="100" step="100" placeholder="e.g. 50000" required />
                   </div>
                   <div class="manual-credit-field">
+                    <label for="creditDate">Payment Date <span class="text-muted">(optional)</span></label>
+                    <input type="date" id="creditDate" name="creditDate"
+                           max="<%= new Date().toISOString().slice(0,10) %>" />
+                  </div>
+                  <div class="manual-credit-field">
                     <label for="creditNote">Note / Reason</label>
                     <input type="text" id="creditNote" name="note"
-                           placeholder="e.g. Bank transfer confirmed — ref TXN123" maxlength="120" />
+                           placeholder="e.g. Paid on old platform — ref TXN123" maxlength="120" />
                   </div>
                   <button type="submit" class="btn btn-gold manual-credit-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -155,6 +159,29 @@
             </div>
             <% } else { %><p>No transactions.</p><% } %>
           </div>
+
+          <% if (user && user.role === 'ADMIN' && user.id !== profileUser.id && profileUser.role !== 'ADMIN') { %>
+          <div class="dash-section danger-zone">
+            <div class="section-header-row">
+              <h3 style="color:#c0392b;">Danger Zone</h3>
+            </div>
+            <p class="manual-credit-note">
+              Permanently delete this user and <strong>all</strong> associated wallet, transaction,
+              investment and KYC records. This <strong>cannot be undone</strong>. An audit-log entry of
+              the deletion is retained.
+            </p>
+            <form action="/admin/users/<%= profileUser.id %>/delete" method="POST" id="deleteUserForm">
+              <div class="manual-credit-row">
+                <div class="manual-credit-field">
+                  <label for="confirmEmail">Type <code><%= profileUser.email %></code> to confirm</label>
+                  <input type="text" id="confirmEmail" name="confirmEmail" autocomplete="off"
+                         placeholder="<%= profileUser.email %>" data-user-email="<%= profileUser.email %>" />
+                </div>
+                <button type="submit" class="btn btn-danger manual-credit-btn">Delete User Permanently</button>
+              </div>
+            </form>
+          </div>
+          <% } %>
         </div>
       </div>
 
@@ -162,5 +189,39 @@
   </div>
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
   <script src="/js/dashboard.js"></script>
+  <script nonce="<%= cspNonce %>">
+    (function () {
+      // Confirm a manual wallet credit before submitting. (Inline onsubmit is
+      // blocked by the Content-Security-Policy, so we wire it here.)
+      var creditForm = document.getElementById('creditForm');
+      if (creditForm) {
+        creditForm.addEventListener('submit', function (e) {
+          var amt = document.getElementById('creditAmount').value;
+          var when = document.getElementById('creditDate').value;
+          var msg = 'Credit ₦' + amt + " to this user's wallet?";
+          if (when) msg += '\n\nRecorded as paid on: ' + when;
+          if (!window.confirm(msg)) e.preventDefault();
+        });
+      }
+
+      // Delete user — require the typed email to match, then a final confirm.
+      var deleteForm = document.getElementById('deleteUserForm');
+      if (deleteForm) {
+        deleteForm.addEventListener('submit', function (e) {
+          var input = document.getElementById('confirmEmail');
+          var expected = (input.getAttribute('data-user-email') || '').toLowerCase();
+          var typed = (input.value || '').trim().toLowerCase();
+          if (typed !== expected) {
+            e.preventDefault();
+            window.alert('Type the exact email address to confirm deletion.');
+            return;
+          }
+          if (!window.confirm('PERMANENTLY delete this user and ALL their records?\nThis cannot be undone.')) {
+            e.preventDefault();
+          }
+        });
+      }
+    })();
+  </script>
 </body>
 </html>

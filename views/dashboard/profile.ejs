@@ -36,7 +36,7 @@
             <label class="avatar-upload-label">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               Change Photo
-              <input type="file" name="avatar" accept="image/jpeg,image/png,image/webp" onchange="this.form.submit()" style="display:none" />
+              <input type="file" name="avatar" id="avatarInput" accept="image/jpeg,image/png,image/webp" style="display:none" />
             </label>
           </form>
         </div>
@@ -47,14 +47,14 @@
           <p class="referral-desc">Invite friends and family to EPR Access Limited using your unique referral code.</p>
           <div class="referral-code-box">
             <span class="referral-code" id="refCode"><%= profileUser.referralCode || 'Not assigned' %></span>
-            <button class="btn-copy" onclick="copyReferralCode()" title="Copy code">
+            <button type="button" class="btn-copy" id="copyCodeBtn" title="Copy code">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
             </button>
           </div>
           <div class="referral-link-box">
             <span class="referral-link-text">Share link:</span>
             <a href="/auth/register?ref=<%= profileUser.referralCode %>" class="referral-link" id="refLink">/auth/register?ref=<%= profileUser.referralCode %></a>
-            <button class="btn-copy" onclick="copyReferralLink()" title="Copy link">
+            <button type="button" class="btn-copy" id="copyLinkBtn" title="Copy link">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
             </button>
           </div>
@@ -120,22 +120,35 @@
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
   <script src="/js/dashboard.js"></script>
   <script nonce="<%= cspNonce %>">
-    function copyReferralCode() {
-      const code = document.getElementById('refCode').textContent.trim();
-      navigator.clipboard.writeText(code).then(() => {
-        const btn = event.currentTarget;
-        btn.innerHTML = '✓ Copied!';
-        setTimeout(() => btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>', 2000);
+    (function () {
+      // Auto-submit the avatar form when a photo is chosen. (Replaces an inline
+      // onchange handler, which the Content-Security-Policy now blocks.)
+      var avatarInput = document.getElementById('avatarInput');
+      if (avatarInput) {
+        avatarInput.addEventListener('change', function () {
+          if (this.files && this.files.length) this.form.submit();
+        });
+      }
+
+      // Copy-to-clipboard buttons. Briefly swap the icon for a tick, then restore.
+      function bindCopy(btnId, getText) {
+        var btn = document.getElementById(btnId);
+        if (!btn) return;
+        btn.addEventListener('click', function () {
+          navigator.clipboard.writeText(getText()).then(function () {
+            var original = btn.innerHTML;
+            btn.innerHTML = '✓ Copied!';
+            setTimeout(function () { btn.innerHTML = original; }, 2000);
+          });
+        });
+      }
+      bindCopy('copyCodeBtn', function () {
+        return document.getElementById('refCode').textContent.trim();
       });
-    }
-    function copyReferralLink() {
-      const link = window.location.origin + document.getElementById('refLink').getAttribute('href');
-      navigator.clipboard.writeText(link).then(() => {
-        const btn = event.currentTarget;
-        btn.innerHTML = '✓ Copied!';
-        setTimeout(() => btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>', 2000);
+      bindCopy('copyLinkBtn', function () {
+        return window.location.origin + document.getElementById('refLink').getAttribute('href');
       });
-    }
+    })();
   </script>
 </body>
 </html>

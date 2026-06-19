@@ -179,6 +179,21 @@ export async function creditWallet(req: Request, res: Response): Promise<void> {
     return;
   }
 
+  // Optional payment date — lets an admin record money a user paid earlier (e.g.
+  // on the previous platform) against its real date. Blank = dated today. The
+  // wallet is credited NOW either way; only the transaction record is backdated.
+  let creditedAt: Date | null = null;
+  const creditDateRaw = (req.body.creditDate as string)?.trim();
+  if (creditDateRaw) {
+    const parsed = new Date(creditDateRaw);
+    if (isNaN(parsed.getTime()) || parsed.getTime() > Date.now()) {
+      req.flash('error', 'Payment date is invalid or in the future.');
+      res.redirect(`/admin/users/${userId}`);
+      return;
+    }
+    creditedAt = parsed;
+  }
+
   const user = await prisma.user.findUnique({
     where: { id: userId },
     include: { wallet: true },
@@ -205,7 +220,7 @@ export async function creditWallet(req: Request, res: Response): Promise<void> {
       where: { userId },
       data: { balance: { increment: amount } },
     }),
-    // Create a confirmed DEPOSIT transaction record
+    // Create a confirmed DEPOSIT transaction record (optionally backdated)
     prisma.transaction.create({
       data: {
         userId,
@@ -215,6 +230,7 @@ export async function creditWallet(req: Request, res: Response): Promise<void> {
         reference,
         paymentMethod: 'BANK_TRANSFER',
         description: `Manual top-up by ${adminName} — ${note}`,
+        ...(creditedAt ? { createdAt: creditedAt } : {}),
       },
     }),
     // Notify the user
@@ -232,7 +248,68 @@ export async function creditWallet(req: Request, res: Response): Promise<void> {
     await emailService.sendDepositConfirmed(user.email, user.firstName, amount, reference);
   } catch { /* silent */ }
 
-  await logAudit(req, 'WALLET_CREDIT', { targetType: 'User', targetId: userId, detail: `₦${amount.toLocaleString()} — ${note} (ref ${reference})` });
-  req.flash('success', `₦${amount.toLocaleString()} successfully credited to ${user.firstName} ${user.lastName}'s wallet. Ref: ${reference}`);
+  const dateNote = creditedAt ? ` dated ${creditedAt.toISOString().slice(0, 10)}` : '';
+  await logAudit(req, 'WALLET_CREDIT', { targetType: 'User', targetId: userId, detail: `₦${amount.toLocaleString()}${dateNote} — ${note} (ref ${reference})` });
+  req.flash('success', `₦${amount.toLocaleString()} successfully credited to ${user.firstName} ${user.lastName}'s wallet${dateNote}. Ref: ${reference}`);
   res.redirect(`/admin/users/${userId}`);
+}
+
+// ─── Delete User (ADMIN only) ──────────────────────────────────────────────────
+// Permanently removes a user and ALL associated records (wallet, transactions,
+// investments, KYC documents, notifications). Irreversible. The AuditLog entry
+// survives (it has no FK to User) so the deletion itself stays on record.
+// Guards: cannot delete yourself, cannot delete another ADMIN, and the admin
+// must re-type the user's email as confirmation.
+export async function deleteUser(req: Request, res: Response): Promise<void> {
+  const targetId = req.params.id;
+  const actingId = req.session.userId;
+
+  if (targetId === actingId) {
+    req.flash('error', 'You cannot delete your own account.');
+    res.redirect(`/admin/users/${targetId}`);
+    return;
+  }
+
+  const target = await prisma.user.findUnique({ where: { id: targetId } });
+  if (!target) {
+    req.flash('error', 'User not found.');
+    res.redirect('/admin/users');
+    return;
+  }
+
+  if (target.role === 'ADMIN') {
+    req.flash('error', 'Administrator accounts cannot be deleted.');
+    res.redirect(`/admin/users/${targetId}`);
+    return;
+  }
+
+  // Typed confirmation must match the target email exactly.
+  const typed = String(req.body.confirmEmail || '').trim().toLowerCase();
+  if (typed !== target.email.toLowerCase()) {
+    req.flash('error', 'Confirmation email did not match — user was NOT deleted.');
+    res.redirect(`/admin/users/${targetId}`);
+    return;
+  }
+
+  // Record the deletion BEFORE the row disappears.
+  await logAudit(req, 'USER_DELETE', {
+    targetType: 'User',
+    targetId,
+    detail: `${target.email} (${target.firstName} ${target.lastName})`,
+  });
+
+  // Remove dependents first, then the user — explicit and order-safe regardless
+  // of the live DB's cascade configuration (transactions reference investments,
+  // so they must go first).
+  await prisma.$transaction([
+    prisma.transaction.deleteMany({ where: { userId: targetId } }),
+    prisma.userInvestment.deleteMany({ where: { userId: targetId } }),
+    prisma.document.deleteMany({ where: { userId: targetId } }),
+    prisma.notification.deleteMany({ where: { userId: targetId } }),
+    prisma.wallet.deleteMany({ where: { userId: targetId } }),
+    prisma.user.delete({ where: { id: targetId } }),
+  ]);
+
+  req.flash('success', `${target.firstName} ${target.lastName} (${target.email}) and all associated records have been permanently deleted.`);
+  res.redirect('/admin/users');
 }
