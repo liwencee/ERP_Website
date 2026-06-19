@@ -40,7 +40,7 @@
                 <% }) %>
               </select>
             </div>
-            <button class="btn btn-gold" onclick="calculateReturns()">Calculate</button>
+            <button type="button" class="btn btn-gold" id="calcBtn">Calculate</button>
           </div>
           <div class="calc-results" id="calcResults" style="display:none">
             <div class="calc-result-item">
@@ -141,7 +141,7 @@
                 <td><span class="badge-status status-<%= inv.status.toLowerCase() %>"><%= inv.status %></span></td>
                 <td>
                   <% if (inv.status === 'ACTIVE' && inv.plan.type === 'SAVINGS') { %>
-                    <form action="/dashboard/investments/<%= inv.id %>/redeem-early" method="POST" onsubmit="return confirm('Early withdrawal returns principal only — no interest. Continue?')">
+                    <form action="/dashboard/investments/<%= inv.id %>/redeem-early" method="POST" class="js-confirm-form" data-confirm="Early withdrawal returns principal only — no interest. Continue?">
                       <button type="submit" class="btn btn-sm btn-danger">Withdraw Early</button>
                     </form>
                   <% } else if (inv.status === 'ACTIVE' && !isMatured) { %>
@@ -225,6 +225,16 @@
     document.getElementById('calcAmount')?.addEventListener('input', function() {
       const planVal = document.getElementById('calcPlan').value;
       if (planVal && this.value) calculateReturns();
+    });
+
+    // Calculate button (replaces a CSP-blocked inline onclick).
+    document.getElementById('calcBtn')?.addEventListener('click', calculateReturns);
+
+    // Confirm early-withdrawal submits (replaces CSP-blocked inline onsubmit).
+    document.querySelectorAll('.js-confirm-form').forEach(function (f) {
+      f.addEventListener('submit', function (e) {
+        if (!window.confirm(f.getAttribute('data-confirm') || 'Are you sure?')) e.preventDefault();
+      });
     });
   </script>
 </body>

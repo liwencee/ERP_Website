@@ -15,14 +15,14 @@
         <div class="section-header-row">
           <h3>All Transactions</h3>
           <form action="/admin/transactions" method="GET" class="search-form">
-            <select name="type" onchange="this.form.submit()">
+            <select name="type" class="js-autosubmit">
               <option value="">All Types</option>
               <option value="DEPOSIT" <%= typeFilter === 'DEPOSIT' ? 'selected' : '' %>>Deposit</option>
               <option value="WITHDRAWAL" <%= typeFilter === 'WITHDRAWAL' ? 'selected' : '' %>>Withdrawal</option>
               <option value="INVESTMENT" <%= typeFilter === 'INVESTMENT' ? 'selected' : '' %>>Investment</option>
               <option value="RETURN" <%= typeFilter === 'RETURN' ? 'selected' : '' %>>Return</option>
             </select>
-            <select name="status" onchange="this.form.submit()">
+            <select name="status" class="js-autosubmit">
               <option value="">All Statuses</option>
               <option value="PENDING" <%= statusFilter === 'PENDING' ? 'selected' : '' %>>Pending</option>
               <option value="CONFIRMED" <%= statusFilter === 'CONFIRMED' ? 'selected' : '' %>>Confirmed</option>
@@ -70,7 +70,7 @@
                 <td><span class="badge-status status-<%= tx.status.toLowerCase() %>"><%= tx.status %></span></td>
                 <td>
                   <% if (tx.status === 'PENDING') { %>
-                  <form action="/admin/transactions/<%= tx.id %>/confirm" method="POST" style="display:inline" onsubmit="return confirmWithBackdate(this, '<%= tx.id %>')">
+                  <form action="/admin/transactions/<%= tx.id %>/confirm" method="POST" style="display:inline" class="js-confirm-backdate">
                     <input type="hidden" name="backdateDate" class="backdate-input" />
                     <button type="submit" class="btn btn-sm btn-gold">Confirm</button>
                   </form>
@@ -101,16 +101,24 @@
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
   <script src="/js/dashboard.js"></script>
   <script nonce="<%= cspNonce %>">
-    function confirmWithBackdate(form, txId) {
-      const useBackdate = confirm('Backdate this transaction? Click OK to set a custom date, or Cancel to use today.');
-      if (useBackdate) {
-        const dateInput = prompt('Enter transaction date (YYYY-MM-DD):', new Date().toISOString().slice(0,10));
-        if (dateInput) {
-          form.querySelector('.backdate-input').value = dateInput;
-        }
-      }
-      return true;
-    }
+    (function () {
+      // Auto-submit filter selects (replaces CSP-blocked inline onchange).
+      document.querySelectorAll('.js-autosubmit').forEach(function (sel) {
+        sel.addEventListener('change', function () { this.form.submit(); });
+      });
+
+      // Confirm a pending transaction, optionally backdating it (replaces a
+      // CSP-blocked inline onsubmit). Not preventing default = the form submits.
+      document.querySelectorAll('.js-confirm-backdate').forEach(function (form) {
+        form.addEventListener('submit', function () {
+          var useBackdate = window.confirm('Backdate this transaction? Click OK to set a custom date, or Cancel to use today.');
+          if (useBackdate) {
+            var dateInput = window.prompt('Enter transaction date (YYYY-MM-DD):', new Date().toISOString().slice(0, 10));
+            if (dateInput) form.querySelector('.backdate-input').value = dateInput;
+          }
+        });
+      });
+    })();
   </script>
 </body>
 </html>

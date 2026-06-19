@@ -15,7 +15,7 @@
         <div class="section-header-row">
           <h3>All Investments</h3>
           <form action="/admin/investments" method="GET" class="search-form">
-            <select name="status" onchange="this.form.submit()">
+            <select name="status" id="statusFilter">
               <option value="">All Statuses</option>
               <option value="ACTIVE" <%= statusFilter === 'ACTIVE' ? 'selected' : '' %>>Active</option>
               <option value="MATURED" <%= statusFilter === 'MATURED' ? 'selected' : '' %>>Matured</option>
@@ -49,7 +49,7 @@
                 <td><%= formatDate(inv.maturityDate) %></td>
                 <td><span class="badge-status status-<%= inv.status.toLowerCase() %>"><%= inv.status %></span></td>
                 <td>
-                  <button class="btn btn-sm btn-outline-gold" onclick="openBackdate('<%= inv.id %>')">Edit Dates</button>
+                  <button type="button" class="btn btn-sm btn-outline-gold js-edit-dates" data-inv-id="<%= inv.id %>">Edit Dates</button>
                 </td>
               </tr>
               <% }) %>
@@ -75,7 +75,7 @@
   <div class="modal" id="backdateModal">
     <div class="modal-box" style="max-width:400px">
       <h3>Edit Investment Dates</h3>
-      <button class="modal-close" onclick="closeModal('backdateModal')">&times;</button>
+      <button type="button" class="modal-close" data-close-modal="backdateModal">&times;</button>
       <p class="text-muted" style="margin-bottom:16px;font-size:0.9rem;">Update start and maturity dates for this investment (admin backdating).</p>
       <form action="/admin/investments/backdate" method="POST" class="auth-form">
         <input type="hidden" name="investmentId" id="backdateInvId" />
@@ -94,14 +94,30 @@
 
   <script src="/js/dashboard.js"></script>
   <script nonce="<%= cspNonce %>">
-    function openBackdate(invId) {
-      document.getElementById('backdateInvId').value = invId;
-      document.getElementById('backdateModal').classList.add('open');
-    }
-    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-    document.querySelectorAll('.modal').forEach(function(m) {
-      m.addEventListener('click', function(e) { if (e.target === m) m.classList.remove('open'); });
-    });
+    (function () {
+      // Auto-submit the status filter (replaces a CSP-blocked inline onchange).
+      var statusFilter = document.getElementById('statusFilter');
+      if (statusFilter) statusFilter.addEventListener('change', function () { this.form.submit(); });
+
+      // Open the backdate modal for a specific investment.
+      document.querySelectorAll('.js-edit-dates').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          document.getElementById('backdateInvId').value = btn.getAttribute('data-inv-id');
+          document.getElementById('backdateModal').classList.add('open');
+        });
+      });
+
+      // Close buttons + backdrop click.
+      document.querySelectorAll('[data-close-modal]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var m = document.getElementById(btn.getAttribute('data-close-modal'));
+          if (m) m.classList.remove('open');
+        });
+      });
+      document.querySelectorAll('.modal').forEach(function (m) {
+        m.addEventListener('click', function (e) { if (e.target === m) m.classList.remove('open'); });
+      });
+    })();
   </script>
 </body>
 </html>

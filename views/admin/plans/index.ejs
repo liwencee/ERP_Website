@@ -39,7 +39,7 @@
                 <td>
                   <a href="/admin/plans/<%= plan.id %>/edit" class="btn btn-sm btn-outline-gold">Edit</a>
                   <form action="/admin/plans/<%= plan.id %>/delete" method="POST" style="display:inline">
-                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Close this plan?')">Close</button>
+                    <button type="submit" class="btn btn-sm btn-danger js-confirm" data-confirm="Close this plan?">Close</button>
                   </form>
                 </td>
               </tr>
@@ -56,5 +56,15 @@
   </div>
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
   <script src="/js/dashboard.js"></script>
+  <script nonce="<%= cspNonce %>">
+    (function () {
+      // Confirm destructive submits (replaces CSP-blocked inline onclick="return confirm(...)").
+      document.querySelectorAll('.js-confirm').forEach(function (el) {
+        el.addEventListener('click', function (e) {
+          if (!window.confirm(el.getAttribute('data-confirm') || 'Are you sure?')) e.preventDefault();
+        });
+      });
+    })();
+  </script>
 </body>
 </html>

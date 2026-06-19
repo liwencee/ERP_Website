@@ -33,7 +33,7 @@
                 <%= profileUser.status === 'ACTIVE' ? 'Suspend Account' : 'Activate Account' %>
               </button>
             </form>
-            <form action="/admin/users/<%= profileUser.id %>/force-logout" method="POST" onsubmit="return confirm('Force logout this user?')">
+            <form action="/admin/users/<%= profileUser.id %>/force-logout" method="POST" class="js-confirm-form" data-confirm="Force logout this user?">
               <button type="submit" class="btn btn-sm btn-outline-gold">Force Logout</button>
             </form>
           </div>
@@ -221,6 +221,14 @@
           }
         });
       }
+
+      // Generic confirm-before-submit forms (e.g. force-logout). Replaces a
+      // CSP-blocked inline onsubmit handler.
+      document.querySelectorAll('.js-confirm-form').forEach(function (f) {
+        f.addEventListener('submit', function (e) {
+          if (!window.confirm(f.getAttribute('data-confirm') || 'Are you sure?')) e.preventDefault();
+        });
+      });
     })();
   </script>
 </body>

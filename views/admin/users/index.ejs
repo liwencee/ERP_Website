@@ -17,7 +17,7 @@
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
             <form action="/admin/users" method="GET" class="search-form">
               <input type="text" name="search" placeholder="Search name or email" value="<%= search %>" />
-              <select name="role" onchange="this.form.submit()">
+              <select name="role" class="js-autosubmit">
                 <option value="">All Roles</option>
                 <option value="INVESTOR" <%= roleFilter === 'INVESTOR' ? 'selected' : '' %>>Investors</option>
                 <option value="STAFF" <%= roleFilter === 'STAFF' ? 'selected' : '' %>>Staff</option>
@@ -60,5 +60,13 @@
   </div>
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
   <script src="/js/dashboard.js"></script>
+  <script nonce="<%= cspNonce %>">
+    (function () {
+      // Auto-submit the role filter on change (replaces CSP-blocked inline onchange).
+      document.querySelectorAll('.js-autosubmit').forEach(function (sel) {
+        sel.addEventListener('change', function () { this.form.submit(); });
+      });
+    })();
+  </script>
 </body>
 </html>
