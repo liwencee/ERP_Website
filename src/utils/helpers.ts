@@ -52,6 +52,19 @@ export function planDisplayName(name: string): string {
   return PLAN_DISPLAY_NAMES[name] || name;
 }
 
+// Canonical plan display order — MUST mirror the Investments dropdown in
+// views/partials/public-nav.ejs. Used to order plan cards on the dashboard and
+// public pages so the whole app is consistent. Matched by name substring.
+const PLAN_DISPLAY_ORDER = ['Silver', 'Bronze', 'Gold', 'Diamond', 'Save Future', 'Trading', 'Dollar', 'Fixed Deposit', 'Real Estate'];
+
+export function sortPlansByMenu<T extends { name: string }>(plans: T[]): T[] {
+  const rank = (name: string): number => {
+    const i = PLAN_DISPLAY_ORDER.findIndex((k) => name.includes(k));
+    return i === -1 ? 999 : i;
+  };
+  return [...plans].sort((a, b) => rank(a.name) - rank(b.name));
+}
+
 export function maskEmail(email: string): string {
   const [local, domain] = email.split('@');
   const masked = local.slice(0, 2) + '***' + local.slice(-1);

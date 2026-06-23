@@ -2,15 +2,14 @@ import { Request, Response } from 'express';
 import prisma from '../../config/database';
 import * as investmentService from '../../services/investment.service';
 import * as emailService from '../../services/email.service';
-import { USD_NGN_RATE } from '../../utils/helpers';
+import { USD_NGN_RATE, sortPlansByMenu } from '../../utils/helpers';
 
 export async function index(req: Request, res: Response): Promise<void> {
   const userId = req.session.userId!;
 
-  const [plans, myInvestments] = await Promise.all([
+  const [rawPlans, myInvestments] = await Promise.all([
     prisma.investmentPlan.findMany({
       where: { status: 'ACTIVE' },
-      orderBy: { type: 'asc' },
       include: { tenures: { orderBy: { sortOrder: 'asc' } } },
     }),
     prisma.userInvestment.findMany({
@@ -19,6 +18,9 @@ export async function index(req: Request, res: Response): Promise<void> {
       orderBy: { createdAt: 'desc' },
     }),
   ]);
+
+  // Order the plan cards to match the Investments menu dropdown.
+  const plans = sortPlansByMenu(rawPlans);
 
   res.render('dashboard/investments', { pageTitle: 'Investments', plans, myInvestments });
 }

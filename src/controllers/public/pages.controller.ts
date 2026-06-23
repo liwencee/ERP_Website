@@ -1,18 +1,8 @@
 import { Request, Response } from 'express';
 import prisma from '../../config/database';
 import logger from '../../utils/logger';
-import { planDisplayName } from '../../utils/helpers';
+import { planDisplayName, sortPlansByMenu } from '../../utils/helpers';
 import * as contactService from '../../services/contact.service';
-
-const PLAN_ORDER = ['Silver', 'Bronze', 'Gold', 'Diamond', 'Save Future', 'Fixed Deposit', 'Trading', 'Dollar', 'Real Estate'];
-
-function sortPlans<T extends { name: string }>(plans: T[]): T[] {
-  return [...plans].sort((a, b) => {
-    const ai = PLAN_ORDER.findIndex(k => a.name.includes(k));
-    const bi = PLAN_ORDER.findIndex(k => b.name.includes(k));
-    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
-  });
-}
 
 function slugify(name: string): string {
   return name
@@ -28,7 +18,7 @@ export async function home(req: Request, res: Response): Promise<void> {
     where: { status: 'ACTIVE' },
     include: { tenures: { orderBy: { sortOrder: 'asc' } } },
   });
-  const plans = sortPlans(allPlans);
+  const plans = sortPlansByMenu(allPlans);
   // Featured cards: all plans shown (Savings, Silver, Bronze, Gold, Diamond, Fixed Deposit, Trading, Dollar, Real Estate)
   const featuredPlans = plans;
   res.render('public/index', { title: 'Home', plans, featuredPlans });
@@ -47,7 +37,7 @@ export async function investmentPlans(_req: Request, res: Response): Promise<voi
     where: { status: 'ACTIVE' },
     include: { tenures: { orderBy: { sortOrder: 'asc' } } },
   });
-  const plans = sortPlans(raw).map(plan => ({ ...plan, slug: slugify(plan.name), displayName: planDisplayName(plan.name) }));
+  const plans = sortPlansByMenu(raw).map(plan => ({ ...plan, slug: slugify(plan.name), displayName: planDisplayName(plan.name) }));
   res.render('public/investment-plans', { title: 'Investment Plans', plans });
 }
 
@@ -56,7 +46,7 @@ export async function investmentPlanDetail(req: Request, res: Response): Promise
     where: { status: 'ACTIVE' },
     include: { tenures: { orderBy: { sortOrder: 'asc' } } },
   });
-  const plans = sortPlans(raw);
+  const plans = sortPlansByMenu(raw);
   const plan = plans.find(p => slugify(p.name) === req.params.slug);
 
   if (!plan) {
