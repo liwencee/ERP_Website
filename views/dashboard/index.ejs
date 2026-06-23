@@ -69,7 +69,7 @@
             <tbody>
               <% activeInvestments.forEach(function(inv) { %>
               <tr>
-                <td><%= inv.plan.name %></td>
+                <td><%= planDisplayName(inv.plan.name) %></td>
                 <td><%= formatCurrency(Number(inv.amount)) %></td>
                 <td class="text-gold"><%= formatCurrency(Number(inv.expectedReturn)) %></td>
                 <td><%= formatDate(inv.maturityDate) %></td>

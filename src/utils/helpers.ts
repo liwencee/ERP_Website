@@ -40,6 +40,18 @@ export function generateToken(): string {
   return randomUUID().replace(/-/g, '') + Date.now().toString(36);
 }
 
+// Display-name overrides for investment plans. The DB `name` is the source of
+// truth — it drives URL slugs and lookups — so to relabel a plan for users WITHOUT
+// breaking its link, add a mapping here instead of renaming it in the database.
+const PLAN_DISPLAY_NAMES: Record<string, string> = {
+  'Save Future – My Savings Plan': 'My Savings Plan - Save Future SF',
+};
+
+// Returns the user-facing name for a plan (falls back to the real name).
+export function planDisplayName(name: string): string {
+  return PLAN_DISPLAY_NAMES[name] || name;
+}
+
 export function maskEmail(email: string): string {
   const [local, domain] = email.split('@');
   const masked = local.slice(0, 2) + '***' + local.slice(-1);

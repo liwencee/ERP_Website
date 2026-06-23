@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../../config/database';
 import logger from '../../utils/logger';
+import { planDisplayName } from '../../utils/helpers';
 import * as contactService from '../../services/contact.service';
 
 const PLAN_ORDER = ['Silver', 'Bronze', 'Gold', 'Diamond', 'Save Future', 'Fixed Deposit', 'Trading', 'Dollar', 'Real Estate'];
@@ -20,14 +21,6 @@ function slugify(name: string): string {
     .replace(/[^a-z0-9\s]/g, '')
     .trim()
     .replace(/\s+/g, '-');
-}
-
-const DISPLAY_NAMES: Record<string, string> = {
-  'Save Future – My Savings Plan': 'My Savings Plan - Save Future SF',
-};
-
-function displayName(name: string): string {
-  return DISPLAY_NAMES[name] || name;
 }
 
 export async function home(req: Request, res: Response): Promise<void> {
@@ -54,7 +47,7 @@ export async function investmentPlans(_req: Request, res: Response): Promise<voi
     where: { status: 'ACTIVE' },
     include: { tenures: { orderBy: { sortOrder: 'asc' } } },
   });
-  const plans = sortPlans(raw).map(plan => ({ ...plan, slug: slugify(plan.name), displayName: displayName(plan.name) }));
+  const plans = sortPlans(raw).map(plan => ({ ...plan, slug: slugify(plan.name), displayName: planDisplayName(plan.name) }));
   res.render('public/investment-plans', { title: 'Investment Plans', plans });
 }
 
@@ -76,7 +69,7 @@ export async function investmentPlanDetail(req: Request, res: Response): Promise
     return;
   }
 
-  const planWithDisplay = { ...plan, displayName: displayName(plan.name) };
+  const planWithDisplay = { ...plan, displayName: planDisplayName(plan.name) };
   res.render('public/investment-plan-detail', { title: planWithDisplay.displayName, plan: planWithDisplay });
 }
 

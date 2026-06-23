@@ -31,7 +31,7 @@
             <tbody>
               <% plans.forEach(function(plan) { %>
               <tr>
-                <td><%= plan.name %></td>
+                <td><%= planDisplayName(plan.name) %></td>
                 <td class="text-gold"><%= plan.returnRate %>%</td>
                 <td><%= plan.duration %> days</td>
                 <td><% if (plan.type === 'DOLLAR') { %>$<%= Number(plan.minAmount).toLocaleString() %><% } else { %><%= formatCurrency(Number(plan.minAmount)) %><% } %></td>

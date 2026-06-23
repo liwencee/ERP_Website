@@ -28,7 +28,7 @@
         <div class="invest-layout">
           <div class="plan-summary-card">
             <div class="plan-type plan-type-<%= plan.type.toLowerCase().replace('_','-') %>"><%= plan.type.replace(/_/g,' ') %></div>
-            <h2><%= plan.name %></h2>
+            <h2><%= planDisplayName(plan.name) %></h2>
             <p><%= plan.description %></p>
             <div class="plan-specs">
               <div class="plan-spec">

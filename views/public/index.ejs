@@ -185,7 +185,7 @@
             %>
             <div class="plan-card <%= isFeatured ? 'featured' : '' %>" data-type="<%= plan.type %>" style="--bar-w:<%= barWidth %>%">
               <% if (isFeatured) { %><div class="plan-featured-badge">Top Pick</div><% } %>
-                            <h3 class="plan-name"><%= plan.name %></h3>
+                            <h3 class="plan-name"><%= planDisplayName(plan.name) %></h3>
               <p class="plan-desc"><%= plan.description.substring(0, 120) %>...</p>
               <div class="plan-details">
                 <div class="plan-detail">

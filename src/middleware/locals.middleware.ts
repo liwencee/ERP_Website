@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import prisma from '../config/database';
-import { formatCurrency, formatDate } from '../utils/helpers';
+import { formatCurrency, formatDate, planDisplayName } from '../utils/helpers';
 
 export default async function localsMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {
   res.locals.success = req.flash('success');
@@ -9,6 +9,7 @@ export default async function localsMiddleware(req: Request, res: Response, next
   res.locals.currentPath = req.path;
   res.locals.formatCurrency = formatCurrency;
   res.locals.formatDate = formatDate;
+  res.locals.planDisplayName = planDisplayName;
   res.locals.user = null;
   res.locals.unreadCount = 0;
 

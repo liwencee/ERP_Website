@@ -42,7 +42,7 @@
               <% investments.forEach(function(inv) { %>
               <tr>
                 <td><a href="/admin/users/<%= inv.userId %>"><%= inv.user.firstName %> <%= inv.user.lastName %></a></td>
-                <td><%= inv.plan.name %></td>
+                <td><%= planDisplayName(inv.plan.name) %></td>
                 <td><%= formatCurrency(Number(inv.amount)) %></td>
                 <td class="text-gold"><%= formatCurrency(Number(inv.expectedReturn)) %></td>
                 <td><%= formatDate(inv.startDate) %></td>

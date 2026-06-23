@@ -28,13 +28,13 @@
                 <% plans.forEach(function(plan) { %>
                   <% if (plan.tenures && plan.tenures.length > 0) { %>
                     <% plan.tenures.forEach(function(t) { %>
-                    <option value="<%= Number(t.returnRate) %>|<%= t.durationDays %>|<%= Number(plan.minAmount) %>|<%= plan.name %> (<%= t.label %>)|<%= plan.type %>">
-                      <%= plan.name %> · <%= t.label %> @ <%= Number(t.returnRate) %>%
+                    <option value="<%= Number(t.returnRate) %>|<%= t.durationDays %>|<%= Number(plan.minAmount) %>|<%= planDisplayName(plan.name) %> (<%= t.label %>)|<%= plan.type %>">
+                      <%= planDisplayName(plan.name) %> · <%= t.label %> @ <%= Number(t.returnRate) %>%
                     </option>
                     <% }) %>
                   <% } else { %>
-                  <option value="<%= Number(plan.returnRate) %>|<%= plan.duration %>|<%= Number(plan.minAmount) %>|<%= plan.name %>|<%= plan.type %>">
-                    <%= plan.name %> — <%= plan.returnRate %>%
+                  <option value="<%= Number(plan.returnRate) %>|<%= plan.duration %>|<%= Number(plan.minAmount) %>|<%= planDisplayName(plan.name) %>|<%= plan.type %>">
+                    <%= planDisplayName(plan.name) %> — <%= plan.returnRate %>%
                   </option>
                   <% } %>
                 <% }) %>
@@ -81,7 +81,7 @@
           <% if (plans.length) { %>
             <% plans.forEach(function(plan) { %>
             <div class="plan-card">
-                            <h4><%= plan.name %></h4>
+                            <h4><%= planDisplayName(plan.name) %></h4>
               <p class="plan-desc"><%= plan.description.substring(0, 100) %>...</p>
               <div class="plan-details">
                 <% if (plan.tenures && plan.tenures.length > 0) { %>
@@ -124,7 +124,7 @@
               <% const isMatured = new Date() >= new Date(inv.maturityDate); %>
               <tr>
                 <td>
-                  <%= inv.plan.name %>
+                  <%= planDisplayName(inv.plan.name) %>
                   <% if (inv.tenure) { %>
                   <small class="plan-type-tag"><%= inv.tenure.label %></small>
                   <% } %>
