@@ -27,7 +27,9 @@
 
         <div class="invest-layout">
           <div class="plan-summary-card">
+            <% if (plan.type !== 'STOCK_EQUITY') { %>
             <div class="plan-type plan-type-<%= plan.type.toLowerCase().replace('_','-') %>"><%= plan.type.replace(/_/g,' ') %></div>
+            <% } %>
             <h2><%= planDisplayName(plan.name) %></h2>
             <p><%= plan.description %></p>
             <div class="plan-specs">
