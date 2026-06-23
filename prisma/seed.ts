@@ -29,7 +29,7 @@ async function main() {
   const plans = [
     // ── Savings Plan ────────────────────────────────────────────────────────
     {
-      name: 'Save Future – My Savings Plan',
+      name: 'My Savings Plan – Save Future SF',
       type: 'SAVINGS' as const,
       description: 'A structured savings plan with fixed contributions toward a specific goal. Funds are placed in low-risk money market instruments and fixed deposits to grow steadily while preserving capital. Withdraw any time, any day — flexibility that fits your cash flow.',
       minAmount: 10000,
