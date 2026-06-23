@@ -7,8 +7,8 @@ const prisma = new PrismaClient();
 // and existing user investments are left untouched. Safe to run repeatedly.
 async function main() {
   const updates: { contains: string; minAmount: number; maxAmount?: number }[] = [
-    { contains: 'Bronze', minAmount: 5200000 },
-    { contains: 'Gold', minAmount: 15000000, maxAmount: 50000000 },
+    { contains: 'Bronze', minAmount: 5000003, maxAmount: 15000000 },
+    { contains: 'Gold', minAmount: 15000003, maxAmount: 50000000 },
   ];
 
   for (const u of updates) {
