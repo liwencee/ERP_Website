@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import crypto from 'crypto';
 import prisma from '../config/database';
 import * as paymentService from '../services/payment.service';
 import * as emailService from '../services/email.service';
@@ -88,92 +87,6 @@ export async function squadcoCallback(req: Request, res: Response): Promise<void
     }
   } catch {
     req.flash('info', 'We could not confirm your payment instantly. If you were debited, your wallet will update once confirmed.');
-  }
-  res.redirect('/dashboard/wallet');
-}
-
-// ─── Paystack ─────────────────────────────────────────────────────────────────
-
-export async function paystack(req: Request, res: Response): Promise<void> {
-  const hash = crypto
-    .createHmac('sha512', process.env.PAYSTACK_SECRET_KEY || '')
-    .update(rawBodyOf(req))
-    .digest('hex');
-  if (hash !== req.headers['x-paystack-signature']) {
-    res.status(401).json({ error: 'Invalid signature' });
-    return;
-  }
-
-  const { event, data } = req.body;
-  if (event === 'charge.success' && data?.reference) {
-    await confirmDeposit(data.reference, Number(data.amount) / 100, 'Paystack');
-  }
-  res.sendStatus(200);
-}
-
-export async function paystackCallback(req: Request, res: Response): Promise<void> {
-  const reference = (req.query.reference || req.query.trxref) as string;
-  if (!reference) {
-    req.flash('info', 'Returning from payment.');
-    res.redirect('/dashboard/wallet');
-    return;
-  }
-  try {
-    const result = await paymentService.verifyPaystack(reference);
-    if (result.success) {
-      await confirmDeposit(reference, result.amount, 'Paystack');
-      req.flash('success', `Payment successful — ₦${result.amount.toLocaleString()} added to your wallet.`);
-    } else {
-      req.flash('error', 'Your payment was not completed. If you were debited, please contact support.');
-    }
-  } catch {
-    req.flash('info', 'We could not confirm your payment instantly. Your wallet will update once confirmed.');
-  }
-  res.redirect('/dashboard/wallet');
-}
-
-// ─── Flutterwave ──────────────────────────────────────────────────────────────
-
-export async function flutterwave(req: Request, res: Response): Promise<void> {
-  const secretHash = process.env.FLW_SECRET_HASH || '';
-  if (req.headers['verif-hash'] !== secretHash) {
-    res.status(401).json({ error: 'Invalid signature' });
-    return;
-  }
-
-  const { event, data } = req.body;
-  if (event === 'charge.completed' && data?.status === 'successful' && data?.tx_ref) {
-    // Flutterwave amounts are already in the major unit (Naira), not kobo.
-    await confirmDeposit(data.tx_ref, Number(data.amount), 'Flutterwave');
-  }
-  res.sendStatus(200);
-}
-
-export async function flutterwaveCallback(req: Request, res: Response): Promise<void> {
-  const status = req.query.status as string;
-  const transactionId = (req.query.transaction_id || req.query.transactionId) as string;
-  const txRef = req.query.tx_ref as string;
-
-  if (status === 'cancelled') {
-    req.flash('error', 'Payment was cancelled.');
-    res.redirect('/dashboard/wallet');
-    return;
-  }
-  if (!transactionId && !txRef) {
-    req.flash('info', 'Returning from payment.');
-    res.redirect('/dashboard/wallet');
-    return;
-  }
-  try {
-    const result = await paymentService.verifyFlutterwave(transactionId);
-    if (result.success) {
-      await confirmDeposit(result.reference, result.amount, 'Flutterwave');
-      req.flash('success', `Payment successful — ₦${result.amount.toLocaleString()} added to your wallet.`);
-    } else {
-      req.flash('error', 'Your payment was not completed. If you were debited, please contact support.');
-    }
-  } catch {
-    req.flash('info', 'We could not confirm your payment instantly. Your wallet will update once confirmed.');
   }
   res.redirect('/dashboard/wallet');
 }

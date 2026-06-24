@@ -60,7 +60,6 @@ app.use(helmet({
         // External scripts still validate against the domain allowlist below.
         (_req: unknown, res: unknown) =>
           `'nonce-${(res as { locals: { cspNonce: string } }).locals.cspNonce}'`,
-        'https://js.paystack.co',
         'https://embed.tawk.to',
         'https://*.tawk.to',
       ],

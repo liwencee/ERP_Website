@@ -3,6 +3,16 @@ import prisma from '../../config/database';
 import * as walletService from '../../services/wallet.service';
 import * as paymentService from '../../services/payment.service';
 import { generateRef } from '../../utils/helpers';
+import logger from '../../utils/logger';
+
+// Whether the Squad card gateway is configured (has a secret key). Used to only
+// show the card option in the fund modal and to reject it server-side if the key
+// is missing. (Paystack/Flutterwave were removed — Squad is the only gateway.)
+function availableGateways(): Record<string, boolean> {
+  return {
+    SQUADCO: !!process.env.SQUADCO_SECRET_KEY,
+  };
+}
 
 export async function index(req: Request, res: Response): Promise<void> {
   const userId = req.session.userId!;
@@ -14,7 +24,7 @@ export async function index(req: Request, res: Response): Promise<void> {
       take: 10,
     }),
   ]);
-  res.render('dashboard/wallet', { pageTitle: 'Wallet', wallet, transactions });
+  res.render('dashboard/wallet', { pageTitle: 'Wallet', wallet, transactions, gateways: availableGateways() });
 }
 
 export async function fundPost(req: Request, res: Response): Promise<void> {
@@ -24,6 +34,15 @@ export async function fundPost(req: Request, res: Response): Promise<void> {
 
   if (!parsed || parsed < 100) {
     req.flash('error', 'Minimum deposit is ₦100.');
+    res.redirect('/dashboard/wallet');
+    return;
+  }
+
+  // Reject card payment if Squad isn't configured (defensive — the UI already
+  // hides it, but a stale page/direct POST could still send it).
+  const gateways = availableGateways();
+  if (method === 'SQUADCO' && !gateways.SQUADCO) {
+    req.flash('error', 'Card payment is currently unavailable. Please use Bank Transfer.');
     res.redirect('/dashboard/wallet');
     return;
   }
@@ -47,34 +66,9 @@ export async function fundPost(req: Request, res: Response): Promise<void> {
 
       const checkoutUrl = await paymentService.initializeSquadco(user!.email, parsed, ref);
       res.redirect(checkoutUrl);
-    } catch {
+    } catch (err) {
+      logger.error(`Squad payment init failed: ${(err as Error).message}`);
       req.flash('error', 'Card payment initialization failed. Please try again.');
-      res.redirect('/dashboard/wallet');
-    }
-  } else if (method === 'PAYSTACK' || method === 'FLUTTERWAVE') {
-    try {
-      const user = await prisma.user.findUnique({ where: { id: userId } });
-      const ref = generateRef('PAY');
-
-      await prisma.transaction.create({
-        data: {
-          userId,
-          type: 'DEPOSIT',
-          amount: parsed,
-          status: 'PENDING',
-          reference: ref,
-          paymentMethod: method,
-          description: `Online deposit via ${method}`,
-        },
-      });
-
-      const checkoutUrl = method === 'PAYSTACK'
-        ? await paymentService.initializePaystack(user!.email, parsed, ref)
-        : await paymentService.initializeFlutterwave(user!.email, user!.firstName, user!.lastName, parsed, ref);
-
-      res.redirect(checkoutUrl);
-    } catch {
-      req.flash('error', 'Payment initialization failed. Please try again.');
       res.redirect('/dashboard/wallet');
     }
   } else {

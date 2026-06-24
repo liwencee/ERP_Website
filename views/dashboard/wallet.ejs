@@ -60,10 +60,8 @@
             <div class="form-group">
               <label>Payment Method</label>
               <select name="method" required>
-                <option value="SQUADCO">Card Payment (Squad by GTBank)</option>
+                <% if (gateways.SQUADCO) { %><option value="SQUADCO">Card Payment (Squad by GTBank)</option><% } %>
                 <option value="BANK_TRANSFER">Manual Bank Transfer</option>
-                <option value="PAYSTACK">Paystack</option>
-                <option value="FLUTTERWAVE">Flutterwave</option>
               </select>
             </div>
             <button type="submit" class="btn btn-gold btn-block">Proceed</button>

@@ -11,13 +11,9 @@ router.use('/', publicRoutes);
 router.use('/auth', authRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/admin', adminRoutes);
-router.post('/webhooks/paystack', webhooks.paystack);
-router.post('/webhooks/flutterwave', webhooks.flutterwave);
 router.post('/webhooks/squadco', webhooks.squadco);
 
 // Browser redirect (callback_url) after the customer finishes paying.
 router.get('/webhooks/squadco/callback', webhooks.squadcoCallback);
-router.get('/webhooks/paystack/callback', webhooks.paystackCallback);
-router.get('/webhooks/flutterwave/callback', webhooks.flutterwaveCallback);
 
 export default router;
