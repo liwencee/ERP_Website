@@ -21,7 +21,7 @@ export async function initializeSquadco(
       email,
       amount: Math.round(amount * 100), // kobo
       currency: 'NGN',
-      initiate_type: 'redirect',
+      initiate_type: 'inline',
       transaction_ref: reference,
       callback_url: `${APP_URL}/webhooks/squadco/callback`,
       ...(customerName && { customer_name: customerName }),
