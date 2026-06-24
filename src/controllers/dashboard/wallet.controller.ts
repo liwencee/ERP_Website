@@ -68,8 +68,9 @@ export async function fundPost(req: Request, res: Response): Promise<void> {
         user!.email, parsed, ref, `${user!.firstName} ${user!.lastName}`
       );
       res.redirect(checkoutUrl);
-    } catch (err) {
-      logger.error(`Squad payment init failed: ${(err as Error).message}`);
+    } catch (err: unknown) {
+      const axErr = err as { response?: { status?: number; data?: unknown }; message?: string };
+      logger.error(`Squad payment init failed: ${axErr.message} | status=${axErr.response?.status} | body=${JSON.stringify(axErr.response?.data)}`);
       req.flash('error', 'Card payment initialization failed. Please try again.');
       res.redirect('/dashboard/wallet');
     }
