@@ -12,7 +12,8 @@ const APP_URL = process.env.APP_URL || 'http://localhost:3000';
 export async function initializeSquadco(
   email: string,
   amount: number,
-  reference: string
+  reference: string,
+  customerName?: string
 ): Promise<string> {
   const response = await axios.post(
     `${SQUADCO_BASE}/transaction/initiate`,
@@ -20,13 +21,19 @@ export async function initializeSquadco(
       email,
       amount: Math.round(amount * 100), // kobo
       currency: 'NGN',
-      initiate_type: 'inline',
+      initiate_type: 'redirect',
       transaction_ref: reference,
       callback_url: `${APP_URL}/webhooks/squadco/callback`,
+      ...(customerName && { customer_name: customerName }),
     },
-    { headers: { Authorization: `Bearer ${SQUADCO_SECRET}`, 'Content-Type': 'application/json' } }
+    {
+      headers: { Authorization: `Bearer ${SQUADCO_SECRET}`, 'Content-Type': 'application/json' },
+      timeout: 30_000,
+    }
   );
-  return response.data.data.checkout_url;
+  const url = response.data?.data?.checkout_url;
+  if (!url) throw new Error('Squad did not return a checkout URL');
+  return url;
 }
 
 export async function verifySquadco(transactionRef: string): Promise<{ success: boolean; amount: number }> {

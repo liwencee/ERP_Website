@@ -64,7 +64,9 @@ export async function fundPost(req: Request, res: Response): Promise<void> {
         },
       });
 
-      const checkoutUrl = await paymentService.initializeSquadco(user!.email, parsed, ref);
+      const checkoutUrl = await paymentService.initializeSquadco(
+        user!.email, parsed, ref, `${user!.firstName} ${user!.lastName}`
+      );
       res.redirect(checkoutUrl);
     } catch (err) {
       logger.error(`Squad payment init failed: ${(err as Error).message}`);
