@@ -76,6 +76,10 @@ app.use(helmet({
         'https://maps.google.com',
         'https://www.google.com',
       ],
+      formAction: [
+        "'self'",
+        'https://pay.squadco.com',
+      ],
     },
   },
   hsts: {
