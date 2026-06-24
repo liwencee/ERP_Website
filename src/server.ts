@@ -19,6 +19,7 @@ import logger from './utils/logger';
 import router from './routes';
 import localsMiddleware from './middleware/locals.middleware';
 import { sameOriginOnly } from './middleware/security.middleware';
+import { maintenanceMode } from './middleware/maintenance.middleware';
 import { serveUpload } from './controllers/files.controller';
 import { runMaturityJob } from './jobs/mature-investments';
 
@@ -148,6 +149,11 @@ app.use(express.static(path.join(ROOT, 'public')));
 // ─── View engine ─────────────────────────────────────────────────────────────
 app.set('view engine', 'ejs');
 app.set('views', path.join(ROOT, 'views'));
+
+// ─── Maintenance gate ────────────────────────────────────────────────────────
+// Reversible site-wide "be right back" page, toggled via the MAINTENANCE_MODE
+// env var (no code change). Placed after static so the page still shows the logo.
+app.use(maintenanceMode);
 
 // ─── Locals ──────────────────────────────────────────────────────────────────
 app.use(localsMiddleware);
