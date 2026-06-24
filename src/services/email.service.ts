@@ -33,9 +33,7 @@ function emailWrapper(bodyHtml: string): string {
 }
 
 function ctaButton(text: string, url: string): string {
-  return `<a href="${url}" style="display:inline-block;background:${BRAND_RED};color:#ffffff;
-    padding:13px 28px;text-decoration:none;border-radius:6px;font-weight:600;
-    font-size:0.95rem;margin:20px 0;">${text}</a>`;
+  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0;"><tr><td style="background:${BRAND_RED};border-radius:6px;"><a href="${url}" target="_blank" style="display:inline-block;padding:13px 28px;color:#ffffff;text-decoration:none;font-weight:600;font-size:0.95rem;">${text}</a></td></tr></table>`;
 }
 
 // ─── Verify Email ────────────────────────────────────────────────────────────
@@ -70,6 +68,9 @@ export async function sendPasswordReset(
       <h2 style="color:${BRAND_NAVY};margin:0 0 8px;">Password Reset</h2>
       <p style="color:#4b5563;">Hi ${firstName}, we received a request to reset your EPR Access password.</p>
       ${ctaButton('Reset Password', url)}
+      <p style="font-size:0.85rem;color:#6b7280;">Or copy this link into your browser:<br>
+        <a href="${url}" target="_blank" style="color:${BRAND_RED};word-break:break-all;">${url}</a>
+      </p>
       <p style="font-size:0.82rem;color:#9ca3af;">
         This link expires in 1 hour. If you did not request this, please ignore this email.
       </p>
