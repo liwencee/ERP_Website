@@ -902,3 +902,16 @@
   overflow-wrap: anywhere;   /* hard-clipping them inside the card */
   line-height: 1.2;
 }
+
+/* --- WhatsApp brand logo on the Contact page (clickable, like a real logo) --- */
+.contact-whatsapp-logo {
+  display: inline-flex;
+  flex-shrink: 0;
+  line-height: 0;
+  border-radius: 50%;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.contact-whatsapp-logo:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 18px rgba(37, 211, 102, 0.35);
+}
