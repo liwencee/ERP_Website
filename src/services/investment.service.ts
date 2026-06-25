@@ -23,11 +23,18 @@ export async function createInvestment(
   const isDollar = plan.type === 'DOLLAR';
   const unit = isDollar ? '$' : '₦';
 
+  // Tiers are non-overlapping price bands: [min, max). The lower bound is
+  // inclusive and the upper bound is EXCLUSIVE, so a boundary amount belongs to
+  // exactly one tier — the higher one (e.g. ₦5,000,000 is Bronze, not Silver).
+  // This prevents a single amount from qualifying for two packages.
   if (amount < Number(plan.minAmount)) {
-    throw new Error(`Minimum investment amount is ${unit}${Number(plan.minAmount).toLocaleString()}.`);
+    throw new Error(`The minimum investment for ${plan.name} is ${unit}${Number(plan.minAmount).toLocaleString()}.`);
   }
-  if (plan.maxAmount && amount > Number(plan.maxAmount)) {
-    throw new Error(`Maximum investment amount is ${unit}${Number(plan.maxAmount).toLocaleString()}.`);
+  if (plan.maxAmount && amount >= Number(plan.maxAmount)) {
+    throw new Error(
+      `${plan.name} is for investments below ${unit}${Number(plan.maxAmount).toLocaleString()}. ` +
+      `Amounts of ${unit}${Number(plan.maxAmount).toLocaleString()} and above belong to a higher tier.`
+    );
   }
 
   // Resolve the chosen tenure. If the plan has tenures, one must be selected

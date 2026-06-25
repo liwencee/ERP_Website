@@ -144,7 +144,9 @@ function suggestForAmount(plans: PlanWithTenures[], amount: number): ChatReply {
   const eligible = plans.filter((p) => {
     const min = Number(p.minAmount);
     const max = p.maxAmount ? Number(p.maxAmount) : null;
-    return amount >= min && (max === null || amount <= max);
+    // [min, max): upper bound exclusive so each amount matches exactly one tier
+    // (a boundary amount belongs to the higher tier, never two at once).
+    return amount >= min && (max === null || amount < max);
   });
 
   if (!eligible.length) {
