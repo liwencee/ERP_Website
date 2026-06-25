@@ -2,7 +2,7 @@ import { randomUUID, randomInt } from 'crypto';
 
 // Exchange rate used for the Dollar Investment plan: how many Naira per US$1.
 // Override per-environment with the USD_NGN_RATE env var (e.g. on Vercel).
-export const USD_NGN_RATE = Number(process.env.USD_NGN_RATE) || 1600;
+export const USD_NGN_RATE = Number(process.env.USD_NGN_RATE) || 1400;
 
 // Convert a US dollar figure to its Naira equivalent at the current rate.
 export function usdToNgn(usd: number): number {

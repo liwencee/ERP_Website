@@ -29,7 +29,7 @@ On the **web service** → **Variables**, add (see `.env.example` for the full l
 | `APP_URL` | your public URL, e.g. `https://epr-access.up.railway.app` |
 | `ADMIN_EMAIL` | the real admin login email |
 | `ADMIN_PASSWORD` | a strong admin password (you choose it) |
-| `USD_NGN_RATE` | `1600` (or your current rate) |
+| `USD_NGN_RATE` | `1400` (or your current rate) |
 | `SMTP_HOST/PORT/SECURE/USER/PASS` | your real email sending credentials |
 | `PAYSTACK_SECRET_KEY` | **live** `sk_live_...` key |
 | `FLUTTERWAVE_SECRET_KEY` / `FLW_SECRET_HASH` | **live** keys |
