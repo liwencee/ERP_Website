@@ -85,7 +85,7 @@
                 <input type="number" id="amount" name="amount"
                   min="<%= Number(plan.minAmount) %>"
                   <% if (plan.maxAmount) { %>max="<%= Number(plan.maxAmount) %>"<% } %>
-                  step="<%= plan.type === 'DOLLAR' ? '1' : '100' %>" required placeholder="<%= plan.type === 'DOLLAR' ? 'Min $50' : 'Enter amount' %>" />
+                  step="1" required placeholder="<%= plan.type === 'DOLLAR' ? 'Min $50' : 'Enter amount' %>" />
                 <% if (plan.type === 'DOLLAR') { %>
                 <p class="form-note" style="margin-top:6px;">Paid from your Naira wallet at ₦<%= Number(usdRate).toLocaleString() %> / $1. Returns are paid back in Naira at maturity.</p>
                 <% } %>
