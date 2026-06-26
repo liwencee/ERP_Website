@@ -94,7 +94,7 @@
 
       <div class="nav-actions" id="navActions">
         <% if (locals.user) { %>
-          <a href="/dashboard" class="btn btn-outline-gold">Dashboard</a>
+          <a href="<%= (user.role === 'ADMIN' || user.role === 'STAFF') ? '/admin' : '/dashboard' %>" class="btn btn-outline-gold">Dashboard</a>
         <% } else { %>
           <a href="/auth/login" class="btn btn-outline-gold">Login</a>
           <a href="/auth/register" class="btn btn-gold">Get Started</a>

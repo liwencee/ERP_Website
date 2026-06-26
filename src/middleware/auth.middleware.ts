@@ -42,5 +42,8 @@ export function isStaff(req: Request, res: Response, next: NextFunction): void {
 
 export function isGuest(req: Request, res: Response, next: NextFunction): void {
   if (!req.session.userId) return next();
-  res.redirect('/dashboard');
+  // Send already-authenticated users to their correct home: admins/staff to the
+  // admin panel, investors to their personal dashboard.
+  const role = req.session.userRole;
+  res.redirect(role === 'ADMIN' || role === 'STAFF' ? '/admin' : '/dashboard');
 }

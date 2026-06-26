@@ -4,6 +4,16 @@ import prisma from '../../config/database';
 export async function index(req: Request, res: Response): Promise<void> {
   const userId = req.session.userId!;
 
+  // Admins/staff have no personal investor portfolio, so this page would show an
+  // empty (₦0, 0 investments) account for them. Send them to the admin dashboard
+  // instead — that's where the real platform data lives. This is the safety net
+  // for any path that lands an admin on /dashboard (stale nav link, bookmark,
+  // the investor sidebar's "Dashboard" link, etc.).
+  if (req.session.userRole === 'ADMIN' || req.session.userRole === 'STAFF') {
+    res.redirect('/admin');
+    return;
+  }
+
   const [wallet, activeInvestments, recentTransactions, totalInvested, allActive] =
     await Promise.all([
       prisma.wallet.findUnique({ where: { userId } }),
