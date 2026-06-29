@@ -550,6 +550,7 @@ h3 { font-size: 1.3rem; }
 .tx-investment { color: var(--info); }
 .tx-return { color: var(--green); }
 .tx-bonus { color: #6d28d9; }
+.tx-reversal { color: #c0392b; }
 
 /* ─── Empty State ─────────────────────────────────── */
 .empty-state { text-align: center; padding: 48px 24px; color: var(--gray-600); }

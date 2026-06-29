@@ -254,6 +254,73 @@ export async function creditWallet(req: Request, res: Response): Promise<void> {
   res.redirect(`/admin/users/${userId}`);
 }
 
+// ─── Admin Wallet Debit (Reversal) ───────────────────────────────────────────
+export async function debitWallet(req: Request, res: Response): Promise<void> {
+  const userId = req.params.id;
+  const amount = parseFloat(req.body.amount);
+  const note = (req.body.note as string)?.trim() || 'Reversal by admin';
+
+  if (!amount || amount < 100) {
+    req.flash('error', 'Minimum debit amount is ₦100.');
+    res.redirect(`/admin/users/${userId}`);
+    return;
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { wallet: true },
+  });
+
+  if (!user) {
+    req.flash('error', 'User not found.');
+    res.redirect('/admin/users');
+    return;
+  }
+
+  if (!user.wallet) {
+    req.flash('error', 'User has no wallet — cannot debit.');
+    res.redirect(`/admin/users/${userId}`);
+    return;
+  }
+
+  if (Number(user.wallet.balance) < amount) {
+    req.flash('error', `Insufficient balance. User only has ₦${Number(user.wallet.balance).toLocaleString()}.`);
+    res.redirect(`/admin/users/${userId}`);
+    return;
+  }
+
+  const reference = generateRef('REV');
+  const adminName = req.session.userName || 'Admin';
+
+  await prisma.$transaction([
+    prisma.wallet.update({
+      where: { userId },
+      data: { balance: { decrement: amount } },
+    }),
+    prisma.transaction.create({
+      data: {
+        userId,
+        type: 'REVERSAL',
+        amount,
+        status: 'CONFIRMED',
+        reference,
+        description: `Reversed by ${adminName} — ${note}`,
+      },
+    }),
+    prisma.notification.create({
+      data: {
+        userId,
+        title: 'Wallet Reversed',
+        message: `₦${amount.toLocaleString()} has been reversed from your wallet. Reason: ${note}. Reference: ${reference}.`,
+      },
+    }),
+  ]);
+
+  await logAudit(req, 'WALLET_REVERSAL', { targetType: 'User', targetId: userId, detail: `₦${amount.toLocaleString()} — ${note} (ref ${reference})` });
+  req.flash('success', `₦${amount.toLocaleString()} successfully reversed from ${user.firstName} ${user.lastName}'s wallet. Ref: ${reference}`);
+  res.redirect(`/admin/users/${userId}`);
+}
+
 // ─── Delete User (ADMIN only) ──────────────────────────────────────────────────
 // Permanently removes a user and ALL associated records (wallet, transactions,
 // investments, KYC documents, notifications). Irreversible. The AuditLog entry
