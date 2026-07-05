@@ -119,7 +119,7 @@ export async function contactPost(req: Request, res: Response): Promise<void> {
     req.flash('success', 'Thank you for your message. We will get back to you shortly.');
   } catch (err) {
     logger.error(`Contact form email failed: ${(err as Error).message}`);
-    req.flash('error', 'Sorry, we could not send your message right now. Please email us directly at info@epraaccess.com.');
+    req.flash('error', 'Sorry, we could not send your message right now. Please email us directly at contact@epraaccess.com.');
   }
   res.redirect('/contact');
 }
