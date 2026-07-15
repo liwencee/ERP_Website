@@ -144,9 +144,17 @@
                     <form action="/dashboard/investments/<%= inv.id %>/redeem-early" method="POST" class="js-confirm-form" data-confirm="Early withdrawal returns principal only — no interest. Continue?">
                       <button type="submit" class="btn btn-sm btn-danger">Withdraw Early</button>
                     </form>
-                  <% } else if (inv.status === 'ACTIVE' && !isMatured) { %>
-                    <span class="text-muted text-sm">Locked</span>
-                  <% } else { %>
+                  <% } %>
+                  <% if (inv.status === 'ACTIVE' && inv.plan.tenures && inv.plan.tenures.length > 0) { %>
+                    <form action="/dashboard/investments/<%= inv.id %>/change-tenure" method="POST" class="js-confirm-form" data-confirm="Change this investment's tenure? Your expected return and maturity date will be recalculated." style="display:flex;gap:6px;align-items:center;margin-top:4px;">
+                      <select name="tenureId" required class="tenure-select">
+                        <% inv.plan.tenures.forEach(function (t) { %>
+                        <option value="<%= t.id %>" <%= inv.tenureId === t.id ? 'selected' : '' %>><%= t.label %> — <%= Number(t.returnRate) %>%</option>
+                        <% }) %>
+                      </select>
+                      <button type="submit" class="btn btn-sm btn-outline-gold">Change</button>
+                    </form>
+                  <% } else if (inv.status !== 'ACTIVE') { %>
                     <span class="text-muted text-sm">—</span>
                   <% } %>
                 </td>

@@ -14,7 +14,7 @@ export async function index(req: Request, res: Response): Promise<void> {
     }),
     prisma.userInvestment.findMany({
       where: { userId },
-      include: { plan: true, tenure: true },
+      include: { plan: { include: { tenures: { orderBy: { sortOrder: 'asc' } } } }, tenure: true },
       orderBy: { createdAt: 'desc' },
     }),
   ]);
@@ -134,5 +134,28 @@ export async function redeemEarly(req: Request, res: Response): Promise<void> {
   ]);
 
   req.flash('success', `₦${Number(investment.amount).toLocaleString()} returned to your wallet. Early withdrawals return principal only.`);
+  res.redirect('/dashboard/investments');
+}
+
+export async function changeTenurePost(req: Request, res: Response): Promise<void> {
+  const userId = req.session.userId!;
+  const { tenureId } = req.body;
+
+  const investment = await prisma.userInvestment.findUnique({ where: { id: req.params.id } });
+  if (!investment || investment.userId !== userId) {
+    req.flash('error', 'Investment not found.');
+    res.redirect('/dashboard/investments');
+    return;
+  }
+
+  try {
+    const result = await investmentService.changeTenure(req.params.id, tenureId);
+    req.flash(
+      'success',
+      `Tenure changed to ${result.newTenureLabel}. New maturity ${result.maturityDate.toLocaleDateString('en-NG')}, expected ₦${result.expectedReturn.toLocaleString()}.`
+    );
+  } catch (err) {
+    req.flash('error', err instanceof Error ? err.message : 'Could not change tenure.');
+  }
   res.redirect('/dashboard/investments');
 }

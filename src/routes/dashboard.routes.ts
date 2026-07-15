@@ -17,6 +17,7 @@ router.get('/investments', investment.index);
 router.get('/investments/:planId/invest', investment.investGet);
 router.post('/investments/:planId/invest', investment.investPost);
 router.post('/investments/:id/redeem-early', investment.redeemEarly);
+router.post('/investments/:id/change-tenure', investment.changeTenurePost);
 router.get('/wallet', wallet.index);
 router.post('/wallet/fund', wallet.fundPost);
 router.post('/wallet/fund/upload',
