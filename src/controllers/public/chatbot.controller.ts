@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../../config/database';
 
-const PLAN_ORDER = ['Save Future', 'Silver', 'Bronze', 'Gold', 'Diamond', 'Fixed Deposit', 'Trading', 'Dollar', 'Real Estate'];
+const PLAN_ORDER = ['Save Future', 'Bronze', 'Silver', 'Gold', 'Diamond', 'Fixed Deposit', 'Trading', 'Dollar', 'Real Estate'];
 
 const CONTACT_TEXT =
   'You can reach our team directly:\n' +

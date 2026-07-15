@@ -40,7 +40,7 @@ async function main() {
     },
     // ── Investment Tiers ────────────────────────────────────────────────────
     {
-      name: 'Silver – My Investment SPlus',
+      name: 'Bronze – My Investment BPlus',
       type: 'STOCK_EQUITY' as const,
       description: 'Entry-level plan designed for first-time investors and those building capital steadily. Focuses on capital preservation with modest, stable returns through low-risk money market and short-term fixed income instruments.',
       minAmount: 50000,
@@ -50,7 +50,7 @@ async function main() {
       tenures: tenures(12, 16.5, 30, 2),
     },
     {
-      name: 'Bronze – My Investment BPlus',
+      name: 'Silver – My Investment SPlus',
       type: 'STOCK_EQUITY' as const,
       description: 'Mid-tier plan for investors seeking balanced growth and security. Combines money market assets with diversified fixed income to deliver consistent returns while maintaining liquidity and low volatility.',
       minAmount: 5000001,
