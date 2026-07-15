@@ -1,6 +1,7 @@
 import prisma from '../config/database';
 import { addDays, generateRef, USD_NGN_RATE, usdToNgn } from '../utils/helpers';
 import { debitWallet, creditWallet } from './wallet.service';
+import { computeTenureChange } from './tenure';
 
 export function calculateExpectedReturn(amount: number, rate: number): number {
   return parseFloat((amount * (1 + rate / 100)).toFixed(2));
@@ -190,4 +191,57 @@ export async function matureInvestment(investmentId: string): Promise<void> {
       message: `Your investment in ${inv.plan.name} has matured. ₦${Number(inv.expectedReturn).toLocaleString()} has been credited to your wallet.`,
     },
   });
+}
+
+// Change the tenure of an ACTIVE investment. Recomputes expected return and
+// maturity from the ORIGINAL start date via the pure computeTenureChange().
+// Referral commissions already paid at creation are intentionally NOT adjusted.
+export async function changeTenure(
+  investmentId: string,
+  newTenureId: string
+): Promise<{
+  oldTenureLabel: string | null;
+  newTenureLabel: string;
+  newReturnRate: number;
+  expectedReturn: number;
+  maturityDate: Date;
+}> {
+  const inv = await prisma.userInvestment.findUnique({
+    where: { id: investmentId },
+    include: { plan: { include: { tenures: true } }, tenure: true },
+  });
+  if (!inv) throw new Error('Investment not found.');
+  if (inv.status !== 'ACTIVE') throw new Error('Only active investments can have their tenure changed.');
+  if (inv.plan.tenures.length === 0) throw new Error('This plan does not support tenure changes.');
+
+  const newTenure = inv.plan.tenures.find((t) => t.id === newTenureId);
+  if (!newTenure) throw new Error('Please select a valid tenure for this plan.');
+
+  const { expectedReturn, maturityDate } = computeTenureChange(
+    inv.startDate,
+    Number(inv.amount),
+    Number(newTenure.returnRate),
+    newTenure.durationDays
+  );
+
+  await prisma.userInvestment.update({
+    where: { id: inv.id },
+    data: { tenureId: newTenure.id, expectedReturn, maturityDate },
+  });
+
+  await prisma.notification.create({
+    data: {
+      userId: inv.userId,
+      title: 'Investment Tenure Updated',
+      message: `Your ${inv.plan.name} tenure is now "${newTenure.label}". New expected value at maturity: ₦${expectedReturn.toLocaleString()} on ${maturityDate.toLocaleDateString('en-NG')}.`,
+    },
+  });
+
+  return {
+    oldTenureLabel: inv.tenure?.label ?? null,
+    newTenureLabel: newTenure.label,
+    newReturnRate: Number(newTenure.returnRate),
+    expectedReturn,
+    maturityDate,
+  };
 }
