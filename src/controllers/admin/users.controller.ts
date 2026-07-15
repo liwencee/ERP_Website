@@ -56,7 +56,14 @@ export async function show(req: Request, res: Response): Promise<void> {
   }
 
   const referralCount = await prisma.user.count({ where: { referredBy: user.id } });
-  res.render('admin/users/show', { pageTitle: `User: ${user.firstName}`, profileUser: user, referralCount });
+
+  const investedAgg = await prisma.userInvestment.aggregate({
+    where: { userId: user.id },
+    _sum: { amount: true },
+  });
+  const totalInvested = Number(investedAgg._sum.amount ?? 0);
+
+  res.render('admin/users/show', { pageTitle: `User: ${user.firstName}`, profileUser: user, referralCount, totalInvested });
 }
 
 export async function reviewKyc(req: Request, res: Response): Promise<void> {
