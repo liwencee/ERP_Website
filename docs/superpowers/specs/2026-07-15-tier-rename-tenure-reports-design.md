@@ -44,25 +44,37 @@ Four related changes requested by the business, bundled into one plan:
 ### Key insight
 
 Every `UserInvestment` references a plan by `planId`. Swapping only the `name`
-and `description` on the two `InvestmentPlan` rows relabels them in place:
-every investor stays linked to the same row, so an investor on the entry-level
-row automatically displays as "Bronze" afterwards, and one on the mid-tier row
-as "Silver". This satisfies both requirement #1 and #2 with **zero** changes to
+field between the two `InvestmentPlan` rows relabels them in place: every
+investor stays linked to the same row, so an investor on the entry-level row
+automatically displays as "Bronze" afterwards, and one on the mid-tier row as
+"Silver". This satisfies both requirement #1 and #2 with **zero** changes to
 `UserInvestment`, `Transaction`, or `Wallet` records. The amount bands, return
 rates, tenures, and durations stay exactly where they are.
 
-Plan-detail page URLs (e.g. `/investment-plans/silver-my-investment-splus`) are
-slugified from the plan name at request time (see
-`pages.controller.ts` `slugify` + `investmentPlanDetail`), so they follow the
-name automatically — no stored slug to update.
+**Descriptions are NOT swapped.** Each row's `description` describes its band
+(the entry-level row reads "Entry-level plan…"; the mid-tier row reads
+"Mid-tier plan…"). The bands never move, so their descriptions must stay with
+the row. After the name swap, the entry-level row is named "Bronze" and still
+carries the correct entry-level description, and the mid-tier row is named
+"Silver" with the mid-tier description. Swapping descriptions would wrongly pair
+the new Bronze (entry-level band) with a mid-tier description.
+
+Because only the `name` values are exchanged between the two rows, the *set* of
+names in the DB is unchanged — both "Silver – My Investment SPlus" and
+"Bronze – My Investment BPlus" still exist, just attached to different bands.
+Plan-detail URLs are slugified from the name at request time (see
+`pages.controller.ts` `slugify` + `investmentPlanDetail`), so both existing
+slugs (`silver-my-investment-splus`, `bronze-my-investment-bplus`) still
+resolve — no href changes are needed, only the dropdown order.
 
 ### Changes
 
 **A. Live database (one-off script, run manually):**
 `prisma/swap-silver-bronze-names.ts`, modelled on the existing
 `prisma/set-tier-upper-range.ts`:
-- In a single `prisma.$transaction`, swap `name` and `description` between the
-  row whose name contains "Silver" and the row whose name contains "Bronze".
+- In a single `prisma.$transaction`, swap the `name` (only — not description)
+  between the row whose name contains "Silver" and the row whose name contains
+  "Bronze".
 - Before/after: print both rows' name, min, max, returnRate.
 - Print the email of every investor holding each of the two plans, so the
   operator can cross-check against the known list of affected Silver investors.
@@ -75,15 +87,16 @@ name automatically — no stored slug to update.
   `['Silver', 'Bronze', ...]` → `['Bronze', 'Silver', ...]`.
 - `src/controllers/public/chatbot.controller.ts` — `PLAN_ORDER`: change
   `['Save Future', 'Silver', 'Bronze', ...]` → `['Save Future', 'Bronze', 'Silver', ...]`.
-- `views/partials/public-nav.ejs` — swap the two dropdown `<li>` lines so
-  "Bronze – Package" is listed before "Silver – Package". The `href` slugs stay
-  as they are; they resolve to whichever plan now bears that name.
+- `views/partials/public-nav.ejs` — reorder the two dropdown `<li>` lines so
+  "Bronze – Package" is listed before "Silver – Package". The `href` slugs are
+  unchanged (both still resolve after a name-only swap).
 
 **C. Seed (keep future re-seeds correct):**
-- `prisma/seed.ts` — swap the `name` and `description` strings between the two
-  tier objects (entry-level object named "Bronze …", mid-tier object named
-  "Silver …") while leaving each object's amounts/rates/tenures in place, so a
-  fresh seed reproduces the corrected naming and band ordering.
+- `prisma/seed.ts` — swap only the `name` strings between the two tier objects
+  (the entry-level object, min ₦50,000, becomes "Bronze …"; the mid-tier
+  object, min ₦5,000,001, becomes "Silver …"), leaving each object's
+  `description`, amounts, rates and tenures in place, so a fresh seed reproduces
+  the corrected naming with each band keeping its correct description.
 
 ### Verification
 - After the script + code changes: home, investment-plans list, plan-detail,
