@@ -7,6 +7,7 @@ import * as wallet from '../controllers/dashboard/wallet.controller';
 import * as transaction from '../controllers/dashboard/transaction.controller';
 import * as profile from '../controllers/dashboard/profile.controller';
 import * as notification from '../controllers/dashboard/notification.controller';
+import * as report from '../controllers/dashboard/report.controller';
 
 const router = Router();
 
@@ -28,6 +29,7 @@ router.post('/wallet/fund/upload',
   wallet.fundUpload);
 router.post('/wallet/withdraw', wallet.withdrawPost);
 router.get('/transactions', transaction.index);
+router.get('/report', report.statement);
 router.get('/profile', profile.profileGet);
 router.post('/profile', profile.profilePost);
 router.post('/profile/avatar',

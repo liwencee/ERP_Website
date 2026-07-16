@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Account Statement | EPR Access Limited</title>
+  <style nonce="<%= cspNonce %>">
+    * { box-sizing: border-box; }
+    body { font-family: Arial, Helvetica, sans-serif; color: #1f2733; margin: 0; padding: 24px; background: #f4f5f7; }
+    .statement { max-width: 900px; margin: 0 auto; background: #fff; padding: 32px; border-radius: 8px; }
+    .st-head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #0a1628; padding-bottom: 16px; margin-bottom: 20px; }
+    .st-brand { font-size: 1.4rem; font-weight: 800; color: #0a1628; }
+    .st-brand small { display: block; font-size: 0.75rem; font-weight: 600; color: #6b7280; letter-spacing: 0.08em; }
+    .st-meta { text-align: right; font-size: 0.85rem; color: #6b7280; }
+    h2 { font-size: 1.05rem; color: #0a1628; margin: 24px 0 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e5e7eb; }
+    th { background: #f9fafb; color: #6b7280; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.04em; }
+    .totals { display: flex; gap: 24px; flex-wrap: wrap; margin: 20px 0; }
+    .totals div { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px 16px; }
+    .totals span { display: block; font-size: 0.72rem; color: #6b7280; text-transform: uppercase; }
+    .totals strong { font-size: 1.1rem; color: #0a1628; }
+    .print-bar { max-width: 900px; margin: 0 auto 16px; text-align: right; }
+    .print-btn { background: #0a1628; color: #fff; border: 0; border-radius: 6px; padding: 10px 18px; font-size: 0.9rem; cursor: pointer; }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .statement { box-shadow: none; border-radius: 0; max-width: none; padding: 0; }
+      .print-bar { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="print-bar">
+    <button type="button" class="print-btn" id="printBtn">Print / Save as PDF</button>
+  </div>
+  <div class="statement">
+    <div class="st-head">
+      <div class="st-brand">EPR Access Limited<small>Account Statement</small></div>
+      <div class="st-meta">
+        <div><strong><%= profileUser.firstName %> <%= profileUser.lastName %></strong></div>
+        <div><%= profileUser.email %></div>
+        <div>Generated: <%= formatDate(generatedAt) %></div>
+      </div>
+    </div>
+
+    <div class="totals">
+      <div><span>Total Invested</span><strong><%= formatCurrency(totalInvested) %></strong></div>
+      <div><span>Total Expected Return</span><strong><%= formatCurrency(totalExpected) %></strong></div>
+      <div><span>Wallet Balance</span><strong><%= formatCurrency(profileUser.wallet ? Number(profileUser.wallet.balance) : 0) %></strong></div>
+    </div>
+
+    <h2>Investments (<%= profileUser.investments.length %>)</h2>
+    <% if (profileUser.investments.length) { %>
+    <table>
+      <thead><tr><th>Plan</th><th>Tenure</th><th>Amount</th><th>Expected</th><th>Start</th><th>Maturity</th><th>Status</th></tr></thead>
+      <tbody>
+        <% profileUser.investments.forEach(function (inv) { %>
+        <tr>
+          <td><%= planDisplayName(inv.plan.name) %></td>
+          <td><%= inv.tenure ? inv.tenure.label : '—' %></td>
+          <td><%= formatCurrency(Number(inv.amount)) %></td>
+          <td><%= formatCurrency(Number(inv.expectedReturn)) %></td>
+          <td><%= formatDate(inv.startDate) %></td>
+          <td><%= formatDate(inv.maturityDate) %></td>
+          <td><%= inv.status %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } else { %><p>No investments.</p><% } %>
+
+    <h2>Transactions (<%= profileUser.transactions.length %>)</h2>
+    <% if (profileUser.transactions.length) { %>
+    <table>
+      <thead><tr><th>Type</th><th>Amount</th><th>Reference</th><th>Date</th><th>Status</th></tr></thead>
+      <tbody>
+        <% profileUser.transactions.forEach(function (tx) { %>
+        <tr>
+          <td><%= tx.type %></td>
+          <td><%= formatCurrency(Number(tx.amount)) %></td>
+          <td><%= tx.reference %></td>
+          <td><%= formatDate(tx.createdAt) %></td>
+          <td><%= tx.status %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } else { %><p>No transactions.</p><% } %>
+  </div>
+  <script nonce="<%= cspNonce %>">
+    document.getElementById('printBtn')?.addEventListener('click', function () { window.print(); });
+  </script>
+</body>
+</html>
