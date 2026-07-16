@@ -1,6 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
+// ⚠️ DO NOT RE-RUN after the Silver↔Bronze rename (swap-silver-bronze-names.ts).
+// This script matches plans by the name substring "Bronze" and writes mid-tier
+// bounds to them. Since the rename, "Bronze" is the ENTRY-LEVEL band
+// (₦50,000–₦5,000,000); re-running would overwrite it with mid-tier bounds and
+// corrupt the band. Kept only as a historical record of the original migration.
+//
 // Non-overlapping tier bands using the "upper range" convention: the boundary
 // amount belongs to the LOWER tier, and each higher tier starts ₦1 above the
 // previous tier's max. Only minAmount changes; maxAmount, Silver, tenures,

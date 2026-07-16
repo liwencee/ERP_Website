@@ -1,6 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
+// ⚠️ DO NOT RE-RUN after the Silver↔Bronze rename (swap-silver-bronze-names.ts).
+// It matches by the name substring "Bronze" and writes mid-tier bounds; since
+// the rename "Bronze" is the ENTRY-LEVEL band, so re-running would corrupt it.
+// Historical record only — the "Safe to run repeatedly" note below predates the
+// rename and no longer holds.
+//
 // Non-destructive: corrects an off-by-one (...001) lower bound on Bronze and
 // Gold so that clean amounts (5,200,000 / 15,000,000) are accepted instead of
 // rejected, and confirms Gold's upper bound at 50,000,000. Tenures, returns

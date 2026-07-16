@@ -1,6 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
+// ⚠️ DO NOT RE-RUN after the Silver↔Bronze rename (swap-silver-bronze-names.ts).
+// It matches by the name substring "Bronze" and writes a mid-tier minAmount;
+// since the rename "Bronze" is the ENTRY-LEVEL band, so re-running would corrupt
+// it. Historical record only — the "Safe to run repeatedly" note below predates
+// the rename and no longer holds.
+//
 // Non-destructive: updates ONLY the minAmount on the three affected tiers so the
 // boundaries are clean round numbers (no ugly +1). Tenures, returns and existing
 // user investments are left completely untouched. Safe to run repeatedly.

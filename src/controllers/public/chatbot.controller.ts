@@ -144,7 +144,7 @@ function suggestForAmount(plans: PlanWithTenures[], amount: number): ChatReply {
   const eligible = plans.filter((p) => {
     const min = Number(p.minAmount);
     const max = p.maxAmount ? Number(p.maxAmount) : null;
-    // Inclusive [min, max]; bands don't share endpoints (Bronze min is
+    // Inclusive [min, max]; bands don't share endpoints (Silver min is
     // ₦5,000,001, not ₦5,000,000) so each amount matches exactly one tier.
     return amount >= min && (max === null || amount <= max);
   });

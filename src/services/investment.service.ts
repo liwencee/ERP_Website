@@ -26,7 +26,7 @@ export async function createInvestment(
 
   // Tiers are non-overlapping price bands with inclusive bounds [min, max].
   // The bands do NOT share endpoints — each higher tier starts ₦1 above the
-  // previous tier's max (Silver max ₦5,000,000, Bronze min ₦5,000,001, etc.),
+  // previous tier's max (Bronze max ₦5,000,000, Silver min ₦5,000,001, etc.),
   // so every amount falls in exactly one tier and can never overlap two.
   if (amount < Number(plan.minAmount)) {
     throw new Error(`The minimum investment for ${plan.name} is ${unit}${Number(plan.minAmount).toLocaleString()}.`);

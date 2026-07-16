@@ -253,7 +253,7 @@
     empty.innerHTML = '<div style="font-size:3rem">📊</div><p>Select a plan and enter an amount to see your projected returns</p>';
 
     // EPR rates are TOTAL returns for the tenure period (not annual).
-    // e.g. Silver 12% for 6 months means ₦100,000 earns exactly ₦12,000.
+    // e.g. Bronze 12% for 6 months means ₦100,000 earns exactly ₦12,000.
     // Trading is profit-sharing (60–75% of profits) — shown as approximate.
     const interest = amount * (r / 100);
     const payout = amount + interest;
