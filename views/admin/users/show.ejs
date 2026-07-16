@@ -157,7 +157,7 @@
             <% if (profileUser.investments.length) { %>
             <div class="table-wrapper">
               <table class="data-table">
-                <thead><tr><th>Plan</th><th>Amount</th><th>Expected</th><th>Maturity</th><th>Status</th></tr></thead>
+                <thead><tr><th>Plan</th><th>Amount</th><th>Expected</th><th>Maturity</th><th>Status</th><th>Action</th></tr></thead>
                 <tbody>
                   <% profileUser.investments.forEach(function(inv) { %>
                   <tr>
@@ -166,6 +166,20 @@
                     <td class="text-gold"><%= formatCurrency(Number(inv.expectedReturn)) %></td>
                     <td><%= formatDate(inv.maturityDate) %></td>
                     <td><span class="badge-status status-<%= inv.status.toLowerCase() %>"><%= inv.status %></span></td>
+                    <td>
+                      <% if (inv.status === 'ACTIVE' && inv.plan.tenures && inv.plan.tenures.length > 0) { %>
+                      <form action="/admin/users/<%= profileUser.id %>/investments/<%= inv.id %>/change-tenure" method="POST" class="js-confirm-form" data-confirm="Change this investment's tenure? Expected return and maturity will be recalculated." style="display:flex;gap:6px;align-items:center;">
+                        <select name="tenureId" required>
+                          <% inv.plan.tenures.forEach(function (t) { %>
+                          <option value="<%= t.id %>" <%= inv.tenureId === t.id ? 'selected' : '' %>><%= t.label %> — <%= Number(t.returnRate) %>%</option>
+                          <% }) %>
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-outline-gold">Change</button>
+                      </form>
+                      <% } else { %>
+                      <span class="text-muted">—</span>
+                      <% } %>
+                    </td>
                   </tr>
                   <% }) %>
                 </tbody>

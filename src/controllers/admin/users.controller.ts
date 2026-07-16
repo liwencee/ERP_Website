@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import prisma from '../../config/database';
 import { generateReferralCode, generateRef } from '../../utils/helpers';
 import * as emailService from '../../services/email.service';
+import * as investmentService from '../../services/investment.service';
 import { logAudit } from '../../services/audit.service';
 
 export async function index(req: Request, res: Response): Promise<void> {
@@ -43,7 +44,10 @@ export async function show(req: Request, res: Response): Promise<void> {
     where: { id: req.params.id },
     include: {
       wallet: true,
-      investments: { include: { plan: true }, orderBy: { createdAt: 'desc' } },
+      investments: {
+        include: { plan: { include: { tenures: { orderBy: { sortOrder: 'asc' } } } }, tenure: true },
+        orderBy: { createdAt: 'desc' },
+      },
       transactions: { orderBy: { createdAt: 'desc' }, take: 10 },
       documents: true,
     },
@@ -386,4 +390,30 @@ export async function deleteUser(req: Request, res: Response): Promise<void> {
 
   req.flash('success', `${target.firstName} ${target.lastName} (${target.email}) and all associated records have been permanently deleted.`);
   res.redirect('/admin/users');
+}
+
+// Admin changes the tenure of a specific investment belonging to a user.
+export async function changeInvestmentTenure(req: Request, res: Response): Promise<void> {
+  const { userId, id } = req.params;
+  const { tenureId } = req.body;
+
+  const investment = await prisma.userInvestment.findUnique({ where: { id } });
+  if (!investment || investment.userId !== userId) {
+    req.flash('error', 'Investment not found for this user.');
+    res.redirect(`/admin/users/${userId}`);
+    return;
+  }
+
+  try {
+    const result = await investmentService.changeTenure(id, tenureId);
+    await logAudit(req, 'INVESTMENT_TENURE_CHANGE', {
+      targetType: 'UserInvestment',
+      targetId: id,
+      detail: `${result.oldTenureLabel ?? '—'} → ${result.newTenureLabel} (expected ₦${result.expectedReturn.toLocaleString()}, matures ${result.maturityDate.toISOString().slice(0, 10)})`,
+    });
+    req.flash('success', `Tenure changed to ${result.newTenureLabel} for this investment.`);
+  } catch (err) {
+    req.flash('error', err instanceof Error ? err.message : 'Could not change tenure.');
+  }
+  res.redirect(`/admin/users/${userId}`);
 }

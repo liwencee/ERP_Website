@@ -26,6 +26,7 @@ router.post('/users/:id/status', adminUsers.toggleStatus);
 router.post('/users/:id/force-logout', adminUsers.forceLogout);
 router.post('/users/:id/credit-wallet', adminUsers.creditWallet);
 router.post('/users/:id/debit-wallet', adminUsers.debitWallet);
+router.post('/users/:userId/investments/:id/change-tenure', adminUsers.changeInvestmentTenure);
 // Permanently delete a user — ADMIN only
 router.post('/users/:id/delete', isAdmin, adminUsers.deleteUser);
 
