@@ -153,7 +153,10 @@
           <% } %>
 
           <div class="dash-section">
-            <h3>Investments (<%= profileUser.investments.length %>)</h3>
+            <div class="section-header-row">
+              <h3>Investments (<%= profileUser.investments.length %>)</h3>
+              <a href="/admin/users/<%= profileUser.id %>/report" target="_blank" rel="noopener" class="btn btn-sm btn-outline-gold">Download / Print Report</a>
+            </div>
             <% if (profileUser.investments.length) { %>
             <div class="table-wrapper">
               <table class="data-table">

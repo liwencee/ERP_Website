@@ -392,6 +392,33 @@ export async function deleteUser(req: Request, res: Response): Promise<void> {
   res.redirect('/admin/users');
 }
 
+// Render the printable account statement for a given user (admin view).
+export async function report(req: Request, res: Response): Promise<void> {
+  const user = await prisma.user.findUnique({
+    where: { id: req.params.id },
+    include: {
+      wallet: true,
+      investments: { include: { plan: true, tenure: true }, orderBy: { createdAt: 'desc' } },
+      transactions: { orderBy: { createdAt: 'desc' } },
+    },
+  });
+  if (!user) {
+    req.flash('error', 'User not found.');
+    res.redirect('/admin/users');
+    return;
+  }
+
+  const totalInvested = user.investments.reduce((s, i) => s + Number(i.amount), 0);
+  const totalExpected = user.investments.reduce((s, i) => s + Number(i.expectedReturn), 0);
+
+  res.render('reports/statement', {
+    profileUser: user,
+    totalInvested,
+    totalExpected,
+    generatedAt: new Date(),
+  });
+}
+
 // Admin changes the tenure of a specific investment belonging to a user.
 export async function changeInvestmentTenure(req: Request, res: Response): Promise<void> {
   const { userId, id } = req.params;
