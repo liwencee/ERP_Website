@@ -14,7 +14,11 @@ export async function index(req: Request, res: Response): Promise<void> {
     }),
     prisma.userInvestment.findMany({
       where: { userId },
-      include: { plan: { include: { tenures: { orderBy: { sortOrder: 'asc' } } } }, tenure: true },
+      include: {
+        plan: { include: { tenures: { orderBy: { sortOrder: 'asc' } } } },
+        tenure: true,
+        tenureChangeRequests: { where: { status: 'PENDING' }, include: { requestedTenure: true } },
+      },
       orderBy: { createdAt: 'desc' },
     }),
   ]);
@@ -137,25 +141,48 @@ export async function redeemEarly(req: Request, res: Response): Promise<void> {
   res.redirect('/dashboard/investments');
 }
 
+// Investors cannot change their own tenure directly — this submits a request
+// that an admin must approve (see admin/tenure-requests.controller.ts) before
+// investmentService.changeTenure actually runs. Admins changing a tenure
+// directly from the admin panel skip this queue entirely — that action is
+// already admin-approved by construction.
 export async function changeTenurePost(req: Request, res: Response): Promise<void> {
   const userId = req.session.userId!;
   const { tenureId } = req.body;
 
-  const investment = await prisma.userInvestment.findUnique({ where: { id: req.params.id } });
+  const investment = await prisma.userInvestment.findUnique({
+    where: { id: req.params.id },
+    include: { plan: { include: { tenures: true } } },
+  });
   if (!investment || investment.userId !== userId) {
     req.flash('error', 'Investment not found.');
     res.redirect('/dashboard/investments');
     return;
   }
-
-  try {
-    const result = await investmentService.changeTenure(req.params.id, tenureId);
-    req.flash(
-      'success',
-      `Tenure changed to ${result.newTenureLabel}. New maturity ${result.maturityDate.toLocaleDateString('en-NG')}, expected ₦${result.expectedReturn.toLocaleString()}.`
-    );
-  } catch (err) {
-    req.flash('error', err instanceof Error ? err.message : 'Could not change tenure.');
+  if (investment.status !== 'ACTIVE') {
+    req.flash('error', 'Only active investments can have their tenure changed.');
+    res.redirect('/dashboard/investments');
+    return;
   }
+  if (!investment.plan.tenures.some((t) => t.id === tenureId)) {
+    req.flash('error', 'Please select a valid tenure.');
+    res.redirect('/dashboard/investments');
+    return;
+  }
+
+  const existingPending = await prisma.tenureChangeRequest.findFirst({
+    where: { investmentId: investment.id, status: 'PENDING' },
+  });
+  if (existingPending) {
+    req.flash('error', 'You already have a pending tenure change request for this investment.');
+    res.redirect('/dashboard/investments');
+    return;
+  }
+
+  await prisma.tenureChangeRequest.create({
+    data: { investmentId: investment.id, requestedTenureId: tenureId },
+  });
+
+  req.flash('success', 'Your tenure change request has been submitted and is awaiting admin approval.');
   res.redirect('/dashboard/investments');
 }

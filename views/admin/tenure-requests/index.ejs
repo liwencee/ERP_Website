@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Tenure Change Requests | EPR Access Admin</title>
+  <%- include('../../partials/head') %>
+</head>
+<body class="dashboard-body">
+  <%- include('../../partials/admin-sidebar') %>
+  <div class="dashboard-main" id="dashboardMain">
+    <%- include('../../partials/topbar', { pageTitle: 'Tenure Change Requests' }) %>
+    <div class="dashboard-content">
+      <%- include('../../partials/flash') %>
+
+      <div class="dash-section">
+        <div class="section-header-row">
+          <h3>Pending Tenure Change Requests (<%= requests.length %>)</h3>
+        </div>
+        <% if (requests.length) { %>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Investor</th>
+                <th>Plan</th>
+                <th>Current Tenure</th>
+                <th>Requested Tenure</th>
+                <th>Submitted</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% requests.forEach(function(r) { %>
+              <tr>
+                <td><a href="/admin/users/<%= r.investment.userId %>"><%= r.investment.user.firstName %> <%= r.investment.user.lastName %></a></td>
+                <td><%= planDisplayName(r.investment.plan.name) %></td>
+                <td><%= r.investment.tenure ? r.investment.tenure.label : '—' %></td>
+                <td><strong><%= r.requestedTenure.label %></strong> — <%= Number(r.requestedTenure.returnRate) %>%</td>
+                <td><%= formatDate(r.createdAt) %></td>
+                <td>
+                  <div style="display:flex;gap:6px;">
+                    <form action="/admin/tenure-requests/<%= r.id %>/approve" method="POST" class="js-confirm-form" data-confirm="Approve this tenure change? <%= r.investment.user.firstName %>'s expected return and maturity date will be recalculated immediately.">
+                      <button type="submit" class="btn btn-sm btn-gold">Approve</button>
+                    </form>
+                    <form action="/admin/tenure-requests/<%= r.id %>/reject" method="POST" class="js-reject-form">
+                      <input type="hidden" name="note" class="js-reject-note" />
+                      <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <% } else { %>
+        <div class="empty-state"><p>No pending tenure change requests.</p></div>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <script src="/js/dashboard.js"></script>
+  <script nonce="<%= cspNonce %>">
+    (function () {
+      document.querySelectorAll('.js-confirm-form').forEach(function (f) {
+        f.addEventListener('submit', function (e) {
+          if (!window.confirm(f.getAttribute('data-confirm') || 'Are you sure?')) e.preventDefault();
+        });
+      });
+
+      // Reject asks for an optional reason before submitting.
+      document.querySelectorAll('.js-reject-form').forEach(function (f) {
+        f.addEventListener('submit', function (e) {
+          if (!window.confirm('Reject this tenure change request?')) { e.preventDefault(); return; }
+          var reason = window.prompt('Reason (optional, shown to the investor):', '') || '';
+          f.querySelector('.js-reject-note').value = reason;
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

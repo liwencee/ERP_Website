@@ -95,6 +95,7 @@ model PlanTenure {
   sortOrder    Int      @default(0)
 
   investments  UserInvestment[]
+  requestedIn  TenureChangeRequest[]
 
   createdAt DateTime @default(now())
 }
@@ -115,10 +116,34 @@ model UserInvestment {
   startDate      DateTime
   maturityDate   DateTime
 
-  transactions Transaction[]
+  transactions         Transaction[]
+  tenureChangeRequests TenureChangeRequest[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// TenureChangeRequestStatus: PENDING | APPROVED | REJECTED
+//
+// An investor-submitted request to change an ACTIVE investment's tenure.
+// Created by the investor (dashboard), then an admin must approve (which
+// applies investmentService.changeTenure) or reject it. Admins changing a
+// tenure directly from the admin panel do NOT go through this table — that
+// is already an admin-approved action.
+model TenureChangeRequest {
+  id                String   @id @default(uuid())
+  investmentId      String
+  investment        UserInvestment @relation(fields: [investmentId], references: [id], onDelete: Cascade)
+  requestedTenureId String
+  requestedTenure   PlanTenure @relation(fields: [requestedTenureId], references: [id])
+  status            String   @default("PENDING")
+  reviewedById      String?
+  reviewNote        String?
+  createdAt         DateTime @default(now())
+  reviewedAt        DateTime?
+
+  @@index([status])
+  @@index([investmentId])
 }
 
 // TransactionType: DEPOSIT | WITHDRAWAL | INVESTMENT | RETURN | BONUS

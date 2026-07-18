@@ -148,14 +148,18 @@
                       <button type="submit" class="btn btn-sm btn-danger">Withdraw Early</button>
                     </form>
                   <% } %>
-                  <% if (inv.status === 'ACTIVE' && inv.plan.tenures && inv.plan.tenures.length > 0) { %>
-                    <form action="/dashboard/investments/<%= inv.id %>/change-tenure" method="POST" class="js-confirm-form" data-confirm="Change this investment's tenure? Your expected return and maturity date will be recalculated." style="display:flex;gap:6px;align-items:center;margin-top:4px;">
+                  <% if (inv.status === 'ACTIVE' && inv.tenureChangeRequests && inv.tenureChangeRequests.length > 0) { %>
+                    <span class="badge-status status-pending" style="display:block;margin-top:4px;" title="Submitted <%= formatDate(inv.tenureChangeRequests[0].createdAt) %>">
+                      Pending approval: <%= inv.tenureChangeRequests[0].requestedTenure.label %>
+                    </span>
+                  <% } else if (inv.status === 'ACTIVE' && inv.plan.tenures && inv.plan.tenures.length > 0) { %>
+                    <form action="/dashboard/investments/<%= inv.id %>/change-tenure" method="POST" class="js-confirm-form" data-confirm="Submit a request to change this investment's tenure? An admin must approve it before your expected return and maturity date are updated." style="display:flex;gap:6px;align-items:center;margin-top:4px;">
                       <select name="tenureId" required class="tenure-select">
                         <% inv.plan.tenures.forEach(function (t) { %>
                         <option value="<%= t.id %>" <%= inv.tenureId === t.id ? 'selected' : '' %>><%= t.label %> — <%= Number(t.returnRate) %>%</option>
                         <% }) %>
                       </select>
-                      <button type="submit" class="btn btn-sm btn-outline-gold">Change</button>
+                      <button type="submit" class="btn btn-sm btn-outline-gold">Request Change</button>
                     </form>
                   <% } else if (inv.status !== 'ACTIVE') { %>
                     <span class="text-muted text-sm">—</span>
@@ -169,7 +173,7 @@
 
         <div class="withdrawal-notice">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <span><strong>Withdrawal Policy:</strong> Fixed Deposit, Real Estate, and Stock Portfolio investments are locked until maturity date. Only Savings Plans allow early withdrawal (principal only, no returns).</span>
+          <span><strong>Withdrawal Policy:</strong> Fixed Deposit, Real Estate, Trading Investment and Equity Portfolio investments are locked until maturity date. Only Savings Plan allow early withdrawal (principal only, no returns) if terminated before the maturity date.</span>
         </div>
         <% } else { %>
         <div class="empty-state"><p>You have not made any investments yet.</p></div>

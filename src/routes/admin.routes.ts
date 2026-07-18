@@ -6,6 +6,7 @@ import * as adminPlans from '../controllers/admin/plans.controller';
 import * as adminInvestments from '../controllers/admin/investments.controller';
 import * as adminTx from '../controllers/admin/transactions.controller';
 import * as adminAudit from '../controllers/admin/audit.controller';
+import * as adminTenureRequests from '../controllers/admin/tenure-requests.controller';
 
 const router = Router();
 
@@ -43,6 +44,11 @@ router.post('/plans/:id/delete', isAdmin, adminPlans.deletePlan);
 // ─── Investments ─────────────────────────────────────────────────────────────
 router.get('/investments', adminInvestments.index);
 router.post('/investments/backdate', isAdmin, adminTx.backdateInvestment);
+
+// ─── Tenure change requests ────────────────────────────────────────────────────
+router.get('/tenure-requests', adminTenureRequests.index);
+router.post('/tenure-requests/:id/approve', adminTenureRequests.approve);
+router.post('/tenure-requests/:id/reject', adminTenureRequests.reject);
 
 // ─── Transactions ─────────────────────────────────────────────────────────────
 router.get('/transactions', adminTx.index);
