@@ -28,6 +28,8 @@
           <p class="text-muted">Referral Code: <code><%= profileUser.referralCode || '—' %></code></p>
           <p class="text-muted">Referrals Made: <strong><%= typeof referralCount !== 'undefined' ? referralCount : 0 %></strong></p>
           <p class="text-muted">Total Invested: <strong class="text-gold"><%= formatCurrency(totalInvested) %></strong></p>
+          <p class="text-muted">Investment Value (incl. returns): <strong class="text-gold"><%= formatCurrency(totalInvestmentValue) %></strong></p>
+          <p class="text-muted">Last Seen: <strong><%= profileUser.lastLoginAt ? formatDateTime(profileUser.lastLoginAt) : 'Never logged in' %></strong></p>
           <div class="admin-actions">
             <form action="/admin/users/<%= profileUser.id %>/status" method="POST">
               <button type="submit" class="btn btn-sm <%= profileUser.status === 'ACTIVE' ? 'btn-danger' : 'btn-gold' %>">

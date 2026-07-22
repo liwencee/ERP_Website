@@ -30,6 +30,18 @@ export function formatDate(date: Date | string): string {
   });
 }
 
+// Date + time (used for "Last Seen" — the time matters for spotting logins at
+// unusual hours, which formatDate alone would hide).
+export function formatDateTime(date: Date | string): string {
+  return new Date(date).toLocaleString('en-NG', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 export function addDays(date: Date, days: number): Date {
   const result = new Date(date);
   result.setDate(result.getDate() + days);

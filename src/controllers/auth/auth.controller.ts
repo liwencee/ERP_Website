@@ -32,6 +32,10 @@ function startSession(
     req.session.sessionVersion = user.sessionVersion;
     req.session.save((err) => {
       if (err) { onError(); return; }
+      // Record "last seen" for security visibility (shown to the user on their
+      // own profile and to admins on the user list/detail pages). Non-critical:
+      // never block or fail login over this.
+      prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } }).catch(() => {});
       onSuccess();
     });
   });

@@ -35,6 +35,7 @@ model User {
   referralCode    String?   @unique
   referredBy      String?
   sessionVersion  Int       @default(0)
+  lastLoginAt     DateTime?
 
   // Saved payout/withdrawal bank details (defaults; can be overridden per request)
   bankName          String?

@@ -63,11 +63,14 @@ export async function show(req: Request, res: Response): Promise<void> {
 
   const investedAgg = await prisma.userInvestment.aggregate({
     where: { userId: user.id },
-    _sum: { amount: true },
+    _sum: { amount: true, expectedReturn: true },
   });
   const totalInvested = Number(investedAgg._sum.amount ?? 0);
+  // expectedReturn already stores the full maturity value (principal + return,
+  // see calculateExpectedReturn in investment.service.ts) — not just the profit.
+  const totalInvestmentValue = Number(investedAgg._sum.expectedReturn ?? 0);
 
-  res.render('admin/users/show', { pageTitle: `User: ${user.firstName}`, profileUser: user, referralCount, totalInvested });
+  res.render('admin/users/show', { pageTitle: `User: ${user.firstName}`, profileUser: user, referralCount, totalInvested, totalInvestmentValue });
 }
 
 export async function reviewKyc(req: Request, res: Response): Promise<void> {

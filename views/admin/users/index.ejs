@@ -30,7 +30,7 @@
         </div>
         <div class="table-wrapper">
           <table class="data-table">
-            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>KYC</th><th>Status</th><th>Joined</th><th></th></tr></thead>
+            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>KYC</th><th>Status</th><th>Joined</th><th>Last Seen</th><th></th></tr></thead>
             <tbody>
               <% users.forEach(function(u) { %>
               <tr>
@@ -41,6 +41,7 @@
                 <td><span class="badge-status status-<%= u.kycStatus.toLowerCase() %>"><%= u.kycStatus %></span></td>
                 <td><span class="badge-status status-<%= u.status.toLowerCase() %>"><%= u.status %></span></td>
                 <td><%= formatDate(u.createdAt) %></td>
+                <td><%= u.lastLoginAt ? formatDateTime(u.lastLoginAt) : '—' %></td>
                 <td><a href="/admin/users/<%= u.id %>" class="btn btn-sm btn-outline-gold">View</a></td>
               </tr>
               <% }) %>

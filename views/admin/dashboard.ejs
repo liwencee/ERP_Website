@@ -29,6 +29,10 @@
           <div class="stat-body"><span class="stat-label">Pending Deposits</span><span class="stat-value"><a href="/admin/transactions?status=PENDING&type=DEPOSIT"><%= pendingDeposits %></a></span></div>
         </div>
         <div class="stat-card">
+          <div class="stat-icon stat-icon-alert">🏧</div>
+          <div class="stat-body"><span class="stat-label">Pending Withdrawals</span><span class="stat-value"><a href="/admin/transactions?status=PENDING&type=WITHDRAWAL"><%= pendingWithdrawals %></a></span></div>
+        </div>
+        <div class="stat-card">
           <div class="stat-icon stat-icon-alert">🪪</div>
           <div class="stat-body"><span class="stat-label">Pending KYC</span><span class="stat-value"><a href="/admin/users"><%= pendingKyc %></a></span></div>
         </div>
@@ -87,6 +91,7 @@
       <div class="admin-quick-links">
         <a href="/admin/plans/new" class="quick-link-card"><span>➕</span><strong>New Investment Plan</strong></a>
         <a href="/admin/transactions?status=PENDING" class="quick-link-card"><span>✅</span><strong>Confirm Deposits</strong></a>
+        <a href="/admin/transactions?status=PENDING&type=WITHDRAWAL" class="quick-link-card"><span>🏧</span><strong>Review Withdrawals</strong></a>
         <a href="/admin/users" class="quick-link-card"><span>🪪</span><strong>Review KYC</strong></a>
       </div>
 
