@@ -28,8 +28,11 @@ export async function index(req: Request, res: Response): Promise<void> {
         orderBy: { createdAt: 'desc' },
         take: 5,
       }),
+      // ACTIVE only — at maturity the money is credited to the wallet and the
+      // status becomes MATURED, so counting those here would double-count it
+      // (shown in the wallet AND as still invested).
       prisma.userInvestment.aggregate({
-        where: { userId },
+        where: { userId, status: 'ACTIVE' },
         _sum: { amount: true },
       }),
       prisma.userInvestment.findMany({

@@ -61,8 +61,11 @@ export async function show(req: Request, res: Response): Promise<void> {
 
   const referralCount = await prisma.user.count({ where: { referredBy: user.id } });
 
+  // ACTIVE only. At maturity `matureInvestment` credits the wallet and flips the
+  // status to MATURED, so counting non-ACTIVE investments here would double-count
+  // that money — it would show both in the wallet AND as still invested.
   const investedAgg = await prisma.userInvestment.aggregate({
-    where: { userId: user.id },
+    where: { userId: user.id, status: 'ACTIVE' },
     _sum: { amount: true, expectedReturn: true },
   });
   const totalInvested = Number(investedAgg._sum.amount ?? 0);
@@ -411,8 +414,11 @@ export async function report(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  const totalInvested = user.investments.reduce((s, i) => s + Number(i.amount), 0);
-  const totalExpected = user.investments.reduce((s, i) => s + Number(i.expectedReturn), 0);
+  // ACTIVE only — matured/withdrawn money has already been credited to the wallet,
+  // so counting it here too would double-count it in the statement totals.
+  const activeInvestments = user.investments.filter((i) => i.status === 'ACTIVE');
+  const totalInvested = activeInvestments.reduce((s, i) => s + Number(i.amount), 0);
+  const totalExpected = activeInvestments.reduce((s, i) => s + Number(i.expectedReturn), 0);
 
   res.render('reports/statement', {
     profileUser: user,
