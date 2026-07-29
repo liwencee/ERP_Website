@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../../config/database';
 
-const PLAN_ORDER = ['Save Future', 'Bronze', 'Silver', 'Gold', 'Diamond', 'Fixed Deposit', 'Trading', 'Dollar', 'Real Estate'];
+const PLAN_ORDER = ['Save Future', 'Bronze', 'Silver', 'Gold', 'Diamond', 'Quickie', 'Fixed Deposit', 'Trading', 'Dollar', 'Real Estate'];
 
 const CONTACT_TEXT =
   'You can reach our team directly:\n' +
@@ -90,6 +90,7 @@ const PLAN_KEYWORDS: { keys: RegExp; match: string }[] = [
   { keys: /\bbronze\b/i, match: 'Bronze' },
   { keys: /\bgold\b/i, match: 'Gold' },
   { keys: /\bdiamond\b/i, match: 'Diamond' },
+  { keys: /\bquickie|qsp\b/i, match: 'Quickie' },
   { keys: /\bfixed\s*deposit\b/i, match: 'Fixed Deposit' },
   { keys: /\btrading|forex|crypto/i, match: 'Trading' },
   { keys: /\bdollar|usd|\$/i, match: 'Dollar' },
@@ -227,7 +228,7 @@ export async function reply(req: Request, res: Response): Promise<void> {
   } else if (/withdraw|cash\s*out|payout|redeem/i.test(msg)) {
     result = {
       reply:
-        'Withdrawals are simple:\n• Fixed-tenure plans (Silver, Bronze, Gold, Diamond, Fixed Deposit, Trading, Dollar, Real Estate) pay principal + returns to your wallet automatically at maturity.\n• Savings Plan can be withdrawn any time — early withdrawal returns your principal only (no interest).\n\nManage it all from Dashboard → Investments.',
+        'Withdrawals are simple:\n• Fixed-tenure plans (Bronze, Silver, Gold, Diamond, Fixed Deposit, Trading, Dollar, Real Estate) pay principal + returns to your wallet automatically at maturity.\n• Savings Plan and Quickie – Short-term Profit can be withdrawn any time — early withdrawal returns your principal only (no interest).\n\nManage it all from Dashboard → Investments.',
       quickReplies: ['How do I open an account?', 'Talk to a human'],
     };
   } else if (/sign\s*up|register|open an account|create an account|get started|\bjoin\b/i.test(msg)) {

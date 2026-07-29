@@ -143,7 +143,7 @@
                 </td>
                 <td><span class="badge-status status-<%= inv.status.toLowerCase() %>"><%= inv.status %></span></td>
                 <td>
-                  <% if (inv.status === 'ACTIVE' && inv.plan.type === 'SAVINGS') { %>
+                  <% if (inv.status === 'ACTIVE' && ['SAVINGS', 'QUICKIE'].includes(inv.plan.type)) { %>
                     <form action="/dashboard/investments/<%= inv.id %>/redeem-early" method="POST" class="js-confirm-form" data-confirm="Early withdrawal returns principal only — no interest. Continue?">
                       <button type="submit" class="btn btn-sm btn-danger">Withdraw Early</button>
                     </form>
@@ -173,7 +173,7 @@
 
         <div class="withdrawal-notice">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <span><strong>Withdrawal Policy:</strong> Fixed Deposit, Real Estate, Trading Investment and Equity Portfolio investments are locked until maturity date. Only Savings Plan allow early withdrawal (principal only, no returns) if terminated before the maturity date.</span>
+          <span><strong>Withdrawal Policy:</strong> Fixed Deposit, Real Estate, Trading Investment and Equity Portfolio investments are locked until maturity date. Only Savings Plan and Quickie – Short-term Profit allow early withdrawal (principal only, no returns) if terminated before the maturity date.</span>
         </div>
         <% } else { %>
         <div class="empty-state"><p>You have not made any investments yet.</p></div>

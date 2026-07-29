@@ -79,6 +79,24 @@ async function main() {
       duration: 365,
       tenures: tenures(19.5, 22, 39, 0.65),
     },
+    // ── Quickie – Short-term Profit ──────────────────────────────────────────
+    {
+      name: 'Quickie - Short-term Profit - QSP',
+      type: 'QUICKIE' as const,
+      description: 'A structured quickie short-term profit with deposit contributions toward a specific goal. Funds are placed in short-term within the period stipulated by the investor to accomplish the financial aim while preserving capital. Withdraw any time, any day. Termination before maturity date will not count interest — flexibility that fits your cash flow.',
+      minAmount: 50000,
+      maxAmount: null,
+      returnRate: 13,
+      duration: 180,
+      tenures: [
+        { label: '1 Month',  durationDays: 30,  returnRate: 3,  referralRate: 2, sortOrder: 1 },
+        { label: '2 Months', durationDays: 60,  returnRate: 5,  referralRate: 2, sortOrder: 2 },
+        { label: '3 Months', durationDays: 90,  returnRate: 7,  referralRate: 2, sortOrder: 3 },
+        { label: '4 Months', durationDays: 120, returnRate: 9,  referralRate: 2, sortOrder: 4 },
+        { label: '5 Months', durationDays: 150, returnRate: 11, referralRate: 2, sortOrder: 5 },
+        { label: '6 Months', durationDays: 180, returnRate: 13, referralRate: 2, sortOrder: 6 },
+      ],
+    },
     // ── Fixed Deposit ────────────────────────────────────────────────────────
     {
       name: 'Fixed Deposit – Stop Unnecessary Spending',

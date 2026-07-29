@@ -81,7 +81,10 @@ export async function investPost(req: Request, res: Response): Promise<void> {
   }
 }
 
-// Early withdrawal — only allowed for SAVINGS plan type
+// Early withdrawal — only allowed for plan types that permit anytime withdrawal
+// (principal only, no returns): SAVINGS and QUICKIE.
+const EARLY_WITHDRAWAL_TYPES = ['SAVINGS', 'QUICKIE'];
+
 export async function redeemEarly(req: Request, res: Response): Promise<void> {
   const userId = req.session.userId!;
   const investment = await prisma.userInvestment.findUnique({
@@ -95,8 +98,8 @@ export async function redeemEarly(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  if (investment.plan.type !== 'SAVINGS') {
-    req.flash('error', 'Early withdrawal is only available for Savings Plan investments. Other plans must be held to maturity.');
+  if (!EARLY_WITHDRAWAL_TYPES.includes(investment.plan.type)) {
+    req.flash('error', 'Early withdrawal is only available for Savings Plan and Quickie investments. Other plans must be held to maturity.');
     res.redirect('/dashboard/investments');
     return;
   }
