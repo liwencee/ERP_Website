@@ -3,7 +3,7 @@ import { Resend } from 'resend';
 const apiKey = process.env.RESEND_API_KEY;
 const resend = apiKey ? new Resend(apiKey) : null;
 
-const TO_EMAIL = process.env.CONTACT_EMAIL_TO || 'info@epraaccess.com';
+const TO_EMAIL = process.env.CONTACT_EMAIL_TO || 'contact@epraaccess.com';
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'EPR Access Website <onboarding@resend.dev>';
 
 const SUBJECT_LABELS: Record<string, string> = {
