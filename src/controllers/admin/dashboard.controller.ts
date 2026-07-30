@@ -5,6 +5,7 @@ export async function index(_req: Request, res: Response): Promise<void> {
   const [
     totalUsers,
     totalInvestments,
+    maturedInvestments,
     pendingDeposits,
     pendingWithdrawals,
     pendingKyc,
@@ -15,6 +16,7 @@ export async function index(_req: Request, res: Response): Promise<void> {
   ] = await Promise.all([
     prisma.user.count({ where: { role: 'INVESTOR' } }),
     prisma.userInvestment.count({ where: { status: 'ACTIVE' } }),
+    prisma.userInvestment.count({ where: { status: 'MATURED' } }),
     prisma.transaction.count({ where: { type: 'DEPOSIT', status: 'PENDING' } }),
     prisma.transaction.count({ where: { type: 'WITHDRAWAL', status: 'PENDING' } }),
     prisma.user.count({ where: { kycStatus: 'SUBMITTED' } }),
@@ -28,6 +30,7 @@ export async function index(_req: Request, res: Response): Promise<void> {
     pageTitle: 'Admin Dashboard',
     totalUsers,
     totalInvestments,
+    maturedInvestments,
     pendingDeposits,
     pendingWithdrawals,
     pendingKyc,

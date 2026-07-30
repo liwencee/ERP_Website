@@ -21,6 +21,10 @@
           <div class="stat-body"><span class="stat-label">Active Investments</span><span class="stat-value"><%= totalInvestments %></span></div>
         </div>
         <div class="stat-card">
+          <div class="stat-icon">✅</div>
+          <div class="stat-body"><span class="stat-label">Matured Investments</span><span class="stat-value"><a href="/admin/investments?status=MATURED"><%= maturedInvestments %></a></span></div>
+        </div>
+        <div class="stat-card">
           <div class="stat-icon">💰</div>
           <div class="stat-body"><span class="stat-label">Total Amount</span><span class="stat-value">₦<%= Math.round(totalAUM).toLocaleString('en-NG') %></span></div>
         </div>
