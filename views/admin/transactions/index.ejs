@@ -113,7 +113,11 @@
         form.addEventListener('submit', function () {
           var useBackdate = window.confirm('Backdate this transaction? Click OK to set a custom date, or Cancel to use today.');
           if (useBackdate) {
-            var dateInput = window.prompt('Enter transaction date (YYYY-MM-DD):', new Date().toISOString().slice(0, 10));
+            var todayStr = new Date().toISOString().slice(0, 10);
+            var dateInput = window.prompt('Enter transaction date (YYYY-MM-DD):', todayStr);
+            while (dateInput && (isNaN(new Date(dateInput).getTime()) || dateInput > todayStr)) {
+              dateInput = window.prompt('That date is invalid or in the future. Enter transaction date (YYYY-MM-DD):', todayStr);
+            }
             if (dateInput) form.querySelector('.backdate-input').value = dateInput;
           }
         });

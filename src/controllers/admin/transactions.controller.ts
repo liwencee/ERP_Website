@@ -51,7 +51,11 @@ export async function confirm(req: Request, res: Response): Promise<void> {
   const updateData: any = { status: 'CONFIRMED' };
   if (backdateDate) {
     const parsed = new Date(backdateDate);
-    if (!isNaN(parsed.getTime())) updateData.createdAt = parsed;
+    // Reject a future date — it would sort above genuinely recent transactions
+    // and stay there until the mistaken date actually arrives.
+    if (!isNaN(parsed.getTime()) && parsed.getTime() <= Date.now()) {
+      updateData.createdAt = parsed;
+    }
   }
 
   await prisma.transaction.update({ where: { id: tx.id }, data: updateData });
