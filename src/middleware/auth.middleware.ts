@@ -10,14 +10,19 @@ export async function isAuthenticated(req: Request, res: Response, next: NextFun
   // Check session version for force-logout support
   const user = await prisma.user.findUnique({ where: { id: req.session.userId }, select: { sessionVersion: true, status: true } });
   if (!user || user.status === 'SUSPENDED') {
+    // Explain via a query param, not req.flash(): flash() needs the session to
+    // still exist to persist the message, but we're about to destroy() this
+    // session — and doing that before the login page's own request re-reads
+    // it is a race (destroy can win, silently dropping the message; it also
+    // throws if called after destroy, per connect-flash's "requires sessions").
+    // A query param carries the reason without touching session state at all.
     req.session.destroy(() => {});
-    req.flash('error', user?.status === 'SUSPENDED' ? 'Your account has been suspended.' : 'Session invalid.');
-    res.redirect('/auth/login');
+    res.redirect(`/auth/login?reason=${user?.status === 'SUSPENDED' ? 'suspended' : 'invalid'}`);
     return;
   }
   if (req.session.sessionVersion !== undefined && req.session.sessionVersion !== user.sessionVersion) {
     req.session.destroy(() => {});
-    res.redirect('/auth/login');
+    res.redirect('/auth/login?reason=logged-out');
     return;
   }
   next();

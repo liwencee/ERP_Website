@@ -1,6 +1,6 @@
 import prisma from '../config/database';
 import { addDays, generateRef, USD_NGN_RATE, usdToNgn } from '../utils/helpers';
-import { debitWallet, creditWallet } from './wallet.service';
+import { debitWallet } from './wallet.service';
 import { computeTenureChange } from './tenure';
 
 export function calculateExpectedReturn(amount: number, rate: number): number {
@@ -175,14 +175,37 @@ export async function matureInvestment(investmentId: string): Promise<void> {
     where: { id: investmentId },
     include: { plan: true },
   });
-  if (!inv || inv.status !== 'ACTIVE') throw new Error('Investment not found or not active.');
+  if (!inv) throw new Error('Investment not found or not active.');
 
-  await prisma.userInvestment.update({
-    where: { id: investmentId },
-    data: { status: 'MATURED' },
+  const matured = await prisma.$transaction(async (tx) => {
+    // Atomic, race-safe: only applies while still ACTIVE, so this can never
+    // credit the wallet twice for the same investment (e.g. an overlapping
+    // scheduler run).
+    const updated = await tx.userInvestment.updateMany({
+      where: { id: investmentId, status: 'ACTIVE' },
+      data: { status: 'MATURED' },
+    });
+    if (updated.count === 0) return false;
+
+    await tx.wallet.update({
+      where: { userId: inv.userId },
+      data: { balance: { increment: inv.expectedReturn } },
+    });
+    await tx.transaction.create({
+      data: {
+        userId: inv.userId,
+        type: 'DEPOSIT',
+        amount: inv.expectedReturn,
+        status: 'CONFIRMED',
+        reference: generateRef('DEP'),
+        paymentMethod: 'WALLET',
+        description: `Returns from ${inv.plan.name}`,
+      },
+    });
+    return true;
   });
 
-  await creditWallet(inv.userId, Number(inv.expectedReturn), 'WALLET', `Returns from ${inv.plan.name}`);
+  if (!matured) throw new Error('Investment not found or not active.');
 
   await prisma.notification.create({
     data: {

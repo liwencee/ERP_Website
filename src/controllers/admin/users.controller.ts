@@ -300,21 +300,19 @@ export async function debitWallet(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  if (Number(user.wallet.balance) < amount) {
-    req.flash('error', `Insufficient balance. User only has ₦${Number(user.wallet.balance).toLocaleString()}.`);
-    res.redirect(`/admin/users/${userId}`);
-    return;
-  }
-
   const reference = generateRef('REV');
   const adminName = req.session.userName || 'Admin';
 
-  await prisma.$transaction([
-    prisma.wallet.update({
-      where: { userId },
+  const debited = await prisma.$transaction(async (tx) => {
+    // Atomic, race-safe: the decrement only applies if the balance still
+    // covers the amount, so two concurrent debits can never overdraw.
+    const updated = await tx.wallet.updateMany({
+      where: { userId, balance: { gte: amount } },
       data: { balance: { decrement: amount } },
-    }),
-    prisma.transaction.create({
+    });
+    if (updated.count === 0) return false;
+
+    await tx.transaction.create({
       data: {
         userId,
         type: 'REVERSAL',
@@ -323,15 +321,22 @@ export async function debitWallet(req: Request, res: Response): Promise<void> {
         reference,
         description: `Reversed by ${adminName} — ${note}`,
       },
-    }),
-    prisma.notification.create({
+    });
+    await tx.notification.create({
       data: {
         userId,
         title: 'Wallet Reversed',
         message: `₦${amount.toLocaleString()} has been reversed from your wallet. Reason: ${note}. Reference: ${reference}.`,
       },
-    }),
-  ]);
+    });
+    return true;
+  });
+
+  if (!debited) {
+    req.flash('error', `Insufficient balance. User only has ₦${Number(user.wallet.balance).toLocaleString()}.`);
+    res.redirect(`/admin/users/${userId}`);
+    return;
+  }
 
   await logAudit(req, 'WALLET_REVERSAL', { targetType: 'User', targetId: userId, detail: `₦${amount.toLocaleString()} — ${note} (ref ${reference})` });
   req.flash('success', `₦${amount.toLocaleString()} successfully reversed from ${user.firstName} ${user.lastName}'s wallet. Ref: ${reference}`);

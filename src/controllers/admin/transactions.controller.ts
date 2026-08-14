@@ -58,17 +58,33 @@ export async function confirm(req: Request, res: Response): Promise<void> {
     }
   }
 
-  await prisma.transaction.update({ where: { id: tx.id }, data: updateData });
+  const confirmed = await prisma.$transaction(async (txClient) => {
+    // Atomic, race-safe: only applies while still PENDING, so a double-click
+    // or duplicate submission can't confirm (and credit) the same transaction twice.
+    const updated = await txClient.transaction.updateMany({
+      where: { id: tx.id, status: 'PENDING' },
+      data: updateData,
+    });
+    if (updated.count === 0) return false;
+
+    if (tx.type === 'DEPOSIT') {
+      await txClient.wallet.update({
+        where: { userId: tx.userId },
+        data: { balance: { increment: tx.amount } },
+      });
+    }
+    return true;
+  });
+
+  if (!confirmed) {
+    req.flash('error', 'Transaction not found or already processed.');
+    res.redirect('/admin/transactions');
+    return;
+  }
 
   const user = await prisma.user.findUnique({ where: { id: tx.userId } });
 
   if (tx.type === 'DEPOSIT') {
-    // Credit wallet only for deposits
-    await prisma.wallet.update({
-      where: { userId: tx.userId },
-      data: { balance: { increment: tx.amount } },
-    });
-
     if (user) {
       await prisma.notification.create({
         data: {
@@ -121,17 +137,34 @@ export async function reject(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  await prisma.transaction.update({ where: { id: tx.id }, data: { status: 'REJECTED' } });
+  const rejected = await prisma.$transaction(async (txClient) => {
+    // Atomic, race-safe: only applies while still PENDING, so a double-click
+    // or duplicate submission can't refund the same withdrawal twice.
+    const updated = await txClient.transaction.updateMany({
+      where: { id: tx.id, status: 'PENDING' },
+      data: { status: 'REJECTED' },
+    });
+    if (updated.count === 0) return false;
+
+    if (tx.type === 'WITHDRAWAL') {
+      // Refund: wallet was debited when the request was submitted
+      await txClient.wallet.update({
+        where: { userId: tx.userId },
+        data: { balance: { increment: tx.amount } },
+      });
+    }
+    return true;
+  });
+
+  if (!rejected) {
+    req.flash('error', 'Transaction not found or already processed.');
+    res.redirect('/admin/transactions');
+    return;
+  }
 
   const user = await prisma.user.findUnique({ where: { id: tx.userId } });
 
   if (tx.type === 'WITHDRAWAL') {
-    // Refund: wallet was debited when the request was submitted
-    await prisma.wallet.update({
-      where: { userId: tx.userId },
-      data: { balance: { increment: tx.amount } },
-    });
-
     if (user) {
       await prisma.notification.create({
         data: {

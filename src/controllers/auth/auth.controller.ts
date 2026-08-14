@@ -127,7 +127,19 @@ export async function registerPost(req: Request, res: Response): Promise<void> {
 
 // ─── Login ───────────────────────────────────────────────────────────────────
 
+const LOGIN_REASON_MESSAGES: Record<string, string> = {
+  suspended: 'Your account has been suspended.',
+  invalid: 'Your session has expired. Please log in again.',
+  'logged-out': 'You have been logged out.',
+};
+
 export function loginGet(req: Request, res: Response): void {
+  // Set directly on res.locals (not req.flash) — this request has no prior
+  // session to have carried a flash message through; the reason travels via
+  // the query string instead. `reason` only ever selects one of the fixed
+  // messages above, never gets reflected into the page itself.
+  const message = LOGIN_REASON_MESSAGES[String(req.query.reason || '')];
+  if (message) res.locals.error = [message];
   res.render('auth/login', { title: 'Login' });
 }
 

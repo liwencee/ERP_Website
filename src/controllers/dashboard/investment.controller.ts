@@ -104,23 +104,21 @@ export async function redeemEarly(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  if (investment.status !== 'ACTIVE') {
-    req.flash('error', 'This investment is not active.');
-    res.redirect('/dashboard/investments');
-    return;
-  }
+  const redeemed = await prisma.$transaction(async (tx) => {
+    // Atomic, race-safe: the status flip only applies while still ACTIVE and
+    // owned by this user, so concurrent redeem-early requests (double-click,
+    // duplicate submission) can never both credit the wallet.
+    const updated = await tx.userInvestment.updateMany({
+      where: { id: investment.id, userId, status: 'ACTIVE' },
+      data: { status: 'WITHDRAWN' },
+    });
+    if (updated.count === 0) return false;
 
-  // Credit wallet with principal only (early withdrawal = no returns)
-  await prisma.$transaction([
-    prisma.wallet.update({
+    await tx.wallet.update({
       where: { userId },
       data: { balance: { increment: investment.amount } },
-    }),
-    prisma.userInvestment.update({
-      where: { id: investment.id },
-      data: { status: 'WITHDRAWN' },
-    }),
-    prisma.transaction.create({
+    });
+    await tx.transaction.create({
       data: {
         userId,
         type: 'RETURN',
@@ -130,15 +128,22 @@ export async function redeemEarly(req: Request, res: Response): Promise<void> {
         description: `Early withdrawal of Savings Plan — ${investment.plan.name} (principal only, no returns)`,
         investmentId: investment.id,
       },
-    }),
-    prisma.notification.create({
+    });
+    await tx.notification.create({
       data: {
         userId,
         title: 'Early Withdrawal Processed',
         message: `Your early withdrawal of ₦${Number(investment.amount).toLocaleString()} from ${investment.plan.name} has been credited to your wallet. Note: returns are only paid at maturity.`,
       },
-    }),
-  ]);
+    });
+    return true;
+  });
+
+  if (!redeemed) {
+    req.flash('error', 'This investment is not active.');
+    res.redirect('/dashboard/investments');
+    return;
+  }
 
   req.flash('success', `₦${Number(investment.amount).toLocaleString()} returned to your wallet. Early withdrawals return principal only.`);
   res.redirect('/dashboard/investments');

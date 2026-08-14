@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { isAdmin, isAdminOrStaff } from '../middleware/auth.middleware';
+import { isAdmin, isAdminOrStaff, isAuthenticated } from '../middleware/auth.middleware';
 import * as adminDash from '../controllers/admin/dashboard.controller';
 import * as adminUsers from '../controllers/admin/users.controller';
 import * as adminPlans from '../controllers/admin/plans.controller';
@@ -10,8 +10,11 @@ import * as adminTenureRequests from '../controllers/admin/tenure-requests.contr
 
 const router = Router();
 
-// All admin routes require at least STAFF role
-router.use(isAdminOrStaff);
+// All admin routes require at least STAFF role. isAuthenticated re-checks
+// status/sessionVersion against the DB on every request — without it,
+// suspending an admin/staff account or force-logging them out had no effect
+// on their already-issued admin session cookie.
+router.use(isAuthenticated, isAdminOrStaff);
 
 // ─── Dashboard ───────────────────────────────────────────────────────────────
 router.get('/', adminDash.index);

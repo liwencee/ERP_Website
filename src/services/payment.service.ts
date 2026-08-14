@@ -53,5 +53,9 @@ export function verifySquadcoWebhook(rawBody: string, signature: string): boolea
     .createHmac('sha512', SQUADCO_SECRET)
     .update(rawBody)
     .digest('hex');
-  return hash.toLowerCase() === signature.toLowerCase();
+  // Constant-time comparison — a plain === short-circuits on the first
+  // differing byte, which is a timing side-channel on the HMAC comparison.
+  const a = Buffer.from(hash.toLowerCase(), 'hex');
+  const b = Buffer.from(signature.toLowerCase(), 'hex');
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
 }

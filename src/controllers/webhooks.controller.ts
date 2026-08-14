@@ -19,23 +19,33 @@ async function confirmDeposit(
   amountNgn: number,
   gateway: string
 ): Promise<'credited' | 'already' | 'notfound'> {
-  const tx = await prisma.transaction.findUnique({ where: { reference } });
-  if (!tx) return 'notfound';
-  if (tx.status !== 'PENDING') return 'already';
+  const existing = await prisma.transaction.findUnique({ where: { reference } });
+  if (!existing) return 'notfound';
 
-  await prisma.$transaction([
-    prisma.transaction.update({ where: { reference }, data: { status: 'CONFIRMED' } }),
-    prisma.wallet.update({ where: { userId: tx.userId }, data: { balance: { increment: amountNgn } } }),
-    prisma.notification.create({
+  const credited = await prisma.$transaction(async (tx) => {
+    // Atomic, race-safe: the status flip only applies while still PENDING, so
+    // concurrent confirmations (the server webhook and the browser callback
+    // racing, or a duplicate webhook retry) can never both credit the wallet.
+    const updated = await tx.transaction.updateMany({
+      where: { reference, status: 'PENDING' },
+      data: { status: 'CONFIRMED' },
+    });
+    if (updated.count === 0) return false;
+
+    await tx.wallet.update({ where: { userId: existing.userId }, data: { balance: { increment: amountNgn } } });
+    await tx.notification.create({
       data: {
-        userId: tx.userId,
+        userId: existing.userId,
         title: 'Deposit Confirmed',
         message: `₦${amountNgn.toLocaleString()} has been credited to your wallet via ${gateway}.`,
       },
-    }),
-  ]);
+    });
+    return true;
+  });
 
-  const user = await prisma.user.findUnique({ where: { id: tx.userId } });
+  if (!credited) return 'already';
+
+  const user = await prisma.user.findUnique({ where: { id: existing.userId } });
   if (user) {
     try {
       await emailService.sendDepositConfirmed(user.email, user.firstName, amountNgn, reference);
