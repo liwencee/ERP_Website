@@ -63,6 +63,8 @@ app.use(helmet({
           `'nonce-${(res as { locals: { cspNonce: string } }).locals.cspNonce}'`,
         'https://embed.tawk.to',
         'https://*.tawk.to',
+        'https://www.google.com/recaptcha/',
+        'https://www.gstatic.com/recaptcha/',
       ],
       imgSrc: ["'self'", 'data:', 'https:'],
       connectSrc: [

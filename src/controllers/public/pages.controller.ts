@@ -84,7 +84,21 @@ export function compliance(_req: Request, res: Response): void {
 }
 
 export function contactGet(_req: Request, res: Response): void {
-  res.render('public/contact', { title: 'Contact Us' });
+  res.render('public/contact', { title: 'Contact Us', recaptchaSiteKey: process.env.RECAPTCHA_SITE_KEY || '' });
+}
+
+async function verifyRecaptcha(token: string, remoteIp: string): Promise<boolean> {
+  const secret = process.env.RECAPTCHA_SECRET_KEY;
+  if (!secret) return true; // not configured — don't block submissions
+
+  const params = new URLSearchParams({ secret, response: token, remoteip: remoteIp });
+  const res = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params,
+  });
+  const data = (await res.json()) as { success: boolean };
+  return data.success === true;
 }
 
 export function privacy(_req: Request, res: Response): void {
@@ -110,6 +124,14 @@ export async function contactPost(req: Request, res: Response): Promise<void> {
   }
   if (name.length > 200 || message.length > 5000) {
     req.flash('error', 'Your message is too long. Please shorten it and try again.');
+    res.redirect('/contact');
+    return;
+  }
+
+  const recaptchaToken = String(req.body['g-recaptcha-response'] || '');
+  const recaptchaOk = await verifyRecaptcha(recaptchaToken, req.ip || '');
+  if (!recaptchaOk) {
+    req.flash('error', 'Please complete the "I\'m not a robot" check and try again.');
     res.redirect('/contact');
     return;
   }
