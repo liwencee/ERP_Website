@@ -1,7 +1,68 @@
+# EPR Access Limited — crawl policy
+#
+# Search engines that send real visitors are welcome. Crawlers that only
+# harvest data for their own products are not: they generated real bandwidth
+# and compute cost while sending zero traffic back.
+
 User-agent: *
 Disallow: /admin
 Disallow: /auth
 Disallow: /dashboard
 Disallow: /uploads
+Crawl-delay: 10
+
+# ── Parasitic SEO crawlers ───────────────────────────────────────────────
+# These scrape the whole site to sell backlink/keyword data to third parties.
+# They never refer a single visitor, and they crawl aggressively.
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: DataForSeoBot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+User-agent: Barkrowler
+Disallow: /
+
+User-agent: ZoominfoBot
+Disallow: /
+
+# ── Bulk dataset scrapers ────────────────────────────────────────────────
+# Common Crawl archives the entire web; Bytespider is widely reported for
+# ignoring limits and hammering small sites. Neither sends visitors.
+User-agent: CCBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+# ── AI assistants ────────────────────────────────────────────────────────
+# Deliberately ALLOWED: these can refer real prospective investors who ask an
+# assistant about Nigerian investment platforms. If cost pressure outweighs
+# that, add "Disallow: /" under each of the three below.
+User-agent: GPTBot
+Crawl-delay: 10
+
+User-agent: ClaudeBot
+Crawl-delay: 10
+
+User-agent: PerplexityBot
+Crawl-delay: 10
+
+# Blocks use of the site's content for AI model training, without affecting
+# Google Search ranking.
+User-agent: Google-Extended
+Disallow: /
 
 Sitemap: https://www.epraaccess.com/sitemap.xml

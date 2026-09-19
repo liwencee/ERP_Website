@@ -135,7 +135,13 @@ app.use(session(sessionConfig));
 app.use(flash());
 
 // ─── Logging ─────────────────────────────────────────────────────────────────
+// Don't log successful static-asset hits. A single image-heavy page produced
+// ~25 log lines, each written through Winston to a rotating file on the volume
+// — mostly noise that buried real events and grew disk usage under crawl
+// traffic. Failures (4xx/5xx) on assets are still logged, so genuine broken
+// links and probing remain visible.
 app.use(morgan('combined', {
+  skip: (req, res) => res.statusCode < 400 && STATIC_ASSET.test(req.path),
   stream: { write: (msg) => logger.info(msg.trim()) },
 }));
 
@@ -150,7 +156,25 @@ const ROOT = process.env.VERCEL ? process.cwd() : path.join(__dirname, '..');
 app.use('/uploads', serveUpload);
 
 // ─── Static files ────────────────────────────────────────────────────────────
-app.use(express.static(path.join(ROOT, 'public')));
+// Cache-Control matters a lot for cost here: the marketing pages pull ~25
+// images each (compliance logos, team photos, hero art). Without max-age the
+// browser still re-requests every one of them on every page view — each a
+// billable round trip to the container, even when the answer is just "304 Not
+// Modified". Crawlers multiply that by every page they walk.
+//
+// Images/fonts get a long TTL because they're stable assets that change only
+// when a file is added. CSS/JS get a short TTL because output.css and
+// premium.css are NOT content-hashed — a long TTL there would leave users on
+// stale styling after a deploy. ETag/Last-Modified still apply after expiry.
+const LONG_CACHE = /\.(png|jpe?g|gif|svg|webp|ico|bmp|woff2?|ttf|eot|mp4|webm)$/i;
+app.use(express.static(path.join(ROOT, 'public'), {
+  maxAge: '1h',
+  setHeaders: (res, filePath) => {
+    if (LONG_CACHE.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=2592000'); // 30 days
+    }
+  },
+}));
 
 // ─── View engine ─────────────────────────────────────────────────────────────
 app.set('view engine', 'ejs');
@@ -171,6 +195,22 @@ app.use(sameOriginOnly);
 app.use(router);
 
 // ─── 404 ─────────────────────────────────────────────────────────────────────
+// Vulnerability scanners probe hundreds of paths per pass (/wp-login.php,
+// /.env, /.git/config, /phpmyadmin). Each one was rendering the full styled
+// 404 page — an EJS render plus ~3KB of egress for a request from something
+// that was never a visitor. These paths can never be valid here, so answer
+// them with a bare status line instead. Genuine mistyped URLs still get the
+// friendly page.
+const SCANNER_PROBE =
+  /\.(php|aspx?|jsp|cgi|env|sql|bak|old|ini|ya?ml|sh)$|^\/(wp-|\.git|\.env|\.aws|\.vscode|vendor\/|phpmyadmin|xmlrpc|cgi-bin)/i;
+app.use((req, res, next) => {
+  if (SCANNER_PROBE.test(req.path)) {
+    res.status(404).type('txt').send('Not Found');
+    return;
+  }
+  next();
+});
+
 app.use((_req, res) => {
   res.status(404).render('errors/404', { title: 'Page Not Found' });
 });
