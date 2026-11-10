@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import prisma from '../../config/database';
 import { generateReferralCode, generateRef } from '../../utils/helpers';
+import { canonicalEmail, normalizePhone } from '../../utils/identity';
 import * as emailService from '../../services/email.service';
 import * as investmentService from '../../services/investment.service';
 import { logAudit } from '../../services/audit.service';
@@ -150,9 +151,19 @@ export async function createStaffPost(req: Request, res: Response): Promise<void
     return;
   }
 
-  const existing = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+  const emailKey = canonicalEmail(email);
+  const phoneKey = phone ? normalizePhone(phone) : null;
+  const existing = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { email: email.toLowerCase() },
+        { emailCanonical: emailKey },
+        ...(phoneKey ? [{ phoneNormalized: phoneKey }] : []),
+      ],
+    },
+  });
   if (existing) {
-    res.render('admin/users/create-staff', { pageTitle: 'Create Staff Account', errors: ['Email already in use.'] });
+    res.render('admin/users/create-staff', { pageTitle: 'Create Staff Account', errors: ['Email or phone number already in use.'] });
     return;
   }
 
@@ -169,7 +180,9 @@ export async function createStaffPost(req: Request, res: Response): Promise<void
       firstName,
       lastName,
       email: email.toLowerCase(),
+      emailCanonical: emailKey,
       phone: phone || null,
+      phoneNormalized: phoneKey,
       password: hash,
       role: 'STAFF',
       emailVerified: true,

@@ -18,6 +18,16 @@ model User {
   firstName       String
   lastName        String
   phone           String?
+
+  // Anti-duplicate-account fingerprints. Nullable: old rows stay NULL until
+  // prisma/backfill-identity.ts fills them. Indexed but deliberately NOT unique:
+  // `prisma db push` (used by the deploy) refuses to add a unique constraint to a
+  // populated table without --accept-data-loss. Uniqueness is enforced in
+  // registerPost under a DB advisory lock instead.
+  emailCanonical  String?             // email with case / +tag / Gmail dots stripped
+  phoneNormalized String?             // digits only, country code / leading 0 removed
+  signupIp        String?             // IP the account was created from
+
   dateOfBirth     DateTime?
   gender          String?
   address         String?
@@ -50,6 +60,10 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([emailCanonical])
+  @@index([phoneNormalized])
+  @@index([signupIp, createdAt])
 }
 
 model Wallet {
