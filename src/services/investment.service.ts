@@ -2,6 +2,8 @@ import prisma from '../config/database';
 import { addDays, generateRef, USD_NGN_RATE, usdToNgn } from '../utils/helpers';
 import { debitWallet } from './wallet.service';
 import { computeTenureChange } from './tenure';
+import logger from '../utils/logger';
+import { selfReferralSignal } from '../utils/identity';
 
 export function calculateExpectedReturn(amount: number, rate: number): number {
   return parseFloat((amount * (1 + rate / 100)).toFixed(2));
@@ -128,15 +130,30 @@ export async function payReferralCommission(
 
   const investor = await prisma.user.findUnique({
     where: { id: investorId },
-    select: { referredBy: true, firstName: true, lastName: true },
+    select: {
+      referredBy: true, firstName: true, lastName: true,
+      phoneNormalized: true, signupIp: true, bankAccountNumber: true,
+    },
   });
   if (!investor?.referredBy) return;
 
   const referrer = await prisma.user.findUnique({
     where: { id: investor.referredBy },
-    select: { id: true, status: true, wallet: { select: { id: true } } },
+    select: {
+      id: true, status: true, wallet: { select: { id: true } },
+      phoneNormalized: true, signupIp: true, bankAccountNumber: true,
+    },
   });
   if (!referrer || referrer.status === 'SUSPENDED' || !referrer.wallet) return;
+
+  // Self-referral guard: no commission when both accounts look like the same
+  // person (shared phone, bank account or signup IP). A legitimate referral that
+  // trips this can still be rewarded manually by an admin (wallet credit).
+  const link = selfReferralSignal(investor, referrer);
+  if (link) {
+    logger.warn(`[Referral] Commission withheld — referrer ${referrer.id} and investor ${investorId} share ${link}`);
+    return;
+  }
 
   const commission = parseFloat((amount * (referralRate / 100)).toFixed(2));
   if (commission <= 0) return;

@@ -4,6 +4,16 @@ import { body, validationResult } from 'express-validator';
 import prisma from '../../config/database';
 import { generateToken, generateReferralCode } from '../../utils/helpers';
 import * as emailService from '../../services/email.service';
+import logger from '../../utils/logger';
+import { canonicalEmail, normalizePhone, isDisposableEmail } from '../../utils/identity';
+
+class SignupRejected extends Error {}
+
+const EMAIL_RE =/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+// Accounts one IP may create per rolling 24h (override via env if it's too tight
+// for e.g. a shared office).
+const MAX_SIGNUPS_PER_IP_PER_DAY = Number(process.env.MAX_SIGNUPS_PER_IP_PER_DAY) || 5;
 
 // How long a verification link stays valid.
 const VERIFY_TTL_MS = 10 * 60 * 1000; // 10 minutes
@@ -62,11 +72,53 @@ export async function registerPost(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  const existing = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
-  if (existing) {
-    res.render('auth/register', { title: 'Create Account', errors: ['An account with this email already exists.'], body: req.body });
-    return;
-  }
+  // ── One person, one account ──────────────────────────────────────────────
+  // Compare on normalised identity, not the raw strings, so jane+2@x.com,
+  // j.ane@gmail.com or 0803… / +234803… can't be used to open a second account.
+  const emailLower = String(email).trim().toLowerCase();
+  const emailKey = canonicalEmail(emailLower);
+  const phoneKey = normalizePhone(phone);
+  const signupIp = req.ip || null;
+
+  const rejectSignup = (message: string): void => {
+    logger.warn(`[Signup blocked] ${message} — ip=${signupIp} email=${emailLower}`);
+    res.render('auth/register', { title: 'Create Account', errors: [message], body: req.body });
+  };
+
+  if (!EMAIL_RE.test(emailLower)) return rejectSignup('Please enter a valid email address.');
+  if (isDisposableEmail(emailLower)) return rejectSignup('Temporary or disposable email addresses are not allowed. Please use your personal email.');
+  if (!phoneKey) return rejectSignup('Please enter a valid phone number.');
+
+  // Returns the reason to refuse this signup, or null if it's fine. Run once up
+  // front (cheap rejection before the slow bcrypt hash) and again inside the
+  // creation transaction, where the advisory lock makes it race-free.
+  const signupProblem = async (db: Pick<typeof prisma, 'user'>): Promise<string | null> => {
+    const clash = await db.user.findFirst({
+      where: { OR: [{ email: emailLower }, { emailCanonical: emailKey }, { phoneNormalized: phoneKey }] },
+      select: { email: true, emailCanonical: true },
+    });
+    if (clash) {
+      const emailTaken = clash.email === emailLower || clash.emailCanonical === emailKey;
+      return emailTaken
+        ? 'An account with this email already exists.'
+        : 'An account with this phone number already exists. If it is yours, please log in or contact support.';
+    }
+
+    // Cap signups per IP per day (database-backed, so it survives restarts and
+    // works across instances). Generous enough for a shared office or mobile NAT.
+    if (signupIp && process.env.NODE_ENV !== 'test') {
+      const recent = await db.user.count({
+        where: { signupIp, createdAt: { gt: new Date(Date.now() - 24 * 60 * 60 * 1000) } },
+      });
+      if (recent >= MAX_SIGNUPS_PER_IP_PER_DAY) {
+        return 'Too many accounts have been created from this network today. Please try again tomorrow or contact support.';
+      }
+    }
+    return null;
+  };
+
+  const earlyProblem = await signupProblem(prisma);
+  if (earlyProblem) return rejectSignup(earlyProblem);
 
   const hash = await bcrypt.hash(password, 12);
   const emailToken = generateToken();
@@ -87,26 +139,49 @@ export async function registerPost(req: Request, res: Response): Promise<void> {
     codeExists = await prisma.user.findUnique({ where: { referralCode } });
   }
 
-  const user = await prisma.user.create({
-    data: {
-      firstName,
-      lastName,
-      email: email.toLowerCase(),
-      phone,
-      dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
-      gender: gender || null,
-      address: address || null,
-      state: state || null,
-      city: city || null,
-      password: hash,
-      emailToken,
-      emailTokenExp,
-      referralCode,
-      referredBy: referredById || null,
-      emailVerified: false,  // must confirm via the emailed link before logging in
-      wallet: { create: { balance: 0 } },
-    },
-  });
+  // The identity columns are indexed, not unique (see schema.prisma), so two
+  // simultaneous signups for the same person could both pass a plain check.
+  // Serialise registrations with a transaction-scoped advisory lock and re-check
+  // under it; signups are low-volume so the brief queue is harmless.
+  let user;
+  try {
+    user = await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext('user-signup'))`;
+      const problem = await signupProblem(tx);
+      if (problem) throw new SignupRejected(problem);
+
+      return tx.user.create({
+        data: {
+          firstName,
+          lastName,
+          email: emailLower,
+          emailCanonical: emailKey,
+          phone,
+          phoneNormalized: phoneKey,
+          signupIp,
+          dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+          gender: gender || null,
+          address: address || null,
+          state: state || null,
+          city: city || null,
+          password: hash,
+          emailToken,
+          emailTokenExp,
+          referralCode,
+          referredBy: referredById || null,
+          emailVerified: false,  // must confirm via the emailed link before logging in
+          wallet: { create: { balance: 0 } },
+        },
+      });
+    });
+  } catch (err) {
+    if (err instanceof SignupRejected) return rejectSignup(err.message);
+    // Plain unique-constraint hit (email / referralCode) from a simultaneous request.
+    if ((err as { code?: string }).code === 'P2002') {
+      return rejectSignup('An account with these details already exists.');
+    }
+    throw err;
+  }
 
   // Remember who just registered so the verify-notice page and the resend form
   // work without ever putting the email address in a URL.
