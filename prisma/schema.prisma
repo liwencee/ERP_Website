@@ -261,3 +261,15 @@ model RealEstateProperty {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// Fixed-window counters behind the sensitive rate limiters and the per-account
+// login lockout (src/services/throttle.ts). Lives in Postgres so limits survive
+// restarts and are shared across instances / serverless invocations.
+// Expired rows are pruned opportunistically.
+model RateLimit {
+  key     String   @id
+  hits    Int
+  resetAt DateTime
+
+  @@index([resetAt])
+}

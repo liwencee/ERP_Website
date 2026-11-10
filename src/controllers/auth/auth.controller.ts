@@ -6,8 +6,18 @@ import { generateToken, generateReferralCode } from '../../utils/helpers';
 import * as emailService from '../../services/email.service';
 import logger from '../../utils/logger';
 import { canonicalEmail, normalizePhone, isDisposableEmail } from '../../utils/identity';
+import * as throttle from '../../services/throttle';
 
 class SignupRejected extends Error {}
+
+// Per-ACCOUNT lockout. The per-IP limiter can't stop an attacker who rotates IPs
+// against one account, so failed logins are also counted against the email
+// itself. Keyed on the typed address (not on whether the account exists) so the
+// response never reveals which emails are registered. The cost is that someone
+// can deliberately lock a victim out for LOCKOUT_WINDOW_MS — acceptable, as
+// "Forgot password" still works and it's far better than a guessable password.
+const MAX_FAILED_LOGINS = 5;
+const LOCKOUT_WINDOW_MS = 15 * 60 * 1000;
 
 const EMAIL_RE =/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -219,14 +229,29 @@ export function loginGet(req: Request, res: Response): void {
 }
 
 export async function loginPost(req: Request, res: Response): Promise<void> {
-  const { email, password } = req.body;
+  const { password } = req.body;
+  const emailLower = String(req.body.email ?? '').trim().toLowerCase();
+  const lockKey = `login-fail:${emailLower}`;
 
-  const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
-  if (!user || !(await bcrypt.compare(password, user.password))) {
+  const lock = await throttle.isLocked(lockKey, MAX_FAILED_LOGINS);
+  if (lock.locked) {
+    const mins = Math.max(1, Math.ceil(lock.retryAfterMs / 60000));
+    logger.warn(`[Login locked] too many failed attempts for ${emailLower} — ip=${req.ip}`);
+    req.flash('error', `Too many failed login attempts for this account. Try again in ${mins} minute${mins === 1 ? '' : 's'}, or reset your password.`);
+    res.redirect('/auth/login');
+    return;
+  }
+
+  const user = await prisma.user.findUnique({ where: { email: emailLower } });
+  if (!user || !(await bcrypt.compare(String(password ?? ''), user.password))) {
+    await throttle.recordFailure(lockKey, LOCKOUT_WINDOW_MS);
     req.flash('error', 'Invalid email or password.');
     res.redirect('/auth/login');
     return;
   }
+
+  // Correct password: forget earlier failures.
+  await throttle.clear(lockKey);
 
   // Block sign-in until the email is confirmed. Stash the address so the notice
   // page can offer a one-click resend without exposing it in the URL.

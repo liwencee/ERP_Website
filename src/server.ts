@@ -29,7 +29,12 @@ const PORT = process.env.PORT || 3000;
 // Trust the Vercel/proxy TLS terminator so secure cookies are set correctly
 // (express-session refuses to set a `secure` cookie if it thinks the
 // connection is plain HTTP, which it is behind the proxy without this).
-app.set('trust proxy', 1);
+// How many reverse proxies sit in front of the app. This decides which address
+// counts as the client's IP — it feeds every rate limit and the per-IP signup
+// cap. Too low and all visitors look like the proxy's IP (shared limits); too
+// high and a client can spoof their IP via X-Forwarded-For. Railway alone = 1;
+// add 1 for each extra proxy (e.g. Cloudflare in front => 2).
+app.set('trust proxy', Number(process.env.TRUST_PROXY_HOPS) || 1);
 
 // ─── Per-request CSP nonce ───────────────────────────────────────────────────
 // Must run before helmet so the nonce is available when the CSP header is built,
@@ -99,7 +104,7 @@ app.use(cors({ origin: process.env.APP_URL, credentials: true }));
 // in a couple of page loads. We also run a generous cap because Nigerian mobile
 // networks place many users behind a single carrier-grade-NAT IP, so a per-IP
 // limit is effectively shared across many real people. Only dynamic requests
-// count; brute-force on auth endpoints is handled separately by `authLimiter`.
+// count; brute-force on auth endpoints is handled separately by the DB-backed limiters in security.middleware.ts.
 const STATIC_ASSET = /\.(css|js|mjs|map|png|jpe?g|gif|svg|webp|ico|bmp|woff2?|ttf|eot|mp4|webm|pdf)$/i;
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
